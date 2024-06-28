@@ -15,3 +15,12 @@ class DiracOperator:
 
     def eigenvalue(self, index):
         return np.pi / self.n_time
+
+    def eigenfunction(self, index, output_space):
+        pass
+
+    def lattice(self, output_space):
+        pass
+
+    def transform(self, values, input_space, output_space):
+        pass

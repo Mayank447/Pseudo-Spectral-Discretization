@@ -6,6 +6,7 @@ from spectrum import Derivative1D
 class DiracOperator:
     """
     Dirac operator class to represent the Dirac operator in the pseudospectral method.
+    Args: Spectrum object
     """
 
     def __init__(self, spectrum):
@@ -28,18 +29,6 @@ class DiracOperator:
         
         else:
             raise ValueError("Unsupported space transformation.")
-
-
-    def lattice(self, output_space):
-        """
-        Return the lattice of the Dirac operator as per the given output space.
-        """
-        if output_space == 'real':
-            return np.linspace(0, self.beta, self.n_real, endpoint=False)
-        elif output_space == 'spectral':
-            return 2 * np.pi * (np.arange(self.n_real) + 0.5) / self.beta
-        else:
-            raise ValueError("Unsupported output space.")
         
 
 if __name__ == "__main__":

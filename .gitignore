@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+pseudo_spectral_discretization.egg-info/
 
 # C extensions
 *.so

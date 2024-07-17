@@ -7,8 +7,8 @@ class DiracOperator:
     Dirac operator class to represent the Dirac operator in the pseudospectral method.
     """
 
-    def __init__(self, n_time, nu, n_landau):
-        self.n_time = n_time
+    def __init__(self, n_real, nu, n_landau):
+        self.n_real = n_real
         self.nu = nu
         self.n_landau = n_landau
         self.beta = 1.0  # Assuming beta is 1 for simplicity, can be parameterized
@@ -18,11 +18,11 @@ class DiracOperator:
         """
         Apply the Dirac operator to the given spectral coefficients as per the given input and output spaces.
         """
-        if input_space == 'time' and output_space == 'frequency':
-            transformed_coefficients = self.transform(spectral_coefficients, 'time', 'frequency')
+        if input_space == 'real' and output_space == 'spectral':
+            transformed_coefficients = self.transform(spectral_coefficients, 'real', 'spectral')
             return self.eigenvalue(0) * transformed_coefficients
-        elif input_space == 'frequency' and output_space == 'time':
-            transformed_coefficients = self.transform(spectral_coefficients, 'frequency', 'time')
+        elif input_space == 'spectral' and output_space == 'real':
+            transformed_coefficients = self.transform(spectral_coefficients, 'spectral', 'real')
             return self.eigenvalue(0) * transformed_coefficients
         else:
             raise ValueError("Unsupported space transformation.")
@@ -40,10 +40,10 @@ class DiracOperator:
         """
         Return the eigenfunction of the Dirac operator at the given index as per the given space.
         """
-        if output_space == 'time':
-            return np.sin((index + 1) * np.pi * np.linspace(0, 1, self.n_time))
-        elif output_space == 'frequency':
-            return np.exp(1j * (index + 0.5) * 2 * np.pi * np.arange(self.n_time) / self.beta)
+        if output_space == 'real':
+            return np.sin((index + 1) * np.pi * np.linspace(0, 1, self.n_real))
+        elif output_space == 'spectral':
+            return np.exp(1j * (index + 0.5) * 2 * np.pi * np.arange(self.n_real) / self.beta)
         else:
             raise ValueError("Unsupported output space.")
 
@@ -52,10 +52,10 @@ class DiracOperator:
         """
         Return the lattice of the Dirac operator as per the given output space.
         """
-        if output_space == 'time':
-            return np.linspace(0, self.beta, self.n_time, endpoint=False)
-        elif output_space == 'frequency':
-            return 2 * np.pi * (np.arange(self.n_time) + 0.5) / self.beta
+        if output_space == 'real':
+            return np.linspace(0, self.beta, self.n_real, endpoint=False)
+        elif output_space == 'spectral':
+            return 2 * np.pi * (np.arange(self.n_real) + 0.5) / self.beta
         else:
             raise ValueError("Unsupported output space.")
 
@@ -64,13 +64,13 @@ class DiracOperator:
         """
         Transform the given values from the input space to the output space.
         """
-        if input_space == 'time' and output_space == 'frequency':
-            # Perform the discrete Fourier transform to go from time to frequency space
-            return np.fft.fft(values) / np.sqrt(self.n_time)
+        if input_space == 'real' and output_space == 'spectral':
+            # Perform the discrete Fourier transform to go from real to spectral space
+            return np.fft.fft(values) / np.sqrt(self.n_real)
         
-        elif input_space == 'frequency' and output_space == 'time':
-            # Perform the inverse discrete Fourier transform to go from frequency to time space
-            return np.fft.ifft(values) * np.sqrt(self.n_time)
+        elif input_space == 'spectral' and output_space == 'real':
+            # Perform the inverse discrete Fourier transform to go from spectral to real space
+            return np.fft.ifft(values) * np.sqrt(self.n_real)
         
         else:
             raise ValueError("Unsupported space transformation.")

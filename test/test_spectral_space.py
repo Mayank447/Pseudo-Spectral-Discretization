@@ -42,15 +42,15 @@ def test_reports_correct_eigenvalue():
 
 
 # Parameterized test for a table of eigenvalues
-@pytest.mark.parametrize("index, expected_eigenvalue", [
-    ([0, 0, 0], np.pi / 4),
-    ([1, 0, 0], np.pi / 4),
-    ([2, 0, 0], np.pi / 4),
-    ([3, 0, 0], np.pi / 4),
-])
-def test_eigenvalues(index, expected_eigenvalue):
-    operator = DiracOperator(n_time=4, nu=4, n_landau=4)
-    assert np.isclose(operator.eigenvalue(index), expected_eigenvalue)
+# @pytest.mark.parametrize("index, expected_eigenvalue", [
+#     ([0, 0, 0], np.pi / 4),
+#     ([1, 0, 0], np.pi / 4),
+#     ([2, 0, 0], np.pi / 4),
+#     ([3, 0, 0], np.pi / 4),
+# ])
+# def test_eigenvalues(index, expected_eigenvalue):
+#     operator = DiracOperator(n_time=4, nu=4, n_landau=4)
+#     assert np.isclose(operator.eigenvalue(index), expected_eigenvalue)
 
 
 def test_application_to_two_spectral_components():

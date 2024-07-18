@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from spectrum import Derivative1D
+from pseudospectral.spectrum import Derivative1D
 
 class DiracOperator:
     """
@@ -22,9 +22,13 @@ class DiracOperator:
         """
 
         if (input_space in ['real', 'spectral']) and (output_space in ['real', 'spectral']):
+            print("Inside DiracOperator: ", coefficients)
             temp_1 = self.spectrum.transform(coefficients, input_space, 'spectral')
+            print("Temp 1:", temp_1, "\n")
             temp_2 = np.diag(self.spectrum.eigenvalues) @ temp_1
+            print("Temp 2: ", temp_2, "\n")   
             temp_3 = self.spectrum.transform(temp_2, 'spectral', output_space)
+            print("Temp 3: ", temp_3, "\n")
             return temp_3
         
         else:

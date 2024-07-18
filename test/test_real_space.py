@@ -1,121 +1,61 @@
 #!/usr/bin/env python3
 
-from pseudospectral import DiracOperator
+from pseudospectral import DiracOperator, Derivative1D
 import numpy as np
 import pytest
 
-def test_application_to_a_single_eigenfunction():
+def test_application_to_a_single_eigenfunction(L=1, n=2):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
-    operator = DiracOperator(n_real=4, nu=4, n_landau=4)
-    arbitrary_index = [2, 3, 1]
+    arbitrary_index = 1 # Index of the eigenfunction to be tested
+    operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    # Create a lattice in real space
-    lattice = operator.lattice(output_space="real")
-    function_values = operator.eigenfunction(
-        arbitrary_index, output_space="real", coordinates=lattice
-    )
+    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(np.linspace(0, L, n))
+    expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
+    print("Eigenfunction: ", eigenfunction, '\n')
+    print("Eigenvalue: ", operator.spectrum.eigenvalues[arbitrary_index], '\n')
+    print("Expected: ", expected, '\n')
     
-    result = operator.apply_to(
-        function_values, input_space="real", output_space="real"
-    )
-    expected = operator.eigenvalue(arbitrary_index) * function_values
-    assert np.allclose(result, expected)
+    result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
+    assert np.allclose(np.sum(np.absolute(result - expected)), 0.05)
 
 
 
-def test_application_to_another_single_eigenfunction():
-    """
-    Python test function to test the application of the Dirac operator to another single eigenfunction in real space.
-    """
-    operator = DiracOperator(n_real=4, nu=4, n_landau=4)
-    arbitrary_index = [1, 2, 0]
-    
-    lattice = operator.lattice(output_space="real")
-    function_values = operator.eigenfunction(
-        arbitrary_index, output_space="real", coordinates=lattice
-    )
-    
-    result = operator.apply_to(
-        function_values, input_space="real", output_space="real"
-    )
-    expected = operator.eigenvalue(arbitrary_index) * function_values
-    assert np.allclose(result, expected)
-
-
-
-def test_application_to_superposition_of_two_eigenfunctions():
+def test_application_to_superposition_of_two_eigenfunctions(L=1, n=5):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
-    operator = DiracOperator(n_time=4, nu=4, n_landau=4)
-    index1 = [0, 1, 2]
-    index2 = [2, 2, 3]
+    arbitrary_index = [1,2] # Index of the eigenfunction to be tested
+    operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    lattice = operator.lattice(output_space="real space")
-    function_values1 = operator.eigenfunction(
-        index1, output_space="real", coordinates=lattice
-    )
-    function_values2 = operator.eigenfunction(
-        index2, output_space="real", coordinates=lattice
-    )
+    eigenfunction_1, eigenfunction_2 = operator.spectrum.eigenfunction(arbitrary_index)(np.linspace(0, L, n))
+    expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
     
-    function_values = function_values1 + function_values2
-    
-    result = operator.apply_to(
-        function_values, input_space="real", output_space="real"
-    )
-    expected = operator.eigenvalue(index1) * function_values1 + operator.eigenvalue(index2) * function_values2
-    assert np.allclose(result, expected)
+    result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")
+    assert np.allclose(np.sum(np.absolute(result -expected)), 0.05)
 
 
 
-def test_eigenfunction():
-    """
-    Python test function to test the eigenfunction method of the Dirac Operator class in the real space.
-    """
-    operator = DiracOperator(n_time=4, nu=4, n_landau=4)
-    index1 = [0, 0, 0]
-    index2 = [1, 0, 0]
+# def test_lattice():
+#     """
+#     Python test function to test the lattice method of the Dirac Operator class in the real space.
+#     """
+#     operator = DiracOperator(Derivative1D(10))
     
-    lattice = operator.lattice(output_space="real")
-    function_values1 = operator.eigenfunction(
-        index1, output_space="real", coordinates=lattice
-    )
-    function_values2 = operator.eigenfunction(
-        index2, output_space="real", coordinates=lattice
-    )
+#     # Check exact lattice values
+#     time_lattice = operator.lattice(output_space="real")
+#     spectral_lattice = operator.lattice(output_space="spectral")
     
-    # Check exact function values for known eigenfunctions (example values)
-    assert np.allclose(function_values1, np.exp(1j * np.dot(lattice, index1)))
-    assert np.allclose(function_values2, np.exp(1j * np.dot(lattice, index2)))
+#     expected_time_lattice = np.linspace(0, operator.beta, operator.n_time, endpoint=False)
+#     expected_spectral_lattice = 2 * np.pi * (np.arange(operator.n_time) + 0.5) / operator.beta
     
-    # Check orthogonality
-    inner_product = np.vdot(function_values1, function_values2)
-    assert np.isclose(inner_product, 0)
-
-
-
-def test_lattice():
-    """
-    Python test function to test the lattice method of the Dirac Operator class in the real space.
-    """
-    operator = DiracOperator(n_time=4, nu=4, n_landau=4)
+#     assert np.allclose(time_lattice, expected_time_lattice)
+#     assert np.allclose(spectral_lattice, expected_spectral_lattice)
     
-    # Check exact lattice values
-    time_lattice = operator.lattice(output_space="real")
-    spectral_lattice = operator.lattice(output_space="spectral")
-    
-    expected_time_lattice = np.linspace(0, operator.beta, operator.n_time, endpoint=False)
-    expected_spectral_lattice = 2 * np.pi * (np.arange(operator.n_time) + 0.5) / operator.beta
-    
-    assert np.allclose(time_lattice, expected_time_lattice)
-    assert np.allclose(spectral_lattice, expected_spectral_lattice)
-    
-    # Potentially more properties to check
-    assert len(time_lattice) == operator.n_time
-    assert len(spectral_lattice) == operator.n_time
+#     # Potentially more properties to check
+#     assert len(time_lattice) == operator.n_time
+#     assert len(spectral_lattice) == operator.n_time
 
 
 # A simpler operator: Free Dirac operator

@@ -4,36 +4,38 @@ from pseudospectral import DiracOperator, Derivative1D
 import numpy as np
 import pytest
 
-def test_application_to_a_single_eigenfunction(L=1, n=2):
+def test_application_to_a_single_eigenfunction(L=4, n=4):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
     arbitrary_index = 1 # Index of the eigenfunction to be tested
     operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(np.linspace(0, L, n))
+    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(np.arange(L))
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
-    print("Eigenfunction: ", eigenfunction, '\n')
-    print("Eigenvalue: ", operator.spectrum.eigenvalues[arbitrary_index], '\n')
-    print("Expected: ", expected, '\n')
-    
     result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
-    assert np.allclose(np.sum(np.absolute(result - expected)), 0.05)
+    
+    # print("Expected: ", expected, '\n')
+    # print("Result: ", result, '\n')
+    assert np.isclose(result, expected).all()
 
 
 
-def test_application_to_superposition_of_two_eigenfunctions(L=1, n=5):
+def test_application_to_superposition_of_two_eigenfunctions(L=5, n=5):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
     arbitrary_index = [1,2] # Index of the eigenfunction to be tested
-    operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
+    operator = DiracOperator(Derivative1D(num_lattice_points = n, L = L))
     
-    eigenfunction_1, eigenfunction_2 = operator.spectrum.eigenfunction(arbitrary_index)(np.linspace(0, L, n))
+    eigenfunction_1 = operator.spectrum.eigenfunction(arbitrary_index[0])(np.arange(L))
+    eigenfunction_2 = operator.spectrum.eigenfunction(arbitrary_index[1])(np.arange(L))
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
     
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")
-    assert np.allclose(np.sum(np.absolute(result -expected)), 0.05)
+    # print("Expected: ", expected, '\n')
+    # print("Result: ", result, '\n')
+    assert np.isclose(result, expected).all()
 
 
 
@@ -81,8 +83,9 @@ def test_application_to_superposition_of_two_eigenfunctions(L=1, n=5):
 # Eigenfunctions are productions of plane waves in each direction
 # In a finite box with (anti-periodic boundary conditions), eigenvalues are linearly spaced with an offset depending on the boundary conditions.
 
-def main():
-    test_application_to_a_single_eigenfunction()
+# def main():
+#     # test_application_to_a_single_eigenfunction(L=4, n=4)
+#     test_application_to_superposition_of_two_eigenfunctions(L=5, n=5)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

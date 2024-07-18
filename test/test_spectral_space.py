@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 
-def test_application_to_a_single_eigenfunction(L=4, n=5):
+def test_application_to_a_single_eigenfunction(L=4, n=4):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
@@ -15,16 +15,15 @@ def test_application_to_a_single_eigenfunction(L=4, n=5):
     eigenfunction = np.zeros(L)
     eigenfunction[arbitrary_index] = 1
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
-    print("Eigenfunction: ", eigenfunction, '\n')
-    print("Eigenvalue: ", operator.spectrum.eigenvalues[arbitrary_index], '\n')
     print("Expected: ", expected, '\n')
     
     result = operator.apply_to(eigenfunction, input_space="spectral", output_space="spectral")
-    assert np.allclose(np.sum(np.absolute(result -expected)), 0.05)
+    print("Result: ", result, '\n')
+    assert np.isclose(result, expected).all()
 
 
 
-def test_application_to_superposition_of_two_eigenfunctions(L=1, n=5):
+def test_application_to_superposition_of_two_eigenfunctions(L=47, n=47):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
@@ -34,9 +33,11 @@ def test_application_to_superposition_of_two_eigenfunctions(L=1, n=5):
     eigenfunction_1, eigenfunction_2 = np.zeros(L), np.zeros(L)
     eigenfunction_1[arbitrary_index[0]], eigenfunction_2[arbitrary_index[1]] = 1, 1
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
-    
+    print("Expected: ", expected, '\n')
+
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="spectral", output_space="spectral")
-    assert np.allclose(np.sum(np.absolute(result -expected)), 0.05)
+    print("Result: ", result, '\n')
+    assert np.isclose(result, expected).all()
 
 
 
@@ -66,3 +67,10 @@ def test_application_to_superposition_of_two_eigenfunctions(L=1, n=5):
 
 
 # you can deduplicate test code via @pytest.parametrize() (or something like that...)
+
+if __name__ == '__main__':
+    # test_application_to_a_single_eigenfunction()
+    test_application_to_superposition_of_two_eigenfunctions()
+    # test_reports_correct_eigenvalue()
+    # test_eigenvalues()
+    # print("All tests passed!")

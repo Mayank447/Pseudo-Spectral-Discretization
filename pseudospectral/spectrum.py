@@ -38,14 +38,14 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_space == 'real' and output_space == 'spectral':
-            return scipy.fft.fft(input_vector) / np.sqrt(self.num_lattice_points)
+            return scipy.fft.fft(input_vector) / self.num_lattice_points
         
         elif input_space == 'spectral' and output_space == 'spectral':
             return input_vector
         
         elif input_space == 'spectral' and output_space == 'real':
             # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
-            return scipy.fft.ifft(input_vector) * np.sqrt(self.num_lattice_points)
+            return scipy.fft.ifft(input_vector) * self.num_lattice_points
         
         else:
             raise ValueError("Unsupported space transformation.")

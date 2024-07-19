@@ -15,10 +15,8 @@ def test_application_to_a_single_eigenfunction(L=4, n=4):
     eigenfunction = np.zeros(L)
     eigenfunction[arbitrary_index] = 1
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
-    print("Expected: ", expected, '\n')
     
     result = operator.apply_to(eigenfunction, input_space="spectral", output_space="spectral")
-    print("Result: ", result, '\n')
     assert np.isclose(result, expected).all()
 
 
@@ -33,10 +31,8 @@ def test_application_to_superposition_of_two_eigenfunctions(L=47, n=47):
     eigenfunction_1, eigenfunction_2 = np.zeros(L), np.zeros(L)
     eigenfunction_1[arbitrary_index[0]], eigenfunction_2[arbitrary_index[1]] = 1, 1
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
-    print("Expected: ", expected, '\n')
 
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="spectral", output_space="spectral")
-    print("Result: ", result, '\n')
     assert np.isclose(result, expected).all()
 
 

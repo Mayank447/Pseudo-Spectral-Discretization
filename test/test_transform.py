@@ -16,8 +16,6 @@ def test_transforms_from_real_to_spectral_space(L=4, n=4):
     # Create spectral coefficients with a single component
     expected = np.zeros(L)
     expected[arbitrary_index] = 1.0
-    print("Expected: ", expected, '\n')
-    print("Result: ", result, '\n')
     assert np.isclose(expected, result).all()
 
 
@@ -36,16 +34,11 @@ def test_transforms_multiple_components_from_real_to_spectral_space(L=4, n=4):
 
     eigenfunction_1 = arbitrary_coefficients[0] * operator.spectrum.eigenfunction(arbitrary_index[0])(array)
     eigenfunction_2 = arbitrary_coefficients[1] * operator.spectrum.eigenfunction(arbitrary_index[1])(array)
-    # print("Eigenfunction 1: ", eigenfunction_1, '\n')
-    # print("Eigenfunction 2: ", eigenfunction_2, '\n')
-    # print("Eigenfunction:", eigenfunction_1 + eigenfunction_2, '\n')
     result = operator.spectrum.transform(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="spectral")
     
     # Create spectral coefficients with a single component
     expected = np.zeros(L)
     expected[arbitrary_index] = arbitrary_coefficients
-    # print("Expected: ", expected, '\n')
-    # print("Result: ", result, '\n')
     assert np.isclose(expected, result).all()
 
 
@@ -68,8 +61,6 @@ def test_transforms_from_spectral_to_real_space(L=4, n=4):
     
     # Generate expected eigenfunction in real space
     expected = operator.spectrum.eigenfunction(arbitrary_index)(np.arange(L))
-    print("Expected: ", expected, '\n')
-    print("Result: ", result, '\n')
     assert np.isclose(expected, result).all()
 
 
@@ -96,19 +87,4 @@ def test_transforms_multiple_components_from_spectral_to_real_space(L=4, n=4):
     e1 = operator.spectrum.eigenfunction(arbitrary_index[0])
     e2 = operator.spectrum.eigenfunction(arbitrary_index[1])
     expected = arbitrary_coefficents[0] * e1(array) + arbitrary_coefficents[1] * e2(array)
-    print("Expected: ", expected, '\n')
-    print("Result: ", result, '\n')
     assert np.isclose(expected, result).all()
-
-
-# def main():
-#     # test_transforms_from_real_to_spectral_space(L=4, n=4)
-#     # test_transforms_multiple_components_from_real_to_spectral_space(L=4, n=4)
-#     # test_transforms_from_spectral_to_real_space(L=4, n=4)
-#     # test_transforms_multiple_components_from_spectral_to_real_space(L=4, n=4)
-#     pass
-
-# if __name__ == "__main__":
-#     main()
-
-

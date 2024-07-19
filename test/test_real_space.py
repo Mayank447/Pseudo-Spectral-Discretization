@@ -15,8 +15,6 @@ def test_application_to_a_single_eigenfunction(L=4, n=4):
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
     result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
     
-    # print("Expected: ", expected, '\n')
-    # print("Result: ", result, '\n')
     assert np.isclose(result, expected).all()
 
 
@@ -33,8 +31,6 @@ def test_application_to_superposition_of_two_eigenfunctions(L=5, n=5):
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
     
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")
-    # print("Expected: ", expected, '\n')
-    # print("Result: ", result, '\n')
     assert np.isclose(result, expected).all()
 
 

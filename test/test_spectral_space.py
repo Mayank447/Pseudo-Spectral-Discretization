@@ -27,7 +27,7 @@ def test_application_to_superposition_of_two_eigenfunctions(L=47, n=47):
     arbitrary_index = [1,2] # Index of the eigenfunction to be tested
     operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    eigenfunction_1, eigenfunction_2 = np.eye(n)[arbitrary_index[0], :], np.eye(n)[arbitrary_index[1], :]
+    eigenfunction_1, eigenfunction_2 = eigenfunction_1, eigenfunction_2 = np.eye(n)[arbitrary_index, :]
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
 
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="spectral", output_space="spectral")

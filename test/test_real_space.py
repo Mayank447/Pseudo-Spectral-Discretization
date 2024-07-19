@@ -11,10 +11,11 @@ def test_application_to_a_single_eigenfunction(L=4, n=4):
     arbitrary_index = 1 # Index of the eigenfunction to be tested
     operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(np.arange(L))
+    sample_points = np.linspace(0,L,n,endpoint=False)
+    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
-    result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
     
+    result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
     assert np.isclose(result, expected).all()
 
 
@@ -26,8 +27,9 @@ def test_application_to_superposition_of_two_eigenfunctions(L=5, n=5):
     arbitrary_index = [1,2] # Index of the eigenfunction to be tested
     operator = DiracOperator(Derivative1D(num_lattice_points = n, L = L))
     
-    eigenfunction_1 = operator.spectrum.eigenfunction(arbitrary_index[0])(np.arange(L))
-    eigenfunction_2 = operator.spectrum.eigenfunction(arbitrary_index[1])(np.arange(L))
+    sample_points = np.linspace(0,L,n,endpoint=False)
+    eigenfunction_1 = operator.spectrum.eigenfunction(arbitrary_index[0])(sample_points)
+    eigenfunction_2 = operator.spectrum.eigenfunction(arbitrary_index[1])(sample_points)
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
     
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")

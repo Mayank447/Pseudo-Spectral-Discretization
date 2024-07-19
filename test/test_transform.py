@@ -9,13 +9,13 @@ def test_transforms_from_real_to_spectral_space(L=4, n=4):
     """
     operator = DiracOperator(Derivative1D(L, n))
     arbitrary_index = 1
-    array = np.arange(L)
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(array)
+    sample_points = np.linspace(0,L,n,endpoint=False)
+    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
     result = operator.spectrum.transform(eigenfunction, input_space="real", output_space="spectral")
     
     # Create spectral coefficients with a single component
-    expected = np.zeros(L)
-    expected[arbitrary_index] = 1.0
+    expected = np.eye(L)[arbitrary_index,:]
+    print("Expected:", expected)
     assert np.isclose(expected, result).all()
 
 
@@ -30,10 +30,10 @@ def test_transforms_multiple_components_from_real_to_spectral_space(L=4, n=4):
     operator = DiracOperator(Derivative1D(L, n))
     arbitrary_index = [1,3]
     arbitrary_coefficients = [1.0, 2.0]
-    array = np.arange(L)
+    sample_points = np.linspace(0,L,n,endpoint=False)
 
-    eigenfunction_1 = arbitrary_coefficients[0] * operator.spectrum.eigenfunction(arbitrary_index[0])(array)
-    eigenfunction_2 = arbitrary_coefficients[1] * operator.spectrum.eigenfunction(arbitrary_index[1])(array)
+    eigenfunction_1 = arbitrary_coefficients[0] * operator.spectrum.eigenfunction(arbitrary_index[0])(sample_points)
+    eigenfunction_2 = arbitrary_coefficients[1] * operator.spectrum.eigenfunction(arbitrary_index[1])(sample_points)
     result = operator.spectrum.transform(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="spectral")
     
     # Create spectral coefficients with a single component
@@ -51,8 +51,7 @@ def test_transforms_from_spectral_to_real_space(L=4, n=4):
     arbitrary_index = 2
     
     # Create spectral coefficients with a single component
-    spectral_coefficients = np.zeros(L)
-    spectral_coefficients[arbitrary_index] = 1.0
+    spectral_coefficients = np.eye(L)[arbitrary_index,:]
     
     # Transform from spectral space to real space
     result = operator.spectrum.transform(
@@ -60,7 +59,8 @@ def test_transforms_from_spectral_to_real_space(L=4, n=4):
     )
     
     # Generate expected eigenfunction in real space
-    expected = operator.spectrum.eigenfunction(arbitrary_index)(np.arange(L))
+    sample_points = np.linspace(0,L,n,endpoint=False)
+    expected = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
     assert np.isclose(expected, result).all()
 
 
@@ -83,8 +83,8 @@ def test_transforms_multiple_components_from_spectral_to_real_space(L=4, n=4):
     )
     
     # Generate expected function values in real space
-    array = np.arange(L)
-    e1 = operator.spectrum.eigenfunction(arbitrary_index[0])
-    e2 = operator.spectrum.eigenfunction(arbitrary_index[1])
-    expected = arbitrary_coefficents[0] * e1(array) + arbitrary_coefficents[1] * e2(array)
+    sample_points = np.linspace(0,L,n,endpoint=False)
+    e1 = operator.spectrum.eigenfunction(arbitrary_index[0])(sample_points)
+    e2 = operator.spectrum.eigenfunction(arbitrary_index[1])(sample_points)
+    expected = arbitrary_coefficents[0] * e1 + arbitrary_coefficents[1] * e2
     assert np.isclose(expected, result).all()

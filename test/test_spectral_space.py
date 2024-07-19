@@ -12,8 +12,7 @@ def test_application_to_a_single_eigenfunction(L=4, n=4):
     arbitrary_index = 1 # Index of the eigenfunction to be tested
     operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    eigenfunction = np.zeros(L)
-    eigenfunction[arbitrary_index] = 1
+    eigenfunction = np.eye(n)[arbitrary_index, :]
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
     
     result = operator.apply_to(eigenfunction, input_space="spectral", output_space="spectral")
@@ -28,8 +27,7 @@ def test_application_to_superposition_of_two_eigenfunctions(L=47, n=47):
     arbitrary_index = [1,2] # Index of the eigenfunction to be tested
     operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
     
-    eigenfunction_1, eigenfunction_2 = np.zeros(L), np.zeros(L)
-    eigenfunction_1[arbitrary_index[0]], eigenfunction_2[arbitrary_index[1]] = 1, 1
+    eigenfunction_1, eigenfunction_2 = np.eye(n)[arbitrary_index[0], :], np.eye(n)[arbitrary_index[1], :]
     expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
 
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="spectral", output_space="spectral")
@@ -63,10 +61,3 @@ def test_application_to_superposition_of_two_eigenfunctions(L=47, n=47):
 
 
 # you can deduplicate test code via @pytest.parametrize() (or something like that...)
-
-if __name__ == '__main__':
-    # test_application_to_a_single_eigenfunction()
-    test_application_to_superposition_of_two_eigenfunctions()
-    # test_reports_correct_eigenvalue()
-    # test_eigenvalues()
-    # print("All tests passed!")

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from pseudospectral.spectrum import Derivative1D
 
 class DiracOperator:
     """

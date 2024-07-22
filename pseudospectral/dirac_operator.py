@@ -22,7 +22,7 @@ class DiracOperator:
 
         if (input_space in ['real', 'spectral']) and (output_space in ['real', 'spectral']):
             temp_1 = self.spectrum.transform(coefficients, input_space, 'spectral')
-            temp_2 = np.diag(self.spectrum.eigenvalues) @ temp_1
+            temp_2 = self.spectrum.eigenvalues * temp_1
             temp_3 = self.spectrum.transform(temp_2, 'spectral', output_space)
             return temp_3
         

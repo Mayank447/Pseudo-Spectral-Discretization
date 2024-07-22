@@ -1,12 +1,24 @@
+[project]
+name = "pseudospectral"
+version = "0.1.0"
+authors = [
+    {name = "Mayank Goel", email = "mayank.goel447@gmail.com"},
+    {name = "Julian Lenz", email = "j.lenz@hzdr.de"}
+]
+
+requires-python = ">=3.12"
+dependencies = [
+    "numpy==2.0.0",
+    "scipy==1.14.0",
+    "matplotlib==3.9.0",
+    "pytest==8.2.2",
+    "pre-commit==4.6.0",
+    "ruff==0.5.0"
+]
+
 [tool.ruff]
 # Set the maximum line length to 100.
 line-length = 100
-
-[project]
-# Support Python 3.12+.
-requires-python = ">=3.12"
-name = "pseudospectral"
-version = "0.1.0"
 
 [tool.ruff.lint]
 # Add the `line-too-long` rule to the enforced rule set.

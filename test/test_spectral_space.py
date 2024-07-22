@@ -64,7 +64,3 @@ def test_lattice_spectral_space(spectrum):
     result = spectrum.lattice(output_space="spectral")
     expected = 2 * np.pi * np.arange(spectrum.num_lattice_points) / spectrum.L
     assert np.equal(result, expected).all()
-
-
-# write a table of eigenvalues and test all of them
-# you can deduplicate test code via @pytest.parametrize() (or something like that...)

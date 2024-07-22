@@ -63,23 +63,11 @@ def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_
     assert np.isclose(result, expected).all()
 
 
-
-# def test_lattice():
-#     """
-#     Python test function to test the lattice method of the Dirac Operator class in the real space.
-#     """
-#     operator = DiracOperator(Derivative1D(10))
+def test_lattice_real_space(spectrum):
+    """
+    Python test function to test the lattice method of the Spectrum class in the real space.
+    """
     
-#     # Check exact lattice values
-#     time_lattice = operator.lattice(output_space="real")
-#     spectral_lattice = operator.lattice(output_space="spectral")
-    
-#     expected_time_lattice = np.linspace(0, operator.beta, operator.n_time, endpoint=False)
-#     expected_spectral_lattice = 2 * np.pi * (np.arange(operator.n_time) + 0.5) / operator.beta
-    
-#     assert np.allclose(time_lattice, expected_time_lattice)
-#     assert np.allclose(spectral_lattice, expected_spectral_lattice)
-    
-#     # Potentially more properties to check
-#     assert len(time_lattice) == operator.n_time
-#     assert len(spectral_lattice) == operator.n_time
+    lattice = spectrum.lattice(output_space="real")
+    excepted = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
+    assert np.equal(lattice, excepted).all()

@@ -62,6 +62,6 @@ class Derivative1D:
         if output_space == 'real':
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
         elif output_space == 'spectral':
-            return 2 * np.pi * (np.arange(self.num_lattice_points) + 0.5) / self.L
+            return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
         else:
             raise ValueError("Unsupported output space.")

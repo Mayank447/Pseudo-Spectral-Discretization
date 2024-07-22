@@ -55,10 +55,10 @@ class FreeFermions2D:
             return input_vector
         
         elif input_space == 'real' and output_space == 'spectral':
-            return 0
+            return np.fft.fft2(input_vector) / (self.n_t * self.n_x)
 
         elif input_space == 'spectral' and output_space == 'real':
-            return 0
+            return np.fft.ifft2(input_vector) * (self.n_t * self.n_x)
 
         else:
             raise ValueError("Unsupported space transformation.")   

@@ -1,2 +1,2 @@
 from .dirac_operator import DiracOperator
-from .spectrum import Derivative1D
+from .derivative_1D import Derivative1D

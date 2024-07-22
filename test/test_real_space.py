@@ -4,34 +4,61 @@ from pseudospectral import DiracOperator, Derivative1D
 import numpy as np
 import pytest
 
-def test_application_to_a_single_eigenfunction(L=4, n=4):
+
+########################################## FIXTURES ##########################################
+@pytest.fixture
+def spectrum(L=4, n=4):
+    """
+    Python fixture to initialize the spectrum for the tests.
+    """
+    return Derivative1D(L=L, num_lattice_points=n)
+
+
+@pytest.fixture
+def arbitrary_index_single_eigenfunction(index=1):
+    """
+    Python fixture to initialize the arbitrary index for the single eigenfunction test.
+    """
+    return index
+
+
+@pytest.fixture
+def arbitrary_index_two_eigenfunctions():
+    """
+    Python fixture to initialize the arbitrary index for the two eigenfunctions test.
+    """
+    return np.array([1,2])
+
+
+
+############################################ TEST FUNCTION ############################################
+def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_eigenfunction):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
-    arbitrary_index = 1 # Index of the eigenfunction to be tested
-    operator = DiracOperator(Derivative1D(num_lattice_points=n, L=L))
+    operator = DiracOperator(spectrum)
     
-    sample_points = np.linspace(0,L,n,endpoint=False)
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
-    expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
-    
+    # Make sample points a fixture later
+    sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
+    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
     result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
+    
+    expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
     assert np.isclose(result, expected).all()
 
 
 
-def test_application_to_superposition_of_two_eigenfunctions(L=5, n=5):
+def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index_two_eigenfunctions):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
-    arbitrary_index = [1,2] # Index of the eigenfunction to be tested
-    operator = DiracOperator(Derivative1D(num_lattice_points = n, L = L))
+    operator = DiracOperator(spectrum)
     
-    sample_points = np.linspace(0,L,n,endpoint=False)
-    eigenfunction_1 = operator.spectrum.eigenfunction(arbitrary_index[0])(sample_points)
-    eigenfunction_2 = operator.spectrum.eigenfunction(arbitrary_index[1])(sample_points)
-    expected = eigenfunction_1 * operator.spectrum.eigenvalues[arbitrary_index[0]] + eigenfunction_2 * operator.spectrum.eigenvalues[arbitrary_index[1]]
-    
+    sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
+    eigenfunction_1 = spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[0])(sample_points)
+    eigenfunction_2 = spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points)
+    expected = np.column_stack((eigenfunction_1, eigenfunction_2)) @ spectrum.eigenvalues[arbitrary_index_two_eigenfunctions]
+
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")
     assert np.isclose(result, expected).all()
 
@@ -56,34 +83,3 @@ def test_application_to_superposition_of_two_eigenfunctions(L=5, n=5):
 #     # Potentially more properties to check
 #     assert len(time_lattice) == operator.n_time
 #     assert len(spectral_lattice) == operator.n_time
-
-
-# A simpler operator: Free Dirac operator
-# @pytest.mark.parametrize("index, expected_eigenvalue", [
-#     ([0, 0, 0], np.pi / 4),
-#     ([1, 0, 0], np.pi / 4),
-#     ([2, 0, 0], np.pi / 4),
-#     ([3, 0, 0], np.pi / 4),
-# ])
-# def test_free_dirac_operator_eigenvalues(index, expected_eigenvalue):
-#     operator = DiracOperator(n_time=4, nu=4, n_landau=4)
-#     assert np.isclose(operator.eigenvalue(index), expected_eigenvalue)
-
-
-# A simpler operator: Free Dirac operator == plain first derivative
-#
-# D = gamma^mu partial_mu =
-#     (
-#           partial_0                   partial_1 + i partial_2
-#           partial_1 - i partial_2        -partial_0
-#     )
-#
-# Eigenfunctions are productions of plane waves in each direction
-# In a finite box with (anti-periodic boundary conditions), eigenvalues are linearly spaced with an offset depending on the boundary conditions.
-
-# def main():
-#     # test_application_to_a_single_eigenfunction(L=4, n=4)
-#     test_application_to_superposition_of_two_eigenfunctions(L=5, n=5)
-
-# if __name__ == "__main__":
-#     main()

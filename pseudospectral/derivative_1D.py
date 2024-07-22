@@ -5,6 +5,10 @@ class Derivative1D:
     """
     Class to represent the eigenfunctions, eigenvalues of a 1D Derivative operator 
     with finite and periodic boundary conditions.
+
+    Args:
+        num_lattice_points: Number of lattice points in the 1D domain
+        L: Length of the periodic 1D domain
     """
 
     def __init__(self, num_lattice_points, L=1):

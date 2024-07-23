@@ -6,16 +6,16 @@ class FreeFermions2D:
     Operator = (\sigma_z \partial_{t} + \sigma_x \partial_{x}) + (m * \Identity) + (\mu * \sigma_z)
                 , where the sigmas are the Pauli matrices.
     
-    The operator is discretized on a 2D lattice with n_t lattice points in the time axis and n_x lattice points in the x axis.
+    The operator is discretized on p_0 2D lattice with n_t lattice points in the time axis and n_x lattice points in the x axis.
     We assume periodic boundary conditions in both directions with lengths L_t and L_x respectively.            
 
     Args:
         mu: Chemical potential (Fermi energy)
         m: mass parameter
         L_t: length of the system in the time axis
-        L_x: length of the system in the x axis
-        n_t: number of lattice points in the time axis
-        n_x: number of lattice points in the x axis
+        L_x: length of the system in the x axis 
+        n_t: number of lattice points in the time axis (even)
+        n_x: number of lattice points in the x axis (odd)
     """
     
     def __init__(self, mu, m, L_t, L_x, n_t, n_x):
@@ -31,16 +31,16 @@ class FreeFermions2D:
         """
         Private function to return the eigenvalues of the 2D free fermions operator.
         """
-        a, b = index
-        return np.sqrt(self.mu**2 + (2 * self.mu * 1j * b) - (a**2 + b**2 + + self.m**2))
+        p_0, p_1 = index
+        return np.sqrt(self.mu**2 + (2 * self.mu * 1j * p_1) - (p_0**2 + p_1**2 + + self.m**2))
     
 
     def eigenfunctions(self, index):
         """
         Function to return the eigenfunctions of the 2D free fermions operator.
         """
-        a, b = index
-        return lambda x, t: np.exp(1j * (a * t) + (b * x))
+        p_0, p_1 = index
+        return lambda x, t: np.exp(1j * ((p_0 - self.mu) * t) + (p_1 * x))
     
 
     def transform(self, input_vector, input_space, output_space):
@@ -61,4 +61,9 @@ class FreeFermions2D:
             return np.fft.ifft2(input_vector) * (self.n_t * self.n_x)
 
         else:
-            raise ValueError("Unsupported space transformation.")   
+            raise ValueError("Unsupported space transformation.") 
+
+
+if __name__ == "__main__":
+    n_t = [-(N-1)/2, ..., -1/2 , 1/2 , ..., (N-1)/2]
+    n_x = [-(N-1)/2, ..., -1, 0, 1, ..., (N-1)/2]

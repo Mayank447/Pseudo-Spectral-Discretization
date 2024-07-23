@@ -52,7 +52,7 @@ class Derivative1D:
             return scipy.fft.ifft(input_vector) * self.num_lattice_points
         
         else:
-            raise ValueError("Unsupported space transformation.")
+            raise ValueError(f"Unsupported space transformation from {input_space} to {output_space}.")
 
 
     def lattice(self, output_space):

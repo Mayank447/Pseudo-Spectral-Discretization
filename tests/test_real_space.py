@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 
-from pseudospectral import DiracOperator, Derivative1D
+from pseudospectral import DiracOperator
 import numpy as np
 import pytest
 
 
 ########################################## FIXTURES ##########################################
-@pytest.fixture
-def spectrum(L=4, n=4):
-    """
-    Python fixture to initialize the spectrum for the tests.
-    """
-    return Derivative1D(L=L, num_lattice_points=n)
-
-
 @pytest.fixture
 def arbitrary_index_single_eigenfunction(index=1):
     """
@@ -27,12 +19,12 @@ def arbitrary_index_two_eigenfunctions():
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.array([1,2])
-
+    return [(x,y) for x in range(4) for y in range(4)]
 
 
 ############################################ TEST FUNCTION ############################################
-def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_eigenfunction):
+@pytest.mark.parametrize("arbitrary_index", np.arange(4))
+def test_application_to_a_single_eigenfunction(arbitrary_index, spectrum):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
@@ -40,24 +32,24 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_
     
     # Make sample points a fixture later
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
+    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
     result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
     
-    expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
+    expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
     assert np.isclose(result, expected).all()
 
 
-
-def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index_two_eigenfunctions):
+@pytest.mark.parametrize("arbitrary_index", [[x,y] for x in range(4) for y in range(4)])
+def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
     operator = DiracOperator(spectrum)
     
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    eigenfunction_1 = spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[0])(sample_points)
-    eigenfunction_2 = spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points)
-    expected = np.column_stack((eigenfunction_1, eigenfunction_2)) @ spectrum.eigenvalues[arbitrary_index_two_eigenfunctions]
+    eigenfunction_1 = spectrum.eigenfunction(arbitrary_index[0])(sample_points)
+    eigenfunction_2 = spectrum.eigenfunction(arbitrary_index[1])(sample_points)
+    expected = np.column_stack((eigenfunction_1, eigenfunction_2)) @ spectrum.eigenvalues[arbitrary_index]
 
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")
     assert np.isclose(result, expected).all()

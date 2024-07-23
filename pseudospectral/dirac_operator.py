@@ -27,4 +27,4 @@ class DiracOperator:
             return temp_3
         
         else:
-            raise ValueError("Unsupported space transformation.")
+            raise ValueError(f"Unsupported space transformation from {input_space} to {output_space}.")

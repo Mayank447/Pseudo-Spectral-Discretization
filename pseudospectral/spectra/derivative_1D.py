@@ -58,10 +58,23 @@ class Derivative1D:
     def lattice(self, output_space):
         """
         Return the lattice of the Dirac operator as per the given output space.
+
+        Parameters:
+        output_space (str): The space for which to generate the lattice. 
+                            Must be either 'real' or 'space'.
+
+        Returns:
+        np.ndarray: The lattice points in the specified output space.
+
+        Raises:
+        ValueError: If the output space is not 'real' or 'space'.
         """
+
         if output_space == 'real':
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
+        
         elif output_space == 'spectral':
             return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
+        
         else:
             raise ValueError("Unsupported output space.")

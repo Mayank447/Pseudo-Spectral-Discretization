@@ -2,32 +2,34 @@ from pseudospectral import Derivative1D
 import numpy as np
 import pytest
 
-TEST_DATA = [
-    (Derivative1D, {"num_lattice_points": 3}),
-    (Derivative1D, {"num_lattice_points": 101}),
-    (Derivative1D, {"num_lattice_points": 3, "L": 3}),
-    (Derivative1D, {"num_lattice_points": 101, "L": 42}),
+SPECTRA = [
+    {"type": Derivative1D, "config": {"num_lattice_points": 3}},
+    {"type": Derivative1D, "config": {"num_lattice_points": 101}},
+    {"type": Derivative1D, "config": {"num_lattice_points": 3, "L": 3}},
+    {"type": Derivative1D, "config": {"num_lattice_points": 101, "L": 42}},
 ]
 
 
-@pytest.mark.parametrize(["Spectrum", "spectral_config"], TEST_DATA)
-def test_orthonormality(Spectrum, spectral_config):
-    spectrum = Spectrum(**spectral_config)
-    eigenfunctions = spectrum.eigenfunction(
-        np.arange(spectral_config["num_lattice_points"]).reshape(-1, 1)
+@pytest.fixture(params=SPECTRA)
+def spectrum(request):
+    return request.param["type"](**request.param["config"])
+
+
+@pytest.fixture()
+def eigenfunctions(spectrum):
+    return spectrum.eigenfunction(
+        np.arange(spectrum.num_lattice_points).reshape(-1, 1)
     )(spectrum.lattice(output_space="real"))
+
+
+def test_orthonormality(spectrum, eigenfunctions):
     assert np.allclose(
         spectrum.scalar_product(eigenfunctions, eigenfunctions),
-        np.eye(spectral_config["num_lattice_points"]),
+        np.eye(*eigenfunctions.shape),
     )
 
 
-@pytest.mark.parametrize(["Spectrum", "spectral_config"], TEST_DATA)
-def test_back_and_forth_transform_is_identity(Spectrum, spectral_config):
-    spectrum = Spectrum(**spectral_config)
-    eigenfunctions = spectrum.eigenfunction(
-        np.arange(spectral_config["num_lattice_points"]).reshape(-1, 1)
-    )(spectrum.lattice(output_space="real"))
+def test_back_and_forth_transform_is_identity(spectrum, eigenfunctions):
     assert np.allclose(
         spectrum.transform(
             spectrum.transform(
@@ -40,13 +42,7 @@ def test_back_and_forth_transform_is_identity(Spectrum, spectral_config):
     )
 
 
-@pytest.mark.parametrize(["Spectrum", "spectral_config"], TEST_DATA)
-def test_unitary_transform(Spectrum, spectral_config):
-    spectrum = Spectrum(**spectral_config)
-    eigenfunctions = spectrum.eigenfunction(
-        np.arange(spectral_config["num_lattice_points"]).reshape(-1, 1)
-    )(spectrum.lattice(output_space="real"))
-
+def test_unitary_transform(spectrum, eigenfunctions):
     after_transform = spectrum.transform(
         eigenfunctions, input_space="real", output_space="spectral"
     )

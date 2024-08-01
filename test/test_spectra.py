@@ -57,7 +57,7 @@ def test_unitary_transform(Spectrum, spectral_config):
     # transformation is also unitary.
     assert np.allclose(
         spectrum.scalar_product(
-            after_transform, after_transform, input_space="spectral"
+            after_transform, after_transform, input_basis="spectral"
         ),
         spectrum.scalar_product(eigenfunctions, eigenfunctions),
     )

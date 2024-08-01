@@ -68,9 +68,9 @@ class Derivative1D:
         else:
             raise ValueError("Unsupported output space.")
 
-    def scalar_product(self, lhs, rhs, input_space="real"):
+    def scalar_product(self, lhs, rhs, input_basis="real"):
         """
-        Compute <lhs, rhs> both being represented as coefficients in the `input_space` basis.
+        Compute <lhs, rhs> both being represented as coefficients in the `input_basis`.
         If multi-dimensional input is given,
         the last dimension gives the individual vector's entries
         while the first dimensions (all others) are interpreted as enumerating the multiple vectors.

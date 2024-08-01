@@ -45,16 +45,17 @@ class Derivative1D:
             return input_vector
         
         # Perform the discrete Fast Fourier transform to go from real to spectral space
-        elif input_space == 'real' and output_space == 'spectral':
-            return scipy.fft.fft(input_vector) / self.num_lattice_points
-        
-        # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
-        elif input_space == 'spectral' and output_space == 'real':
-            return scipy.fft.ifft(input_vector) * self.num_lattice_points
-        
-        else:
-            raise ValueError(f"Unsupported space transformation from {input_space} to {output_space}.")
+        elif input_space == "real" and output_space == "spectral":
+            return scipy.fft.fft(input_vector, norm="ortho")
 
+        # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
+        elif input_space == "spectral" and output_space == "real":
+            return scipy.fft.ifft(input_vector, norm="ortho")
+
+        else:
+            raise ValueError(
+                f"Unsupported space transformation from {input_space} to {output_space}."
+            )
 
     def lattice(self, output_space):
         """
@@ -67,6 +68,7 @@ class Derivative1D:
         else:
             raise ValueError("Unsupported output space.")
 
-    def scalar_product(self, lhs, rhs):
+    def scalar_product(self, lhs, rhs, input_space="real"):
         # for this case the quadrature (and thereby the scalar product) is trivial
+        # also, it's the same for both spaces
         return lhs.T.conjugate() @ rhs

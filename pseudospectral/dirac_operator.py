@@ -21,9 +21,14 @@ class DiracOperator:
         """
 
         if (input_space in ['real', 'spectral']) and (output_space in ['real', 'spectral']):
+            print(coefficients)
+            print(self.spectrum.eigenvalues)
             temp_1 = self.spectrum.transform(coefficients, input_space, 'spectral')
+            print(temp_1)
             temp_2 = self.spectrum.eigenvalues * temp_1
+            print(temp_2)
             temp_3 = self.spectrum.transform(temp_2, 'spectral', output_space)
+            print(temp_3)
             return temp_3
         
         else:

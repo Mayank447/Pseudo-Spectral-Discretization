@@ -1,13 +1,19 @@
 import numpy as np
 import pytest
 
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0: 
+       return v
+    return v / norm
+
 ########################################## FIXTURES ##########################################
 @pytest.fixture
 def arbitrary_single_coefficient():
     """
     Python fixture to initialize the single coefficient for the tests.
     """
-    return 2.5
+    return 1
 
 
 @pytest.fixture
@@ -43,10 +49,12 @@ def test_transforms_from_real_to_spectral_space(spectrum, arbitrary_index_single
     """
 
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
-    
-    expected = arbitrary_single_coefficient * np.eye(spectrum.num_lattice_points)[arbitrary_index_single_eigenfunction, :]
+    eigenfunction = arbitrary_single_coefficient * normalize(spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points))
     result = spectrum.transform(eigenfunction, input_space="real", output_space="spectral")
+    print(result)
+
+    expected = arbitrary_single_coefficient * np.eye(spectrum.num_lattice_points)[arbitrary_index_single_eigenfunction, :]
+    print(expected)
     assert np.isclose(expected, result).all()
 
 
@@ -58,8 +66,8 @@ def test_transforms_multiple_components_from_real_to_spectral_space(spectrum, ar
 
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
 
-    eigenfunction_1 = arbitrary_two_coefficients[0] * spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[0])(sample_points)
-    eigenfunction_2 = arbitrary_two_coefficients[1] * spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points)
+    eigenfunction_1 = arbitrary_two_coefficients[0] * normalize(spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[0])(sample_points))
+    eigenfunction_2 = arbitrary_two_coefficients[1] * normalize(spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points))
     
     expected = np.zeros(spectrum.num_lattice_points)
     expected[arbitrary_index_two_eigenfunctions] = arbitrary_two_coefficients
@@ -76,9 +84,11 @@ def test_transforms_from_spectral_to_real_space(spectrum, arbitrary_single_coeff
 
     spectral_vector = arbitrary_single_coefficient * np.eye(spectrum.num_lattice_points)[arbitrary_index_single_eigenfunction,:]
     result = spectrum.transform(spectral_vector, input_space="spectral", output_space="real")
-    
+    print(result)
+
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    expected = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
+    expected = arbitrary_single_coefficient * normalize(spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points))
+    print(expected)
     assert np.isclose(expected, result).all()
 
 
@@ -94,10 +104,12 @@ def test_transforms_multiple_components_from_spectral_to_real_space(spectrum, ar
     result = spectrum.transform(
         spectral_coefficients, input_space="spectral", output_space="real"
     )
+    print(result)
     
     # Generate expected function values in real space
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    e1 = spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[0])(sample_points)
-    e2 = spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points)
+    e1 = normalize(spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[0])(sample_points))
+    e2 = normalize(spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points))
     expected = np.column_stack((e1, e2)) @ arbitrary_two_coefficients
+    print(expected)
     assert np.isclose(expected, result).all()

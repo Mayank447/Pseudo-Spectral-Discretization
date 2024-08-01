@@ -6,7 +6,7 @@ def cartisean_product(array_1, array_2):
 class FreeFermions2D:
     """
     Spectrum class to represent the spectrum (eigenfunctions, eigenvalues) of the 2D free fermions operator.
-    Operator = (\sigma_z \partial_{t} + \sigma_x \partial_{x}) + (m * \Identity) + (\mu * \sigma_z)
+    Operator = (\sigma_z \partial_{t} + \sigma_x \partial_{x}) + (m * \Identity) - (\mu * \sigma_z)
                 , where the sigmas are the Pauli matrices.
     
     The operator is discretized on p_0 2D lattice with n_t lattice points in the time axis and n_x lattice points in the x axis.
@@ -32,8 +32,8 @@ class FreeFermions2D:
         self.n_t = n_t
         self.n_x = n_x
         
-        self._array_t = np.linspace(-(n_t-1)/2, (n_t-1)/2, n_t)
-        self._array_x = np.linspace(-(n_x-1)/2, (n_x-1)/2, n_x)
+        self._array_t = np.linspace(-(n_t - 1)/2, (n_t - 1)/2, n_t)
+        self._array_x = np.linspace(-(n_x - 1)/2, (n_x - 1)/2, n_x)
         sign = [1, -1]
         self.eigenvalues = self._eigenvalues(np.meshgrid(self._array_t, self._array_x), sign)
 
@@ -76,8 +76,8 @@ class FreeFermions2D:
             g = g.reshape(self.n_t, self.n_x)
 
             # Perform the 2D discrete Fast Fourier transform to go from real to spectral space on both halves which are in discrete space after reshaping them
-            f = scipy.fft.fft2(f)/(self.n_t * self.n_x)
-            g = scipy.fft.fft2(g)/(self.n_t * self.n_x)
+            f = scipy.fft.fft2(f)/(np.sqrt(self.n_t * self.n_x))
+            g = scipy.fft.fft2(g)/(np.sqrt(self.n_t * self.n_x))
             
             # Reflatten and then return concatenate the two halves
             return np.join([f.flatten(), g.flatten()], axis=0)
@@ -94,8 +94,8 @@ class FreeFermions2D:
             g = g.reshape(self.n_t, self.n_x)
 
             # Perform the 2D discrete Fast Fourier transform to go from real to spectral space on both halves which are in discrete space after reshaping them
-            f = scipy.fft.ifft2(f)/(self.n_t * self.n_x)
-            g = scipy.fft.ifft2(g)/(self.n_t * self.n_x)
+            f = scipy.fft.ifft2(f)/np.sqrt(self.n_t * self.n_x)
+            g = scipy.fft.ifft2(g)/np.sqrt(self.n_t * self.n_x)
             
             # Reflatten and then return concatenate the two halves
             return np.join([f.flatten(), g.flatten()], axis=0)

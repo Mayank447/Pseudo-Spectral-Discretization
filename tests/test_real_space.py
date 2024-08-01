@@ -4,6 +4,12 @@ from pseudospectral import DiracOperator
 import numpy as np
 import pytest
 
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0: 
+       return v
+    return v / norm
+
 
 ########################################## FIXTURES ##########################################
 @pytest.fixture
@@ -32,7 +38,7 @@ def test_application_to_a_single_eigenfunction(arbitrary_index, spectrum):
     
     # Make sample points a fixture later
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
+    eigenfunction = normalize(operator.spectrum.eigenfunction(arbitrary_index)(sample_points))
     result = operator.apply_to(eigenfunction, input_space="real", output_space="real")
     
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index]
@@ -47,8 +53,8 @@ def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_
     operator = DiracOperator(spectrum)
     
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    eigenfunction_1 = spectrum.eigenfunction(arbitrary_index[0])(sample_points)
-    eigenfunction_2 = spectrum.eigenfunction(arbitrary_index[1])(sample_points)
+    eigenfunction_1 = normalize(spectrum.eigenfunction(arbitrary_index[0])(sample_points))
+    eigenfunction_2 = normalize(spectrum.eigenfunction(arbitrary_index[1])(sample_points))
     expected = np.column_stack((eigenfunction_1, eigenfunction_2)) @ spectrum.eigenvalues[arbitrary_index]
 
     result = operator.apply_to(eigenfunction_1 + eigenfunction_2, input_space="real", output_space="real")

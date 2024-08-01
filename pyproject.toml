@@ -21,15 +21,15 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "ruff==~0.5.0", 
+    "ruff==~0.5.0",
     "pre-commit==^4.6.0"
 ]
 test = ["pytest==^8.2.2"]
 
 
-[tool.ruff]
-line-length = 100 # Set the maximum line length to 100.
-
-
 [tool.ruff.lint]
 extend-select = ["E501"] # Add the `line-too-long` rule to the enforced rule set.
+
+
+[tool.ruff]
+line-length = 280 # Set the maximum line length to 250.

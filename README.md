@@ -24,7 +24,7 @@ This codebase contains the implementation of the DiracOperator class, which is u
 ├── LICENSE
 └── tests
     ├── conftest.py
-    ├── test_real_space.py
+    ├── test_real_basis.py
     ├── test_spectral.py
     ├── test_transform.py
 </pre>
@@ -43,11 +43,11 @@ This codebase contains the implementation of the DiracOperator class, which is u
 
 ##  DiracOperator Class
 
-The DiracOperator class provides several methods to work with the Dirac operator in both real and spectral domains. 
+The DiracOperator class provides several methods to work with the Dirac operator in both real and spectral domains.
 
 ### 1 Initialization ``` DiracOperator(spectrum) ```
 
-#### 1.1 Args: 
+#### 1.1 Args:
 - spectrum: The spectrum class object that represents the spectrum of the given system / operator.
 
 ### 2 Methods
@@ -56,18 +56,18 @@ The DiracOperator class provides several methods to work with the Dirac operator
 Applies the given Dirac operator to the input coefficients as per the given input and output spaces.
 
 ##### 2.1.1 Signature:
-```apply_to(coefficients, input_space='real', output_space='real')```
+```apply_to(coefficients, input_basis='real', output_basis='real')```
 
 ##### 2.1.2 Parameters:
 - coefficients (np.ndarray): An array of coefficients in the input space.
-- input_space (str): Specifies the space of the input coefficients. Valid values are 'real' and 'spectral'.
-- output_space (str): Specifies the space of the output coefficients. Valid values are 'real' and 'spectral'.
+- input_basis (str): Specifies the space of the input coefficients. Valid values are 'real' and 'spectral'.
+- output_basis (str): Specifies the space of the output coefficients. Valid values are 'real' and 'spectral'.
 
 ##### 2.1.3 Returns:
 - np.ndarray: An array of coefficients in the output space.
 
 ##### 2.1.4 Raises:
-- ValueError: If input_space or output_space is not 'real' or 'spectral'.
+- ValueError: If input_basis or output_basis is not 'real' or 'spectral'.
 
 
 #### ```lattice```
@@ -79,7 +79,7 @@ Generates a discretized set of points representing the lattice structure in eith
 
 #####  Parameters:
 
-- output_space (str): Specifies the space for which the lattice is generated. Valid values are:
+- output_basis (str): Specifies the space for which the lattice is generated. Valid values are:
 - 'time': Generates a lattice for the time domain.
 - 'frequency': Generates a lattice for the frequency domain.
 
@@ -89,7 +89,7 @@ Generates a discretized set of points representing the lattice structure in eith
 
 #####  Raises:
 
-- ValueError: If output_space is not 'real' or 'spectral'.
+- ValueError: If output_basis is not 'real' or 'spectral'.
 
 Time Lattice
 

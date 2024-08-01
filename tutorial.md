@@ -1,6 +1,6 @@
-# Tutorial 
+# Tutorial
 
-## Dirac Operator - 
+## Dirac Operator -
 This tutorial covers the application of a finite-dimensional linear operator using its spectral representation.
 
 ## Usage -
@@ -20,21 +20,21 @@ class Derivative1D:
         self.L = 1
         self.eigenvalues = self._eigenvalue(..)
 
-    def transform(self, input_vector, input_space, output_space):
-        if input_space == 'real' and output_space == 'real':
+    def transform(self, input_vector, input_basis, output_basis):
+        if input_basis == 'real' and output_basis == 'real':
             return input_vector
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
-        elif input_space == 'real' and output_space == 'spectral':
+        elif input_basis == 'real' and output_basis == 'spectral':
             return np.fft.fft(input_vector) / np.sqrt(self.n_real)
-        
-        elif input_space == 'spectral' and output_space == 'spectral':
+
+        elif input_basis == 'spectral' and output_basis == 'spectral':
             return input_vector
-        
-        elif input_space == 'spectral' and output_space == 'real':
+
+        elif input_basis == 'spectral' and output_basis == 'real':
             # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
             return np.fft.ifft(input_vector) * np.sqrt(self.n_real)
-        
+
         else:
             raise ValueError("Unsupported space transformation.")
 ```
@@ -65,7 +65,7 @@ assert expected == actual
 
 # Development
 Default values for input, output space to be real.
-input_space='real', output_space='real'
+input_basis='real', output_basis='real'
 
 ```
 def DiracOperator:

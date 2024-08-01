@@ -61,14 +61,21 @@ class Derivative1D:
         """
         Return the lattice of the Dirac operator as per the given output space.
         """
-        if output_space == 'real':
+        if output_space == "real":
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
-        elif output_space == 'spectral':
+        elif output_space == "spectral":
             return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
         else:
             raise ValueError("Unsupported output space.")
 
     def scalar_product(self, lhs, rhs, input_space="real"):
+        """
+        Compute <lhs, rhs> both being represented as coefficients in the `input_space` basis.
+        If multi-dimensional input is given,
+        the last dimension gives the individual vector's entries
+        while the first dimensions (all others) are interpreted as enumerating the multiple vectors.
+        """
         # for this case the quadrature (and thereby the scalar product) is trivial
         # also, it's the same for both spaces
-        return lhs.T.conjugate() @ rhs
+        # the unexpected ordering takes care of the indexing convention mentioned in the docstring
+        return rhs @ lhs.transpose(-1, 0).conjugate()

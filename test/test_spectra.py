@@ -4,8 +4,9 @@ import pytest
 
 TEST_DATA = [
     (Derivative1D, {"num_lattice_points": 3}),
-    (Derivative1D, {"num_lattice_points": 11}),
     (Derivative1D, {"num_lattice_points": 101}),
+    (Derivative1D, {"num_lattice_points": 3, "L": 3}),
+    (Derivative1D, {"num_lattice_points": 101, "L": 42}),
 ]
 
 

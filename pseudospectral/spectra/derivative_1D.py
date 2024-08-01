@@ -21,8 +21,9 @@ class Derivative1D:
         """
         Private function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
         """
-        return lambda x: np.exp(self.eigenvalues[index] * x)
-
+        return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(
+            self.num_lattice_points
+        )
 
     def _eigenvalues(self):
         """
@@ -65,3 +66,7 @@ class Derivative1D:
             return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
         else:
             raise ValueError("Unsupported output space.")
+
+    def scalar_product(self, lhs, rhs):
+        # for this case the quadrature (and thereby the scalar product) is trivial
+        return lhs.T.conjugate() @ rhs

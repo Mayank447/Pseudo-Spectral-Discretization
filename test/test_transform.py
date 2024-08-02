@@ -31,7 +31,7 @@ def arbitrary_index_single_eigenfunction(index=1):
     """
     Python fixture to initialize the arbitrary index for the single eigenfunction test.
     """
-    return index
+    return np.array(index)
 
 
 @pytest.fixture

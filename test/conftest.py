@@ -1,4 +1,3 @@
-
 from pseudospectral import Derivative1D
 import pytest
 

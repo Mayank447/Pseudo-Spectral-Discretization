@@ -61,9 +61,7 @@ The DiracOperator class provides several methods to work with the Dirac operator
 
 Applies the given Dirac operator to the input coefficients as per the given input and output spaces.
 
-##### 2.1.1 Signature:
-
-``apply_to(coefficients, input_basis='real', output_basis='real')``
+##### 2.1.1 Signature: ``apply_to(coefficients, input_basis='real', output_basis='real')``
 
 ##### 2.1.2 Parameters:
 
@@ -79,106 +77,66 @@ Applies the given Dirac operator to the input coefficients as per the given inpu
 
 - ValueError: If input_basis or output_basis is not 'real' or 'spectral'.
 
-#### ``lattice``
+## Derivative1D Class
 
+The Derivative1D class provides methods to work with the 1D derivative operator in both real and spectral domains with periodic boundary conditions.
+
+### 1 Initialization ``Derivative1D``
+#### 1.1 Args:
+- L: The length of the domain.
+- num_points: The number of points in the discretization.
+
+### 2 Attributes:
+- L: The length of the domain.
+- num_points: The number of points in the discretization.
+- eigenvalues: Eigenvalues of the 1D derivative operator.
+
+### 3 Methods
+#### 3.1 ``eigenfunctions``
+Returns the eigenfunction of the 1D derivative operator at the given eigenvalue index i.e. exp(ikx).
+
+##### 3.1.1 Signature: `eigenfunctions(eigenvalue_index)`
+
+##### 3.1.2 Parameters:
+- eigenvalue_index (int): The index of the eigenvalue. This range is from 0 to L - 1.
+
+##### 3.1.3 Returns:
+- lambda function: The eigenfunction of the 1D derivative operator which can be sampled at the given points by passing the array as an argument.
+
+##### 3.1.4 Raises:
+- ValueError: If eigenvalue_index is not in the range from 0 to L - 1.
+
+#### 3.2 ``_eigenvalues``
+Private function to compute the eigenvalues of the 1D derivative operator.
+
+#### 3.3 ``transform``
+Transforms the input coefficients from the real space to the spectral space and vice-verse.
+
+##### 3.3.1 Signature: `transform(coefficients, input_basis='real', output_basis='real')`
+
+##### 3.3.2 Parameters:
+- coefficients (np.ndarray): An array of coefficients in the input space.
+- input_basis (str): Specifies the space of the input coefficients. Valid values are 'real' and 'spectral'.
+- output_basis (str): Specifies the space of the output coefficients. Valid values are 'real' and 'spectral'.
+
+##### 3.3.3 Returns:
+- np.ndarray: An array of coefficients in the output space.
+
+##### 3.3.4 Raises:
+- ValueError: If input_basis or output_basis is not 'real' or 'spectral'.
+
+#### 3.4 ``lattice``
 Generates a discretized set of points representing the lattice structure in either the time or frequency domain.
 
-##### Signature:
+##### 3.4.1 Signature: `lattice(output_basis)`
 
-`lattice`
-
-##### Parameters:
-
+##### 3.4.2 Parameters:
 - output_basis (str): Specifies the space for which the lattice is generated. Valid values are:
-- 'time': Generates a lattice for the time domain.
-- 'frequency': Generates a lattice for the frequency domain.
+    - 'real': Generates a lattice for the time domain.
+    - 'spectral': Generates a lattice for the frequency domain.
 
-##### Returns:
-
+##### 3.4.3 Returns:
 - np.ndarray: An array of lattice points in the specified output space.
 
-##### Raises:
-
+##### 3.4.4 Raises:
 - ValueError: If output_basis is not 'real' or 'spectral'.
-
-Time Lattice
-
-The time lattice is created using a linear space from 0 to β, divided into n_time points. This discretization allows representing time on a grid for numerical calculations.
-
-apply
-
-Applies the Dirac operator to a set of spectral coefficients.
-
-Signature:
-
-Parameters:
-
-    •	coefficients (np.ndarray): An array of spectral coefficients.
-
-Returns:
-
-    •	np.ndarray: An array of transformed spectral coefficients.
-
-Raises:
-
-    •	ValueError: If coefficients is not a 1-dimensional array.
-
-eigenvalues
-
-Computes the eigenvalues of the Dirac operator.
-
-Signature:
-
-Returns:
-
-    •	np.ndarray: An array of eigenvalues.
-
-eigenfunctions
-
-Computes the eigenfunctions of the Dirac operator.
-
-Signature:
-
-Returns:
-
-    •	list: A list of eigenfunctions.
-
-to_frequency
-
-Transforms time-domain values to frequency-domain values.
-
-Signature:
-
-Parameters:
-
-    •	time_values (np.ndarray): An array of values in the time domain.
-
-Returns:
-
-    •	np.ndarray: An array of values in the frequency domain.
-
-Raises:
-
-    •	ValueError: If time_values is not a 1-dimensional array.
-
-to_time
-
-Transforms frequency-domain values to time-domain values.
-
-Signature:
-
-Parameters:
-
-    •	frequency_values (np.ndarray): An array of values in the frequency domain.
-
-Returns:
-
-    •	np.ndarray: An array of values in the time domain.
-
-Raises:
-
-    •	ValueError: If frequency_values is not a 1-dimensional array.
-
-Usage
-
-To use the DiracOperator class, create an instance and call the desired methods with appropriate parameters. For example:

@@ -21,7 +21,11 @@ class Derivative1D:
         """
         Private function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
         """
-        return lambda x: np.exp(self.eigenvalues[index] * x)
+        if index < 0 or index >= self.L:
+            raise ValueError("Index out of bounds for the eigenfunction.")
+
+        else:
+            return lambda x: np.exp(self.eigenvalues[index] * x)
 
     def _eigenvalues(self):
         """

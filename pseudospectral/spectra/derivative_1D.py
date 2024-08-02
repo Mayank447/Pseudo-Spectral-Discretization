@@ -75,7 +75,13 @@ class Derivative1D:
         the last dimension gives the individual vector's entries
         while the first dimensions (all others) are interpreted as enumerating the multiple vectors.
         """
-        # for this case the quadrature (and thereby the scalar product) is trivial
-        # also, it's the same for both spaces
-        # the unexpected ordering takes care of the indexing convention mentioned in the docstring
-        return rhs @ lhs.transpose(-1, 0).conjugate()
+        # For this case the quadrature (and thereby the scalar product) is trivial.
+        # Also, it's the same for both spaces.
+        #
+        # The unexpected ordering takes care of the indexing convention mentioned in the docstring:
+        # We are considering lhs, rhs as row vectors in a matrix (or higher-dimensional object).
+        # For this reason, we must commute them with respect to the normal interpretation as column vectors
+        # (that's why rhs @ lhs and not lhs @ rhs).
+        # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
+        # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
+        return rhs @ lhs.transpose(-1, -2).conjugate()

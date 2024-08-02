@@ -18,7 +18,7 @@ def arbitrary_index_single_eigenfunction(index=1):
     """
     Python fixture to initialize the arbitrary index for the single eigenfunction test.
     """
-    return index
+    return np.array(index)
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def arbitrary_index_two_eigenfunctions():
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return [(x, y) for x in range(4) for y in range(4)]
+    return np.array([(x, y) for x in range(4) for y in range(4)])
 
 
 ############################################ TEST FUNCTION ############################################
@@ -51,7 +51,7 @@ def test_application_to_a_single_eigenfunction(arbitrary_index, spectrum):
 
 
 @pytest.mark.parametrize(
-    "arbitrary_index", [[x, y] for x in range(4) for y in range(4)]
+    "arbitrary_index", np.array([[x, y] for x in range(4) for y in range(4)])
 )
 def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index):
     """

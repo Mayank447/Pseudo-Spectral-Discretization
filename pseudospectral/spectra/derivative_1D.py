@@ -15,24 +15,27 @@ class Derivative1D:
     def __init__(self, num_lattice_points, L=1):
         self.num_lattice_points = num_lattice_points
         self.L = L
+        self.a = L / num_lattice_points
         self.eigenvalues = self._eigenvalues()
 
     def eigenfunction(self, index):
         """
         Private function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
         """
-        if index < 0 or index >= self.L:
+        if (index < 0).any() or (index >= self.num_lattice_points).any():
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(self.eigenvalues[index] * x)
+            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(
+                self.num_lattice_points
+            )
 
     def _eigenvalues(self):
         """
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        return np.fft.fftfreq(self.L, 1 / (1j * 2 * np.pi))
+        return 1j * 2 * np.pi * np.fft.fftfreq(self.num_lattice_points, d=self.a)
 
     def transform(self, input_vector, input_basis, output_basis):
         """

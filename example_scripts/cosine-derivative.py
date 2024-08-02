@@ -15,4 +15,3 @@ if __name__ == "__main__":
     plt.plot(x, d.apply_to(np.cos(2 * np.pi * x / 10)), label="d/dx sin(x)")
     plt.legend()
     plt.show()
-    # print()

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import numpy as np
-
 
 class DiracOperator:
     """
@@ -17,7 +15,8 @@ class DiracOperator:
 
     def apply_to(self, coefficients, input_basis="real", output_basis="real"):
         """
-        Apply the Dirac operator to the given spectral coefficients as per the given input and output spaces.
+        Apply the Dirac operator to the given spectral coefficients
+        as per the given input and output spaces.
         """
 
         if (input_basis in ["real", "spectral"]) and (

@@ -12,19 +12,19 @@ readme = "README.md"
 
 requires-python = ">=3.12"
 dependencies = [
-    "numpy==^2.0.0",
-    "scipy==^1.14.0",
-    "matplotlib==^3.9.0",
-    "scikit-learn = ^1.5.1"
+    "numpy >= 2.0.0",
+    "scipy == 1.14.0",
+    "matplotlib >= 3.9.0",
+    "scikit-learn >= 1.5.1"
 ]
 
 
 [project.optional-dependencies]
 dev = [
-    "ruff==~0.5.0",
-    "pre-commit==^4.6.0"
+    "ruff >= 0.5.0",
+    "pre-commit >= ^4.6.0"
 ]
-test = ["pytest==^8.2.2"]
+test = ["pytest >= 8.2.2"]
 
 
 [tool.ruff.lint]

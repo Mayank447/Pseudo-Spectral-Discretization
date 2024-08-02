@@ -43,11 +43,11 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            return scipy.fft.fft(input_vector) / np.sqrt(self.num_lattice_points)
+            return scipy.fft.fft(input_vector, norm="ortho")
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return scipy.fft.ifft(input_vector) * np.sqrt(self.num_lattice_points)
+            return scipy.fft.ifft(input_vector, norm="ortho")
 
         else:
             raise ValueError(
@@ -76,4 +76,16 @@ class Derivative1D:
             return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
 
         else:
-            raise ValueError("Unsupported output space.")
+            raise ValueError(f"Unsupported output space.")
+
+    def scalar_product(self, lhs, rhs, input_basis="real"):
+        """
+        Compute <lhs, rhs> both being represented as coefficients in the `input_basis`.
+        If multi-dimensional input is given,
+        the last dimension gives the individual vector's entries
+        while the first dimensions (all others) are interpreted as enumerating the multiple vectors.
+        """
+        # for this case the quadrature (and thereby the scalar product) is trivial
+        # also, it's the same for both spaces
+        # the unexpected ordering takes care of the indexing convention mentioned in the docstring
+        return rhs @ lhs.transpose(-1, 0).conjugate()

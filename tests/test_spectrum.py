@@ -3,10 +3,10 @@ import numpy as np
 import pytest
 
 SPECTRA = [
-    # {"type": Derivative1D, "config": {"num_lattice_points": 3}},
-    # {"type": Derivative1D, "config": {"num_lattice_points": 101}},
+    {"type": Derivative1D, "config": {"num_lattice_points": 3}},
+    {"type": Derivative1D, "config": {"num_lattice_points": 101}},
     {"type": Derivative1D, "config": {"num_lattice_points": 3, "L": 3}},
-    # {"type": Derivative1D, "config": {"num_lattice_points": 101, "L": 42}},
+    {"type": Derivative1D, "config": {"num_lattice_points": 101, "L": 42}},
 ]
 
 
@@ -17,9 +17,9 @@ def spectrum(request):
 
 @pytest.fixture()
 def eigenfunctions(spectrum):
-    return spectrum.eigenfunction(np.arange(spectrum.num_lattice_points))(
-        spectrum.lattice(output_basis="real")
-    )
+    return spectrum.eigenfunction(
+        np.arange(spectrum.num_lattice_points).reshape(-1, 1)
+    )(spectrum.lattice(output_basis="real"))
 
 
 def test_orthonormality(spectrum, eigenfunctions):

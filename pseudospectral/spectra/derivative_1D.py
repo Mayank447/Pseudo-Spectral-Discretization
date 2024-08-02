@@ -35,10 +35,7 @@ class Derivative1D:
         Transform the input vector according to 1D derivative operator
         from the given input space to the given output space.
         """
-        if input_basis == "real" and output_basis == "real":
-            return input_vector
-
-        elif input_basis == "spectral" and output_basis == "spectral":
+        if input_basis == output_basis in ["real", "spectral"]:
             return input_vector
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
@@ -76,7 +73,7 @@ class Derivative1D:
             return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
 
         else:
-            raise ValueError(f"Unsupported output space.")
+            raise ValueError("Unsupported output space.")
 
     def scalar_product(self, lhs, rhs, input_basis="real"):
         """

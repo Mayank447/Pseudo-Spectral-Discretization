@@ -71,10 +71,7 @@ class FreeFermions2D:
         Function to transform the input vector according to the 2D free fermions operator between real and spectral spaces.
         """
 
-        if input_basis == "real" and output_basis == "real":
-            return input_vector
-
-        elif input_basis == "spectral" and output_basis == "spectral":
+        if input_basis == output_basis in ["real", "spectral"]:
             return input_vector
 
         elif input_basis == "real" and output_basis == "spectral":

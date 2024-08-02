@@ -29,9 +29,10 @@ py-modules = [
     "pseudospectral",
 ]
 
-[tool.ruff.lint]
-extend-select = ["E501"] # Add the `line-too-long` rule to the enforced rule set.
-
-
 [tool.ruff]
-line-length = 280 # Set the maximum line length to 250.
+exclude = ["__init__.py"]
+show-fixes = true
+line-length = 250
+
+[tool.ruff.lint]
+extend-select = ["E501", "C4", "SIM", "TCH"]

@@ -26,8 +26,7 @@ def test_orthonormality(spectrum, eigenfunctions):
     """
     Function to test the orthonormality of the eigenfunctions of the 1D Derivative operator.
     """
-
-    print(eigenfunctions)
+    print(eigenfunctions, '\n')
     assert np.allclose(
         spectrum.scalar_product(eigenfunctions, eigenfunctions),
         np.eye(*eigenfunctions.shape),
@@ -62,3 +61,12 @@ def test_unitary_transform(spectrum, eigenfunctions):
         ),
         spectrum.scalar_product(eigenfunctions, eigenfunctions),
     )
+
+if __name__ == "__main__":
+    spectra = Derivative1D(num_lattice_points=3, L=1)
+    print(spectra.eigenvalues)
+    ef = spectra.eigenfunction(
+        np.arange(spectra.num_lattice_points).reshape(-1, 1)
+    )(spectra.lattice(output_basis="real"))
+    print(ef)
+    # test_orthonormality(spectra, eigenfunctions)

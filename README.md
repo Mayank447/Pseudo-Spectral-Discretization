@@ -28,6 +28,7 @@ This codebase contains the implementation of the DiracOperator class, which is u
     ├── test_real_basis.py
     ├── test_spectral_basis.py
     ├── test_transform.py
+    ├── test_spectra.py
 `</pre>`
 
 #### Setup

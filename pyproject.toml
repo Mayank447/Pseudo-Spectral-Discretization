@@ -9,7 +9,7 @@ authors = [
 description = "A Python package for pseudospectral discretization of the Dirac operator."
 keywords = ["pseudospectral", "spectral methods", "Dirac Operator"]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12.0"
 dependencies = [
     "numpy >= 2.0.0",
     "scipy == 1.14.0",
@@ -23,10 +23,8 @@ dev = [
 ]
 test = ["pytest >= 8.2.2"]
 
-[tool.setuptools]
-py-modules = [
-    "pseudospectral",
-]
+[tool.setuptools.packages.find]
+where = ["."]
 
 [tool.ruff]
 exclude = ["__init__.py"]

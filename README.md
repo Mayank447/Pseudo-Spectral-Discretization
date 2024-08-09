@@ -6,7 +6,7 @@ This codebase contains the implementation of the DiracOperator class, which is u
 
 - `pseudospectral` folder contains all the source code of the project which are mainly `.py` files broadly categorized into Dirac Operator and Spectra python files.
 - `pseudospectral/spectra` folder contains spectrum class implementations.
-- `example_scripts` folder contains example scripts to demonstrate the usage of the DiracOperator and Spectrum classes.
+  - `example_scripts` folder for example script usage of the `DiracOperator`, `Spectrum` classes, methods and a boiler-plate to begin with.
 - `tests` folder contains all the pytests written for the project.
 
 <pre>

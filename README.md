@@ -9,7 +9,7 @@ This codebase contains the implementation of the DiracOperator class, which is u
 - `example_scripts` folder contains example scripts to demonstrate the usage of the DiracOperator and Spectrum classes.
 - `tests` folder contains all the pytests written for the project.
 
-`<pre>`
+<pre>
 .
 ├── pseudospectral
     ├── __init__.py
@@ -29,7 +29,7 @@ This codebase contains the implementation of the DiracOperator class, which is u
     ├── test_spectral_basis.py
     ├── test_transform.py
     ├── test_spectra.py
-`</pre>`
+</pre>
 
 #### Setup
 

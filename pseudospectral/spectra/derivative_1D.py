@@ -72,10 +72,10 @@ class Derivative1D:
         Raises:
         ValueError: If the output space is not 'real' or 'space'.
         """
-        if output_space == "real":
+        if output_basis == "real":
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
         
-        elif output_space == "spectral":
+        elif output_basis == "spectral":
             return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
 
         else:

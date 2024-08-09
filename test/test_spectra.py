@@ -19,7 +19,7 @@ def spectrum(request):
 def eigenfunctions(spectrum):
     return spectrum.eigenfunction(
         np.arange(spectrum.num_lattice_points).reshape(-1, 1)
-    )(spectrum.lattice(output_space="real"))
+    )(spectrum.lattice(output_basis="real"))
 
 
 def test_orthonormality(spectrum, eigenfunctions):
@@ -33,10 +33,10 @@ def test_back_and_forth_transform_is_identity(spectrum, eigenfunctions):
     assert np.allclose(
         spectrum.transform(
             spectrum.transform(
-                eigenfunctions, input_space="real", output_space="spectral"
+                eigenfunctions, input_basis="real", output_basis="spectral"
             ),
-            input_space="spectral",
-            output_space="real",
+            input_basis="spectral",
+            output_basis="real",
         ),
         eigenfunctions,
     )
@@ -44,7 +44,7 @@ def test_back_and_forth_transform_is_identity(spectrum, eigenfunctions):
 
 def test_unitary_transform(spectrum, eigenfunctions):
     after_transform = spectrum.transform(
-        eigenfunctions, input_space="real", output_space="spectral"
+        eigenfunctions, input_basis="real", output_basis="spectral"
     )
 
     # It suffices to test the forward transformation because if the forward

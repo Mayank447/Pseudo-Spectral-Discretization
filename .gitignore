@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 pseudo_spectral_discretization.egg-info/
 .cph/
+.ruff_cache
 
 # C extensions
 *.so

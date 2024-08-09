@@ -46,31 +46,31 @@ This codebase contains the implementation of the DiracOperator class, which is u
 
 ## DiracOperator Class
 
-The DiracOperator class provides several methods to work with the Dirac operator in both real and spectral domains.
+The `DiracOperator` class provides wrapping infrastructure to apply an operator defined by its `Spectrum` to a function defined by its vector of `coefficients` in `"real"` or `"spectral"` basis.
 
 ### 1 Initialization ``DiracOperator(spectrum)``
 
 #### 1.1 Args:
 
-- spectrum: The spectrum class object that represents the spectrum of the given system / operator.
+- `spectrum`: The spectrum class object that represents the spectrum of the given system / operator.
 
 ### 2 Methods
 
 #### 2.1 ``apply_to``
 
-Applies the given Dirac operator to the input coefficients as per the given input and output spaces.
+Applies the given Dirac operator to a function represented by its coefficient vector in the specified `"real"` or `"spectral"` basis.
 
 ##### 2.1.1 Signature: ``apply_to(coefficients, input_basis='real', output_basis='real')``
 
 ##### 2.1.2 Parameters:
 
-- coefficients (np.ndarray): An array of coefficients in the input space.
+- coefficients (np.ndarray): An array of coefficients in the input basis.
 - input_basis (str): Specifies the space of the input coefficients. Valid values are 'real' and 'spectral'.
 - output_basis (str): Specifies the space of the output coefficients. Valid values are 'real' and 'spectral'.
 
 ##### 2.1.3 Returns:
 
-- np.ndarray: An array of coefficients in the output space.
+- np.ndarray: An array of coefficients in the output basis.
 
 ##### 2.1.4 Raises:
 
@@ -78,7 +78,7 @@ Applies the given Dirac operator to the input coefficients as per the given inpu
 
 ## Derivative1D Class
 
-The Derivative1D class provides methods to work with the 1D derivative operator in both real and spectral domains with periodic boundary conditions.
+The Derivative1D class provides methods to work with the 1D derivative operator in both real and spectral basis with periodic boundary conditions.
 
 ### 1 Initialization ``Derivative1D``
 
@@ -103,7 +103,7 @@ Returns the eigenfunction of the 1D derivative operator at the given eigenvalue 
 
 ##### 3.1.2 Parameters:
 
-- eigenvalue_index (int): The index of the eigenvalue. This range is from 0 to L - 1.
+- eigenvalue_index (int): The index of the eigenvalue. This range is from 0 to `num_lattice_points - 1`.
 
 ##### 3.1.3 Returns:
 
@@ -113,46 +113,42 @@ Returns the eigenfunction of the 1D derivative operator at the given eigenvalue 
 
 - ValueError: If eigenvalue_index is not in the range from 0 to L - 1.
 
-#### 3.2 ``_eigenvalues``
-
-Private function to compute the eigenvalues of the 1D derivative operator.
-
-#### 3.3 ``transform``
+#### 3.2 ``transform``
 
 Transforms the input coefficients from the real space to the spectral space and vice-verse.
 
-##### 3.3.1 Signature: `transform(coefficients, input_basis='real', output_basis='real')`
+##### 3.2.1 Signature: `transform(coefficients, input_basis='real', output_basis='real')`
 
-##### 3.3.2 Parameters:
+##### 3.2.2 Parameters:
 
 - coefficients (np.ndarray): An array of coefficients in the input space.
 - input_basis (str): Specifies the space of the input coefficients. Valid values are 'real' and 'spectral'.
 - output_basis (str): Specifies the space of the output coefficients. Valid values are 'real' and 'spectral'.
 
-##### 3.3.3 Returns:
+##### 3.2.3 Returns:
 
 - np.ndarray: An array of coefficients in the output space.
 
-##### 3.3.4 Raises:
+##### 3.2.4 Raises:
 
 - ValueError: If input_basis or output_basis is not 'real' or 'spectral'.
 
-#### 3.4 ``lattice``
+#### 3.3 ``lattice``
 
-Generates a discretized set of points representing the lattice structure in either the time or frequency domain.
+Generates a discretized set of points representing the lattice structure in either the `"real"` or `"spectral"` domain. This defines the basis with respect to which the coefficients are to be interpreted, e.g., the `i`th eigenfunction in real-space basis representation is given by `spectrum.eigenfunction(i)(spectrum.lattice("real")).`
 
-##### 3.4.1 Signature: `lattice(output_basis)`
+##### 3.3.1 Signature: `lattice(output_basis)`
 
-##### 3.4.2 Parameters:
+##### 3.3.2 Parameters:
 
 - output_basis (str): Specifies the space for which the lattice is generated. Valid values are:
   - 'real': Generates a lattice for the time domain.
   - 'spectral': Generates a lattice for the frequency domain.
 
-##### 3.4.3 Returns:
+##### 3.3.3 Returns:
 
 - np.ndarray: An array of lattice points in the specified output space.
 
-##### 3.4.4 Raises:
+##### 3.3.4 Raises:
 
 - ValueError: If output_basis is not 'real' or 'spectral'.

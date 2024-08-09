@@ -4,9 +4,9 @@ This codebase contains the implementation of the DiracOperator class, which is u
 
 ### Directory Structure
 
-- `pseudospectral` folder contains all the source code of the project which are mainly `.py` files broadly categorized into Dirac Operator and Spectra python files.
+- `pseudospectral` folder contains all the source code of the project which are mainly `.py` files broadly categorized into Dirac operator and Spectra python files.
 - `pseudospectral/spectra` folder contains spectrum class implementations.
-  - `example_scripts` folder for example script usage of the `DiracOperator`, `Spectrum` classes, methods and a boiler-plate to begin with.
+- `example_scripts` folder for example script usage of the `DiracOperator`, `Spectrum` classes, methods and a boiler-plate to begin with.
 - `tests` folder contains all the pytests written for the project.
 
 <pre>
@@ -42,5 +42,5 @@ This codebase contains the implementation of the DiracOperator class, which is u
 - After setting up the package, you can import the classes and methods from `pseudospectral` module in your code as follows:
   ``from pseudospectral import DiracOperator, FreeFermions2D``
 - You may further refer to:
-  - `example_scripts` folder for example script usage of the DiracOperator, Spectrum classes, methods and a boiler-plate to begin with.
+  - `example_scripts` folder for example script usage of the DiracOperator, Spectrum classes, methods and a boilerplate to begin with.
   - `tutorial.md` for a step-by-step guide on how to use the classes and methods and a bit of theory behind the implementation (history behind the project).

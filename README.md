@@ -34,7 +34,8 @@ This codebase contains the implementation of the DiracOperator class, which is u
 #### Setup
 
 - git clone the repository - `git clone https://github.com/Mayank447/Pseudo-Spectral-Discretization.git`
-- pip install the library - `pip install Pseudo-Spectral-Discretization`
+- cd into the repository - `cd Pseudo-Spectral-Discretization`
+- run `pip install .`
 
 #### Usage
 

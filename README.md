@@ -14,21 +14,21 @@ This codebase contains the implementation of the DiracOperator class, which is u
 ├── pseudospectral
     ├── __init__.py
     ├── dirac_operator.py
-    ├── spectra
+    └──  spectra
         ├── derivative_1D.py
-        ├── free_fermions_2D.py
+        └──  free_fermions_2D.py
 ├── pyproject.toml
 ├── README.md
 ├── tutorial.md
 ├── example_scripts
-    ├── cosine_derivative.py
+    └──  cosine_derivative.py
 ├── LICENSE
 └── tests
     ├── conftest.py
     ├── test_real_basis.py
     ├── test_spectral_basis.py
     ├── test_transform.py
-    ├── test_spectra.py
+    └──  test_spectra.py
 </pre>
 
 #### Setup

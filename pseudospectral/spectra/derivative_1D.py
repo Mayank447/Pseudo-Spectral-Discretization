@@ -14,6 +14,7 @@ class Derivative1D:
     def __init__(self, num_lattice_points, L=1):
         self.num_lattice_points = num_lattice_points
         self.L = L
+        self.a = self.L / self.num_lattice_points
         self.eigenvalues = self._eigenvalues()
 
 
@@ -21,9 +22,7 @@ class Derivative1D:
         """
         Private function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
         """
-        return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(
-            self.num_lattice_points
-        )
+        return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.L)
 
     def _eigenvalues(self):
         """
@@ -84,4 +83,4 @@ class Derivative1D:
         # (that's why rhs @ lhs and not lhs @ rhs).
         # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
         # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
-        return rhs @ lhs.transpose(-1, -2).conjugate()
+        return rhs @ lhs.transpose(-1, -2).conjugate() * self.a

@@ -1,18 +1,5 @@
-from pseudospectral import Derivative1D
 import numpy as np
 import pytest
-
-SPECTRA = [
-    {"type": Derivative1D, "config": {"num_lattice_points": 3}},
-    {"type": Derivative1D, "config": {"num_lattice_points": 101}},
-    {"type": Derivative1D, "config": {"num_lattice_points": 3, "L": 3}},
-    {"type": Derivative1D, "config": {"num_lattice_points": 101, "L": 42}},
-]
-
-
-@pytest.fixture(params=SPECTRA)
-def spectrum(request):
-    return request.param["type"](**request.param["config"])
 
 
 @pytest.fixture()

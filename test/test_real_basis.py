@@ -5,13 +5,6 @@ import numpy as np
 import pytest
 
 
-def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    return v / norm
-
-
 ########################################## FIXTURES ##########################################
 @pytest.fixture
 def arbitrary_index_single_eigenfunction(index=1):
@@ -41,7 +34,7 @@ def test_application_to_a_single_eigenfunction(arbitrary_index, spectrum):
     sample_points = np.linspace(
         0, spectrum.L, spectrum.num_lattice_points, endpoint=False
     )
-    eigenfunction = operator.spectrum.eigenfunction(arbitrary_index)(sample_points)
+    eigenfunction = spectrum.eigenfunction(arbitrary_index)(sample_points)
 
     result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
 

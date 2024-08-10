@@ -10,19 +10,13 @@ num_eigenfunctions_superposition_testrun = 10
 
 
 ############################################ TEST FUNCTION ############################################
-@pytest.mark.parametrize(
-    "arbitrary_index_single_eigenfunction", 
-    range(num_single_eigenfunction_testrun),
-    indirect=True
-)
+@pytest.mark.parametrize("arbitrary_index_single_eigenfunction", range(num_single_eigenfunction_testrun), indirect=True)
 def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_eigenfunction):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
     operator = DiracOperator(spectrum)
-    sample_points = np.linspace(
-        0, spectrum.L, spectrum.num_lattice_points, endpoint=False
-    )
+    sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
     eigenfunction = spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
 
     result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
@@ -31,26 +25,18 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_
     assert np.isclose(result, expected).all()
 
 
-@pytest.mark.parametrize(
-    "arbitrary_index_multiple_eigenfunctions", 
-    range(num_eigenfunctions_superposition_testrun), 
-    indirect=True
-)
+@pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions", range(num_eigenfunctions_superposition_testrun), indirect=True)
 def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index_multiple_eigenfunctions):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
     operator = DiracOperator(spectrum)
 
-    sample_points = np.linspace(
-        0, spectrum.L, spectrum.num_lattice_points, endpoint=False
-    )
+    sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
     eigenfunctions = spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(sample_points.reshape(-1, 1))
     expected = eigenfunctions @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
 
-    result = operator.apply_to(
-        np.sum(eigenfunctions, axis=1), input_basis="real", output_basis="real"
-    )
+    result = operator.apply_to(np.sum(eigenfunctions, axis=1), input_basis="real", output_basis="real")
     assert np.isclose(result, expected).all()
 
 

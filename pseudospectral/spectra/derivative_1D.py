@@ -37,9 +37,7 @@ class Derivative1D:
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(
-                self.num_lattice_points
-            )
+            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.num_lattice_points)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -51,18 +49,16 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            premultiplier = np.exp(2j * np.pi * self.theta * np.arange(self.num_lattice_points)/self.L)
+            premultiplier = np.exp(2j * np.pi * self.theta * np.arange(self.num_lattice_points) / self.L)
             return scipy.fft.fft(premultiplier * input_vector, norm="ortho")
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            inv_premultiplier = np.exp(-2j * np.pi * self.theta * np.arange(self.num_lattice_points)/self.L)
+            inv_premultiplier = np.exp(-2j * np.pi * self.theta * np.arange(self.num_lattice_points) / self.L)
             return inv_premultiplier * scipy.fft.ifft(input_vector, norm="ortho")
 
         else:
-            raise ValueError(
-                f"Unsupported space transformation from {input_basis} to {output_basis}."
-            )
+            raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
 
     def lattice(self, output_basis):
         """
@@ -80,7 +76,7 @@ class Derivative1D:
         """
         if output_basis == "real":
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
-        
+
         elif output_basis == "spectral":
             return self.eigenvalues
 

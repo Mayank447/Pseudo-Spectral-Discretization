@@ -9,6 +9,7 @@ SPECTRA = [
     {"type": Derivative1D, "config": {"num_lattice_points": 101, "L": 42}},
 ]
 
+
 ################## Common Fixtures for PyTests ######################
 @pytest.fixture(params=SPECTRA)
 def spectrum(request):
@@ -24,14 +25,13 @@ def arbitrary_index_single_eigenfunction(spectrum):
 
 
 @pytest.fixture
-def arbitrary_index_multiple_eigenfunctions(spectrum, ):
+def arbitrary_index_multiple_eigenfunctions(
+    spectrum,
+):
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.choice(spectrum.num_lattice_points, 
-                            np.random.randint(spectrum.num_lattice_points), 
-                            replace=False
-                            )
+    return np.random.choice(spectrum.num_lattice_points, np.random.randint(spectrum.num_lattice_points), replace=False)
 
 
 @pytest.fixture

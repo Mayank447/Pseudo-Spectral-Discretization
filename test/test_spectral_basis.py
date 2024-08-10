@@ -14,11 +14,7 @@ num_eigenfunctions_superposition_testrun = 10
 ########################################### TEST FUNCTION ############################################
 
 
-@pytest.mark.parametrize(
-    "arbitrary_index_single_eigenfunction", 
-    range(num_single_eigenfunction_testrun),
-    indirect=True
-)
+@pytest.mark.parametrize("arbitrary_index_single_eigenfunction", range(num_single_eigenfunction_testrun), indirect=True)
 def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_eigenfunction):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
@@ -28,17 +24,11 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_
     eigenfunction = np.eye(spectrum.num_lattice_points)[arbitrary_index_single_eigenfunction, :]
     expected = eigenfunction * spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
 
-    result = operator.apply_to(
-        eigenfunction, input_basis="spectral", output_basis="spectral"
-    )
+    result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")
     assert np.isclose(result, expected).all()
 
 
-@pytest.mark.parametrize(
-    "arbitrary_index_multiple_eigenfunctions", 
-    range(num_eigenfunctions_superposition_testrun), 
-    indirect=True
-)
+@pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions", range(num_eigenfunctions_superposition_testrun), indirect=True)
 def test_application_to_superposition_of_multiple_eigenfunctions(spectrum, arbitrary_index_multiple_eigenfunctions):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
@@ -46,10 +36,7 @@ def test_application_to_superposition_of_multiple_eigenfunctions(spectrum, arbit
     operator = DiracOperator(spectrum)
 
     eigenfunctions = np.eye(spectrum.num_lattice_points)[arbitrary_index_multiple_eigenfunctions].transpose()
-    expected = (
-        eigenfunctions
-        @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
-    )
+    expected = eigenfunctions @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
 
     result = operator.apply_to(
         np.sum(eigenfunctions, axis=1),

@@ -22,9 +22,21 @@ def arbitrary_index_single_eigenfunction(spectrum):
     """
     return np.random.randint(0, spectrum.num_lattice_points)
 
+
 @pytest.fixture
 def arbitrary_index_multiple_eigenfunctions(spectrum, ):
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.randint(0, 2, size=(spectrum.num_lattice_points))
+    return np.random.choice(spectrum.num_lattice_points, 
+                            np.random.randint(spectrum.num_lattice_points), 
+                            replace=False
+                            )
+
+
+@pytest.fixture
+def arbitrary_single_coefficient():
+    """
+    Python fixture to initialize the single coefficient for the tests.
+    """
+    return np.random.randn()

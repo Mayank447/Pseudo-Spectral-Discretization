@@ -60,13 +60,11 @@ def test_transforms_from_real_to_spectral_basis(
     result = spectrum.transform(
         eigenfunction, input_basis="real", output_basis="spectral"
     )
-    print(result)
 
     expected = (
         arbitrary_single_coefficient
         * np.eye(spectrum.num_lattice_points)[arbitrary_index_single_eigenfunction, :]
     )
-    print(expected)
     assert np.isclose(expected, result).all()
 
 
@@ -112,7 +110,6 @@ def test_transforms_from_spectral_to_real_basis(
     result = spectrum.transform(
         spectral_vector, input_basis="spectral", output_basis="real"
     )
-    print(result)
 
     sample_points = np.linspace(
         0, spectrum.L, spectrum.num_lattice_points, endpoint=False
@@ -120,7 +117,6 @@ def test_transforms_from_spectral_to_real_basis(
     expected = arbitrary_single_coefficient * normalize(
         spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
     )
-    print(expected)
     assert np.isclose(expected, result).all()
 
 
@@ -141,7 +137,6 @@ def test_transforms_multiple_components_from_spectral_to_real_basis(
     result = spectrum.transform(
         spectral_coefficients, input_basis="spectral", output_basis="real"
     )
-    print(result)
 
     # Generate expected function values in real space
     sample_points = np.linspace(
@@ -154,5 +149,4 @@ def test_transforms_multiple_components_from_spectral_to_real_basis(
         spectrum.eigenfunction(arbitrary_index_two_eigenfunctions[1])(sample_points)
     )
     expected = np.column_stack((e1, e2)) @ arbitrary_two_coefficients
-    print(expected)
     assert np.isclose(expected, result).all()

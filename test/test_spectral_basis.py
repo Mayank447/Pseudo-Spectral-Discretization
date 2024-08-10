@@ -3,6 +3,7 @@
 from pseudospectral import DiracOperator
 import numpy as np
 import pytest
+import scipy
 
 
 ########################################## FIXTURES ##########################################
@@ -51,7 +52,6 @@ def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_
     eigenfunction_1, eigenfunction_2 = np.eye(spectrum.num_lattice_points)[
         arbitrary_index, :
     ]
-    print(eigenfunction_1, eigenfunction_2)
     expected = (
         np.column_stack((eigenfunction_1, eigenfunction_2))
         @ spectrum.eigenvalues[arbitrary_index]
@@ -70,5 +70,5 @@ def test_lattice_spectral_basis(spectrum):
     Python test function to test the lattice of the Dirac operator in spectral space.
     """
     result = spectrum.lattice(output_basis="spectral")
-    expected = 2 * np.pi * np.arange(spectrum.num_lattice_points) / spectrum.L
+    expected = 2 * np.pi * (scipy.fft.fftfreq(spectrum.num_lattice_points, d=spectrum.a) - spectrum.theta / spectrum.L)
     assert np.equal(result, expected).all()

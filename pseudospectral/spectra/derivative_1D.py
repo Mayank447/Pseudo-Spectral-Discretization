@@ -10,17 +10,26 @@ class Derivative1D:
     Args:
         num_lattice_points: Number of lattice points in the 1D domain
         L: Length of the periodic 1D domain
+        theta: Real number in [0,1] as per the boundary condition (e.g. 0 for periodic, 0.5 for anti-periodic)
     """
 
-    def __init__(self, num_lattice_points, L=1):
+    def __init__(self, num_lattice_points, L=1, theta=0):
         self.num_lattice_points = num_lattice_points
         self.L = L
         self.a = L / num_lattice_points
+        self.theta = theta
         self.eigenvalues = self._eigenvalues()
+
+    def _eigenvalues(self):
+        """
+        Private function to return the eigenvalues of the 1D derivative operator
+        i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
+        """
+        return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a) - self.theta / self.L)
 
     def eigenfunction(self, index):
         """
-        Private function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
+        Function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
         """
         if (index < 0).any() or (index >= self.num_lattice_points).any():
             raise ValueError("Index out of bounds for the eigenfunction.")
@@ -29,13 +38,6 @@ class Derivative1D:
             return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(
                 self.num_lattice_points
             )
-
-    def _eigenvalues(self):
-        """
-        Private function to return the eigenvalues of the 1D derivative operator
-        i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
-        """
-        return 1j * 2 * np.pi * np.fft.fftfreq(self.num_lattice_points, d=self.a)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -47,11 +49,13 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            return scipy.fft.fft(input_vector, norm="ortho")
+            premultiplier = np.exp(2j * np.pi * self.theta * np.arange(self.num_lattice_points)/self.L)
+            return scipy.fft.fft(premultiplier * input_vector, norm="ortho")
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return scipy.fft.ifft(input_vector, norm="ortho")
+            inv_premultiplier = np.exp(-2j * np.pi * self.theta * np.arange(self.num_lattice_points)/self.L)
+            return inv_premultiplier * scipy.fft.ifft(input_vector, norm="ortho")
 
         else:
             raise ValueError(
@@ -76,7 +80,7 @@ class Derivative1D:
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
         
         elif output_basis == "spectral":
-            return 2 * np.pi * np.arange(self.num_lattice_points) / self.L
+            return self.eigenvalues/1j
 
         else:
             raise ValueError("Unsupported output space.")

@@ -1,10 +1,10 @@
 import numpy as np
 
-
-########################################## FIXTURES ##########################################
+########################################## HELPER FUNCTIONS ##########################################
 def arbitrary_multiple_coefficients(length=1):
     """
-    Python fixture to initialize the arbitrary coefficients for the tests.
+    Python function to initialize a numpy array of the given length 
+    with arbitrary coefficients sampled from a normal distribution for the tests.
     """
     return np.random.randn(length)
 

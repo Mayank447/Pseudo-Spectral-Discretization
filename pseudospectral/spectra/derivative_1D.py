@@ -5,7 +5,7 @@ import scipy.fft
 class Derivative1D:
     """
     Class to represent the eigenfunctions, eigenvalues of a 1D Derivative operator
-    with finite and periodic boundary conditions.
+    on a finite interval with periodic boundary conditions.
 
     Args:
         num_lattice_points: Number of lattice points in the 1D domain
@@ -27,10 +27,12 @@ class Derivative1D:
         """
         return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a) - self.theta / self.L)
 
-    def eigenfunction(self, index):
+    def eigenfunction(self, index: np.ndarray):
         """
         Function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
         """
+        index = np.asarray(index)
+
         if (index < 0).any() or (index >= self.num_lattice_points).any():
             raise ValueError("Index out of bounds for the eigenfunction.")
 

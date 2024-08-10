@@ -43,22 +43,20 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index):
 @pytest.mark.parametrize(
     "arbitrary_index", [[x, y] for x in range(4) for y in range(4)]
 )
-def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index):
+def test_application_to_superposition_of_multiple_eigenfunctions(spectrum, arbitrary_index):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
     operator = DiracOperator(spectrum)
 
-    eigenfunction_1, eigenfunction_2 = np.eye(spectrum.num_lattice_points)[
-        arbitrary_index, :
-    ]
+    eigenfunctions = np.eye(spectrum.num_lattice_points)[arbitrary_index].transpose()
     expected = (
-        np.column_stack((eigenfunction_1, eigenfunction_2))
+        eigenfunctions
         @ spectrum.eigenvalues[arbitrary_index]
     )
 
     result = operator.apply_to(
-        eigenfunction_1 + eigenfunction_2,
+        eigenfunctions.sum(axis=1),
         input_basis="spectral",
         output_basis="spectral",
     )
@@ -70,5 +68,5 @@ def test_lattice_spectral_basis(spectrum):
     Python test function to test the lattice of the Dirac operator in spectral space.
     """
     result = spectrum.lattice(output_basis="spectral")
-    expected = 2 * np.pi * (scipy.fft.fftfreq(spectrum.num_lattice_points, d=spectrum.a) - spectrum.theta / spectrum.L)
+    expected = 2j * np.pi * (scipy.fft.fftfreq(spectrum.num_lattice_points, d=spectrum.a) - spectrum.theta / spectrum.L)
     assert np.equal(result, expected).all()

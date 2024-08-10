@@ -82,7 +82,7 @@ class Derivative1D:
             return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
         
         elif output_basis == "spectral":
-            return self.eigenvalues/1j
+            return self.eigenvalues
 
         else:
             raise ValueError("Unsupported output space.")

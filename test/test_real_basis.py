@@ -54,15 +54,11 @@ def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_
     sample_points = np.linspace(
         0, spectrum.L, spectrum.num_lattice_points, endpoint=False
     )
-    eigenfunction_1 = spectrum.eigenfunction(arbitrary_index[0])(sample_points)
-    eigenfunction_2 = spectrum.eigenfunction(arbitrary_index[1])(sample_points)
-    expected = (
-        np.column_stack((eigenfunction_1, eigenfunction_2))
-        @ spectrum.eigenvalues[arbitrary_index]
-    )
+    eigenfunctions = spectrum.eigenfunction(arbitrary_index)(sample_points.reshape(-1, 1))
+    expected = eigenfunctions @ spectrum.eigenvalues[arbitrary_index]
 
     result = operator.apply_to(
-        eigenfunction_1 + eigenfunction_2, input_basis="real", output_basis="real"
+        np.sum(eigenfunctions, axis=1), input_basis="real", output_basis="real"
     )
     assert np.isclose(result, expected).all()
 

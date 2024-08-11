@@ -26,7 +26,7 @@ class FreeFermions2D:
     sign = +-1
     """
 
-    def __init__(self, mu, m, L_t, L_x, n_t, n_x):
+    def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
         self.mu = mu
         self.m = m
         self.L_t = L_t

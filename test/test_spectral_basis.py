@@ -5,6 +5,9 @@ import numpy as np
 import pytest
 import scipy
 
+## Some Fixtures like Spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions
+## are defined in the conftest.py file.and imported in all the test files automatically.
+
 num_single_eigenfunction_testrun = 10
 num_eigenfunctions_superposition_testrun = 10
 

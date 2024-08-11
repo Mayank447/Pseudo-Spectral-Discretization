@@ -8,6 +8,9 @@ import pytest
 num_single_eigenfunction_testrun = 10
 num_eigenfunctions_superposition_testrun = 10
 
+## Some Fixtures like Spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions
+## are defined in the conftest.py file.and imported in all the test files automatically.
+
 
 ########################################## HELPER_FUNCTIONS ##########################################
 def arbitrary_multiple_coefficients(length=1):

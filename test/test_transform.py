@@ -1,9 +1,10 @@
 import numpy as np
 
+
 ########################################## HELPER FUNCTIONS ##########################################
 def arbitrary_multiple_coefficients(length=1):
     """
-    Python function to initialize a numpy array of the given length 
+    Python function to initialize a numpy array of the given length
     with arbitrary coefficients sampled from a normal distribution for the tests.
     """
     return np.random.randn(length)

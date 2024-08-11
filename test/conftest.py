@@ -41,6 +41,7 @@ def arbitrary_single_coefficient():
     """
     return np.random.randn()
 
+
 def arbitrary_multiple_coefficients(length=1):
     """
     Python fixture to initialize the arbitrary coefficients for the tests.

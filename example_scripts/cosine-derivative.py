@@ -14,7 +14,8 @@ if __name__ == "__main__":
     plt.plot(x, y, label="cos(x)")
     plt.plot(x, -np.sin(x), label="-sin(x)")
     plt.plot(x, np.real(z), label="d/dx cos(x)", linestyle="--")
-    
+
+    # Any imaginary contribution is numerical noise:
     assert np.allclose(np.imag(z), 0)
     plt.legend()
     plt.show()

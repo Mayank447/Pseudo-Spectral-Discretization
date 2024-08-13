@@ -75,25 +75,46 @@ class FreeFermions2D:
     def eigenfunctions(self, index, sign):
         """
         Function to return the eigenfunctions of the 2D free fermions operator.
-        Note: Here p_t, p_x are scalars and not arrays.
+        Note: p_t, p_x used in the function are scalars and not arrays.
+        
+        Args:
+            index: 2D index of the eigenfunction
+            sign: +-1 for the two eigenvectors
+
+        Returns:
+            lambda function (t,x) of the eigenfunction at the specified index
+
+        Note: t,x passed to the returned lambda function must be flattened out meshgrid.
+        e.g. x, t = np.meshgrid(array_x, array_t)
+             t = t.flatten()
+             x = x.flatten()
         """
-        p_t = self.p_t[index[0]]
-        p_x = self.p_x[index[1]]
+
+        offset = self.n_x * index[0]
+        p_t = self.p_t[offset]
+        p_x = self.p_x[offset + index[1]]
         p_t_mu = p_t - self.mu
 
-        normalization = np.sqrt(
-            2 * np.sqrt(p_t_mu**2 + p_x**2) * (np.sqrt(p_t_mu**2 + p_x**2) - sign * p_t_mu)
-        )
-        array = np.array(
-            [p_x, sign * np.sqrt(p_t_mu**2 + p_x**2) - p_t_mu]
-        ) / normalization
+        normalization = None
+        array = np.eye(2)[int(0.5 * (sign-1))]
+
+        if p_x != 0:
+            normalization = np.sqrt(
+                2 * np.sqrt(p_t_mu**2 + p_x**2) 
+                * (np.sqrt(p_t_mu**2 + p_x**2) - sign * p_t_mu)
+            )
+
+            array = np.array([p_x, 
+                              sign * np.sqrt(p_t_mu**2 + p_x**2) - p_t_mu
+                              ]) / normalization
 
         return (
-            lambda x, t: np.exp(
-                p_t * t +  p_x * x
-            ) 
-            / np.sqrt(self.n_t * self.n_x)
-            * array
+            lambda t, x: np.kron(
+                np.exp(
+                    p_t * t +  p_x * x
+                )
+                / np.sqrt(self.n_t * self.n_x)
+            , array)
         )
 
 
@@ -196,4 +217,15 @@ class FreeFermions2D:
 
 if __name__ == "__main__":
     fermion = FreeFermions2D(n_t=7, n_x=5, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0)
-    print(fermion.eigenvalues)
+    
+    x, t = np.meshgrid(
+        np.linspace(0, fermion.L_x, fermion.n_x, endpoint=False), 
+        np.linspace(0, fermion.L_t, fermion.n_t, endpoint=False)
+    )
+    t = t.flatten()
+    x = x.flatten()
+    print("t", t)
+    print("x", x)
+    e1 = fermion.eigenfunctions([0, 0], 1)(t,x)
+    print(e1)
+    print(np.linalg.norm(e1))

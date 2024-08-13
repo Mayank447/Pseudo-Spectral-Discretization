@@ -97,6 +97,7 @@ class FreeFermions2D:
 
         normalization = None
         array = np.eye(2)[int(0.5 * (sign-1))]
+        print(p_t_mu, p_x)
 
         if p_x != 0:
             normalization = np.sqrt(
@@ -121,6 +122,19 @@ class FreeFermions2D:
     def transform(self, input_vector, input_basis, output_basis):
         """
         Function to transform the input vector according to the 2D free fermions operator between real and spectral spaces.
+        
+        Args:
+            input_vector: input vector to be transformed
+            input_basis: basis of the input vector (real/spectral)
+            output_basis: basis of the output vector (real/spectral)
+
+        Returns:
+            transformed vector in the specified output basis
+
+        Raises:
+            ValueError: if the input_basis or output_basis is not supported.    
+
+        Note: The input vector must be a 1D array of size 2 * n_t * n_x.
         """
 
         if input_basis == output_basis in ["real", "spectral"]:
@@ -185,24 +199,25 @@ class FreeFermions2D:
         Private function to transform a vector in spectral space to real space
         """
 
+        # Post multiplication by block diagonalized eigenvector matrix
+        spectral_vector = eta_1 * spectral_vector + eta_2 * spectral_vector
+
         # Reshaping to 2D and performing the 2D discrete Inverse Fast Fourier transform to go from spectral to real space
         spectral_vector = spectral_vector.reshape(self.n_t, self.n_x)
-        spectral_vector = scipy.fft.ifft2(spectral_vector, norm="ortho")
+        spectral_vector = scipy.fft.ifft2(spectral_vector, norm="ortho").flatten()
 
-        # Premultiplication in variable t since the boundary conditions are anti periodic
+        # Reversing premultiplication in variable t since the boundary conditions are anti periodic
         spectral_vector = (
             spectral_vector *
             np.repeat(np.exp(I2PI * self.theta_t * np.arange(self.n_t)/self.L_t), self.n_x)
         )
 
-        # Premultiplication in variable x since the boundary conditions may not be periodic
+        # Reversing premultiplication in variable x since the boundary conditions may not be periodic
         spectral_vector = (
             spectral_vector *
-            np.repeat(np.exp(I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
+            np.repeat(np.exp(I2PI * self.theta_x * np.linspace(0, self.L_x, self.n_x, endpoint=False), self.n_t))
         )
 
-        # Post multiplication by block diagonalized eigenvector matrix
-        spectral_vector = eta_1 * spectral_vector + eta_2 * spectral_vector
         return spectral_vector
     
 
@@ -227,5 +242,4 @@ if __name__ == "__main__":
     print("t", t)
     print("x", x)
     e1 = fermion.eigenfunctions([0, 0], 1)(t,x)
-    print(e1)
-    print(np.linalg.norm(e1))
+    print(fermion.transform(e1, "real", "spectral"))

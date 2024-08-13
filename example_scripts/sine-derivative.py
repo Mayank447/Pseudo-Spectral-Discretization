@@ -17,7 +17,7 @@ if __name__ == "__main__":
     L = 2 * np.pi * theta
     d = DiracOperator(Derivative1D(num_lattice_points, L, theta))
 
-    x = np.linspace(0, L, num_lattice_points, endpoint=False)
+    x = np.linspace(-L/2, L/2, num_lattice_points, endpoint=False)
     y = function(np.sin, x)
     y_ = derivative(np.cos, x)
 

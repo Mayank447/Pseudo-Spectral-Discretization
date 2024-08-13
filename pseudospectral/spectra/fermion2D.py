@@ -97,7 +97,8 @@ class FreeFermions2D:
 
         normalization = None
         array = np.eye(2)[int(0.5 * (sign-1))]
-        print(p_t_mu, p_x)
+        print("p_t_mu", p_t_mu)
+        print("p_x", p_x)
 
         if p_x != 0:
             normalization = np.sqrt(
@@ -174,48 +175,48 @@ class FreeFermions2D:
         Private function to transform a vector from real space to spectral space.
         """
         # Premultiplication factor in variable t since the boundary conditions are anti periodic
-        premultiplier = np.exp(-I2PI * self.theta_t * np.arange(self.n_t)/self.L_t)
+        premultiplier_t = np.exp(-I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
         real_vector = (
-            premultiplier[:, np.newaxis] * real_vector.reshape(-1, self.n_t)
+            premultiplier_t[ :, np.newaxis] * real_vector.reshape(self.n_t, -1)
         )
 
         # Premultiplication factor in variable x since the boundary conditions may not be periodic
+        premultiplier_x = np.exp(-I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
         real_vector = (
-            real_vector *
-            np.repeat(np.exp(-I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
+            premultiplier_x[:, np.newaxis] * real_vector.reshape(self.n_x, -1)
         )
 
         # Reshaping to 2D and performing the 2D discrete Fast Fourier transform to go from real to spectral space
-        real_vector = real_vector.reshape(self.n_t, self.n_x)
+        real_vector = real_vector.reshape(self.n_x, self.n_t)
         real_vector = scipy.fft.fft2(real_vector, norm="ortho").flatten()
 
         # Post multiplication by block diagonalized eigenvector matrix transpose
-        real_vector = eta_1 * real_vector + eta_2 * real_vector
+        # real_vector = eta_1 * real_vector + eta_2 * real_vector
         return real_vector
     
 
-    def _spectal_to_real(self, spectral_vector, eta_1, eta_2):
+    def _spectral_to_real(self, spectral_vector, eta_1, eta_2):
         """
         Private function to transform a vector in spectral space to real space
         """
 
-        # Post multiplication by block diagonalized eigenvector matrix
-        spectral_vector = eta_1 * spectral_vector + eta_2 * spectral_vector
+        # Block diagonal multiplication of eigenvector matrix
+        # spectral_vector = eta_1 * spectral_vector + eta_2 * spectral_vector
 
-        # Reshaping to 2D and performing the 2D discrete Inverse Fast Fourier transform to go from spectral to real space
-        spectral_vector = spectral_vector.reshape(self.n_t, self.n_x)
+        # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
+        spectral_vector = spectral_vector.reshape(self.n_x, self.n_t)
         spectral_vector = scipy.fft.ifft2(spectral_vector, norm="ortho").flatten()
 
         # Reversing premultiplication in variable t since the boundary conditions are anti periodic
+        inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
         spectral_vector = (
-            spectral_vector *
-            np.repeat(np.exp(I2PI * self.theta_t * np.arange(self.n_t)/self.L_t), self.n_x)
+            inv_premultiplier_t[ :, np.newaxis] * spectral_vector.reshape(self.n_t, -1)
         )
 
         # Reversing premultiplication in variable x since the boundary conditions may not be periodic
+        inv_premultiplier_x = np.exp(I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
         spectral_vector = (
-            spectral_vector *
-            np.repeat(np.exp(I2PI * self.theta_x * np.linspace(0, self.L_x, self.n_x, endpoint=False), self.n_t))
+            inv_premultiplier_x[:, np.newaxis] * spectral_vector.reshape(self.n_x, -1)
         )
 
         return spectral_vector
@@ -239,7 +240,8 @@ if __name__ == "__main__":
     )
     t = t.flatten()
     x = x.flatten()
-    print("t", t)
-    print("x", x)
     e1 = fermion.eigenfunctions([0, 0], 1)(t,x)
-    print(fermion.transform(e1, "real", "spectral"))
+    s1 = fermion.transform(e1, "real", "spectral")
+    assert np.isclose(fermion.transform(s1, "spectral", "real"), e1).all()
+    print(np.linalg.norm(e1))
+    print(np.linalg.norm(s1))

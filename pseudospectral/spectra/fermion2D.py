@@ -40,22 +40,27 @@ class FreeFermions2D:
 
         self._lattice_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._lattice_x = scipy.fft.fftfreq(n_x, d=self.a_x)
-        T, X = np.meshgrid(self._lattice_t, self._lattice_x)
+        X, T = np.meshgrid(self._lattice_x, self._lattice_t)
+        X = X.flatten()
+        T = T.flatten()
 
-        self.p_t = I2PI * (T + (self.theta_t/self.L_t)).flatten()
-        self.p_x = I2PI * (X + (self.theta_x/self.L_x)).flatten()
+        self.p_t = I2PI * (T + (self.theta_t/self.L_t))
+        self.p_x = I2PI * (X + (self.theta_x/self.L_x))
         self.p_t_mu = self.p_t - self.mu
-        
+
         self.sqrt = np.sqrt(self.p_t_mu**2 + self.p_x**2)
         self.eigenvalues = self._eigenvalues()
 
         # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
         self._norm_1 = np.sqrt(2 * self.sqrt * (self.sqrt - self.p_t_mu))
         self._norm_2 = np.sqrt(2 * self.sqrt * (self.sqrt + self.p_t_mu))
+        self._norm_1[self.p_x == 0] = self.p_t_mu[self.p_x == 0]
+        self._norm_2[self.p_x == 0] = self.p_t_mu[self.p_x == 0]
+
         self._eta_11 = self.p_x/self._norm_1
-        self._eta_21 = (-self.sqrt - self.p_t_mu)/self._norm_1
+        self._eta_21 = (self.sqrt - self.p_t_mu)/self._norm_1
         self._eta_12 = self.p_x/self._norm_2
-        self._eta_22 = (self.sqrt - self.p_t_mu)/self._norm_2
+        self._eta_22 = (-self.sqrt - self.p_t_mu)/self._norm_2
 
 
     def _eigenvalues(self):
@@ -190,5 +195,5 @@ class FreeFermions2D:
 
 
 if __name__ == "__main__":
-    fermion = FreeFermions2D(n_t=5, n_x=5, L_t=1, L_x=1, mu=0, m=0, theta_t=0, theta_x=0)
+    fermion = FreeFermions2D(n_t=7, n_x=5, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0)
     print(fermion.eigenvalues)

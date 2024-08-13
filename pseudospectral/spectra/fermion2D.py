@@ -42,12 +42,20 @@ class FreeFermions2D:
         self._lattice_x = scipy.fft.fftfreq(n_x, d=self.a_x)
         T, X = np.meshgrid(self._lattice_t, self._lattice_x)
 
-        self.p_t = I2PI * (T - (self.theta_t/self.L_t))
-        self.p_x = I2PI * (X - (self.theta_x/self.L_x))
+        self.p_t = I2PI * (T + (self.theta_t/self.L_t)).flatten()
+        self.p_x = I2PI * (X + (self.theta_x/self.L_x)).flatten()
         self.p_t_mu = self.p_t - self.mu
         
         self.sqrt = np.sqrt(self.p_t_mu**2 + self.p_x**2)
         self.eigenvalues = self._eigenvalues()
+
+        # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
+        self._norm_1 = np.sqrt(2 * self.sqrt * (self.sqrt - self.p_t_mu))
+        self._norm_2 = np.sqrt(2 * self.sqrt * (self.sqrt + self.p_t_mu))
+        self._eta_11 = self.p_x/self._norm_1
+        self._eta_21 = (-self.sqrt - self.p_t_mu)/self._norm_1
+        self._eta_12 = self.p_x/self._norm_2
+        self._eta_22 = (self.sqrt - self.p_t_mu)/self._norm_2
 
 
     def _eigenvalues(self):
@@ -55,13 +63,14 @@ class FreeFermions2D:
         Private function to return the eigenvalues of the 2D free fermions operator.
         """
         return (
-            (I2PI * np.kron(self.sqrt.flatten(), [1, -1])) + self.m
+            (np.kron(self.sqrt, [1, -1])) + self.m
         )
 
 
     def eigenfunctions(self, index, sign):
         """
         Function to return the eigenfunctions of the 2D free fermions operator.
+        Note: Here p_t, p_x are scalars and not arrays.
         """
         p_t = self.p_t[index[0]]
         p_x = self.p_x[index[1]]
@@ -96,8 +105,8 @@ class FreeFermions2D:
             f, g = input_vector[0::2], input_vector[1::2]
 
             # Transform the two halves to spectral space
-            f = self._real_to_spectral(f)
-            g = self._real_to_spectral(g)
+            f = self._real_to_spectral(f, self._eta_11, self._eta_21)
+            g = self._real_to_spectral(g, self._eta_12, self._eta_22)
 
             # Reflatten and then return the array with elements alternatively concatenated
             return np.ravel([f.flatten(), g.flatten()],'F')
@@ -108,8 +117,8 @@ class FreeFermions2D:
             f, g = input_vector[0::2], input_vector[1::2]
 
             # Transform the two halves to spectral space
-            f = self._spectral_to_real(f)
-            g = self._spectral_to_real(g)
+            f = self._spectral_to_real(f, self._eta_11, self._eta_12)
+            g = self._spectral_to_real(g, self._eta_21, self._eta_22)
 
             # Reflatten and then return the array with elements alternatively concatenated
             return np.ravel([f.flatten(), g.flatten()],'F')
@@ -120,30 +129,32 @@ class FreeFermions2D:
             )
 
 
-    def _real_to_spectral(self, real_vector):
+    def _real_to_spectral(self, real_vector, eta_1, eta_2):
         """
         Private function to transform a vector from real space to spectral space.
         """
-        # Premultiplication in variable t since the boundary conditions are anti periodic
-        premultiplier = np.exp(I2PI * self.theta_t * np.arange(self.n_t)/self.L_t)
+        # Premultiplication factor in variable t since the boundary conditions are anti periodic
+        premultiplier = np.exp(-I2PI * self.theta_t * np.arange(self.n_t)/self.L_t)
         real_vector = (
             premultiplier[:, np.newaxis] * real_vector.reshape(-1, self.n_t)
         )
 
-        # Premultiplication in variable x since the boundary conditions may not be periodic
+        # Premultiplication factor in variable x since the boundary conditions may not be periodic
         real_vector = (
             real_vector *
-            np.repeat(np.exp(I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
+            np.repeat(np.exp(-I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
         )
 
         # Reshaping to 2D and performing the 2D discrete Fast Fourier transform to go from real to spectral space
         real_vector = real_vector.reshape(self.n_t, self.n_x)
-        real_vector = scipy.fft.fft2(real_vector, norm="ortho")
+        real_vector = scipy.fft.fft2(real_vector, norm="ortho").flatten()
 
+        # Post multiplication by block diagonalized eigenvector matrix transpose
+        real_vector = eta_1 * real_vector + eta_2 * real_vector
         return real_vector
     
 
-    def _spectal_to_real(self, spectral_vector):
+    def _spectal_to_real(self, spectral_vector, eta_1, eta_2):
         """
         Private function to transform a vector in spectral space to real space
         """
@@ -155,17 +166,20 @@ class FreeFermions2D:
         # Premultiplication in variable t since the boundary conditions are anti periodic
         spectral_vector = (
             spectral_vector *
-            np.repeat(np.exp(-I2PI * self.theta_t * np.arange(self.n_t)/self.L_t), self.n_x)
+            np.repeat(np.exp(I2PI * self.theta_t * np.arange(self.n_t)/self.L_t), self.n_x)
         )
 
         # Premultiplication in variable x since the boundary conditions may not be periodic
         spectral_vector = (
             spectral_vector *
-            np.repeat(np.exp(-I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
+            np.repeat(np.exp(I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
         )
 
+        # Post multiplication by block diagonalized eigenvector matrix
+        spectral_vector = eta_1 * spectral_vector + eta_2 * spectral_vector
         return spectral_vector
     
+
     def _operate(f,g, p_t, p_x):
         return (p_t * f + p_x * g, p_x * f - p_t * g) 
 
@@ -176,6 +190,5 @@ class FreeFermions2D:
 
 
 if __name__ == "__main__":
-    fermion = FreeFermions2D(0, 0, 4, 5, 4, 5)
-    # print(fermion.eigenvalues)
-    # print(fermion.eigenfunctions([1, 1], 1)(0,0))
+    fermion = FreeFermions2D(n_t=5, n_x=5, L_t=1, L_x=1, mu=0, m=0, theta_t=0, theta_x=0)
+    print(fermion.eigenvalues)

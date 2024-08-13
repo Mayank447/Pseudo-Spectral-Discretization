@@ -12,7 +12,7 @@ def derivative(der, x):
 
 
 if __name__ == "__main__":
-    num_lattice_points = 100
+    num_lattice_points = 91
     theta = 0.5
     L = 2 * np.pi * theta
     d = DiracOperator(Derivative1D(num_lattice_points, L, theta))

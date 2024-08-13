@@ -21,8 +21,11 @@ class DiracOperator:
 
         if (input_basis in ["real", "spectral"]) and (output_basis in ["real", "spectral"]):
             temp_1 = self.spectrum.transform(coefficients, input_basis, "spectral")
+            print("V^T", temp_1)
             temp_2 = self.spectrum.eigenvalues * temp_1
+            print("ulta V", temp_2)
             temp_3 = self.spectrum.transform(temp_2, "spectral", output_basis)
+            print("V", temp_3)
             return temp_3
 
         else:

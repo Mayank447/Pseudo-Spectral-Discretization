@@ -20,12 +20,14 @@ class Derivative1D:
         self.theta = theta
         self.eigenvalues = self._eigenvalues()
 
+
     def _eigenvalues(self):
         """
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a) - self.theta / self.L)
+        return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a) + self.theta / self.L)
+
 
     def eigenfunction(self, index: np.ndarray):
         """
@@ -33,11 +35,12 @@ class Derivative1D:
         """
         index = np.asarray(index)
 
-        if (index < 0).any() or (index >= self.num_lattice_points).any():
+        if (index < -self.num_lattice_points).any() or (index >= self.num_lattice_points).any():
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
             return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.num_lattice_points)
+
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -49,12 +52,12 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            premultiplier = np.exp(2j * np.pi * self.theta * np.arange(self.num_lattice_points) / self.L)
+            premultiplier = np.exp(-2j * np.pi * self.theta * np.arange(self.num_lattice_points) / self.L)
             return scipy.fft.fft(premultiplier * input_vector, norm="ortho")
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            inv_premultiplier = np.exp(-2j * np.pi * self.theta * np.arange(self.num_lattice_points) / self.L)
+            inv_premultiplier = np.exp(2j * np.pi * self.theta * np.arange(self.num_lattice_points) / self.L)
             return inv_premultiplier * scipy.fft.ifft(input_vector, norm="ortho")
 
         else:

@@ -58,6 +58,7 @@ class FreeFermions2D:
             (I2PI * np.kron(self.sqrt.flatten(), [1, -1])) + self.m
         )
 
+
     def eigenfunctions(self, index, sign):
         """
         Function to return the eigenfunctions of the 2D free fermions operator.
@@ -91,36 +92,27 @@ class FreeFermions2D:
             return input_vector
 
         elif input_basis == "real" and output_basis == "spectral":
-            # Split the input vector into f(continuous upper vector component) and g(continuous lower vector component)
-            f, g = np.split(input_vector, 2)
+            # Split the input vector into f(even index elements) and g(odd index elements)
+            f, g = input_vector[0::2], input_vector[1::2]
 
             # Transform the two halves to spectral space
             f = self._real_to_spectral(f)
             g = self._real_to_spectral(g)
 
-            # Multiply by respective eta scaler field and then flatten the 2D array
-            f = self._eta_0 * f
-
-            # Reflatten and then return concatenate the two halves
-            return np.join([f.flatten(), g.flatten()], axis=0)
+            # Reflatten and then return the array with elements alternatively concatenated
+            return np.ravel([f.flatten(), g.flatten()],'F')
 
 
         elif input_basis == "spectral" and output_basis == "real":
-            # Split the input vector into f(continuous upper vector component) and g(continuous lower vector component)
-            f, g = np.split(input_vector, 2)
+            # Split the input vector into f(even index elements) and g(odd index elements)
+            f, g = input_vector[0::2], input_vector[1::2]
 
-            # Premultiplication of t since the boundary conditions are anti periodic and reshaping them to 2D
-            f = np.repeat(np.exp(1j * np.pi * self._lattice_t / self.L_t), self.n_x) * f
-            g = np.repeat(np.exp(1j * np.pi * self._lattice_t / self.L_t), self.n_x) * g
-            f = f.reshape(self.n_t, self.n_x)
-            g = g.reshape(self.n_t, self.n_x)
+            # Transform the two halves to spectral space
+            f = self._spectral_to_real(f)
+            g = self._spectral_to_real(g)
 
-            # Perform the 2D discrete Fast Fourier transform to go from real to spectral space on both halves which are in discrete space after reshaping them
-            f = scipy.fft.ifft2(f, norm="ortho")
-            g = scipy.fft.ifft2(g, norm="ortho")
-
-            # Reflatten and then return concatenate the two halves
-            return np.join([f.flatten(), g.flatten()], axis=0)
+            # Reflatten and then return the array with elements alternatively concatenated
+            return np.ravel([f.flatten(), g.flatten()],'F')
 
         else:
             raise ValueError(
@@ -128,22 +120,59 @@ class FreeFermions2D:
             )
 
 
-    def _real_to_spectral(self, real_vector, eta):
+    def _real_to_spectral(self, real_vector):
         """
-        Private function to transform a real vector to spectral space.
+        Private function to transform a vector from real space to spectral space.
         """
-        # Premultiplication of t since the boundary conditions are anti periodic and reshaping them to 2D
+        # Premultiplication in variable t since the boundary conditions are anti periodic
+        premultiplier = np.exp(I2PI * self.theta_t * np.arange(self.n_t)/self.L_t)
         real_vector = (
-            np.repeat(np.exp(-1j * np.pi * self._lattice_t / self.L_t), self.n_x)
-            * real_vector
+            premultiplier[:, np.newaxis] * real_vector.reshape(-1, self.n_t)
         )
 
-        # Perform the 2D discrete Fast Fourier transform to go from real to spectral space on both halves which are in discrete space after reshaping them
+        # Premultiplication in variable x since the boundary conditions may not be periodic
+        real_vector = (
+            real_vector *
+            np.repeat(np.exp(I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
+        )
+
+        # Reshaping to 2D and performing the 2D discrete Fast Fourier transform to go from real to spectral space
         real_vector = real_vector.reshape(self.n_t, self.n_x)
         real_vector = scipy.fft.fft2(real_vector, norm="ortho")
 
         return real_vector
+    
 
+    def _spectal_to_real(self, spectral_vector):
+        """
+        Private function to transform a vector in spectral space to real space
+        """
+
+        # Reshaping to 2D and performing the 2D discrete Inverse Fast Fourier transform to go from spectral to real space
+        spectral_vector = spectral_vector.reshape(self.n_t, self.n_x)
+        spectral_vector = scipy.fft.ifft2(spectral_vector, norm="ortho")
+
+        # Premultiplication in variable t since the boundary conditions are anti periodic
+        spectral_vector = (
+            spectral_vector *
+            np.repeat(np.exp(-I2PI * self.theta_t * np.arange(self.n_t)/self.L_t), self.n_x)
+        )
+
+        # Premultiplication in variable x since the boundary conditions may not be periodic
+        spectral_vector = (
+            spectral_vector *
+            np.repeat(np.exp(-I2PI * self.theta_x * np.arange(self.n_x)/self.L_x), self.n_t)
+        )
+
+        return spectral_vector
+    
+    def _operate(f,g, p_t, p_x):
+        return (p_t * f + p_x * g, p_x * f - p_t * g) 
+
+    def direct_apply(self, vector):
+        for i in range(self.n_t * self.n_x):
+            vector[i, i+1] = self._operate(vector[i], vector[i+1], self.p_t_mu[i], self.p_x[i])
+        return vector
 
 
 if __name__ == "__main__":

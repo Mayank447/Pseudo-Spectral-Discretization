@@ -9,8 +9,12 @@ if __name__ == "__main__":
     d = DiracOperator(Derivative1D(num_lattice_points, L))
     x = np.linspace(0, L, num_lattice_points, endpoint=False)
     y = np.cos(x)
+    z = d.apply_to(y)
+    
     plt.plot(x, y, label="cos(x)")
     plt.plot(x, -np.sin(x), label="-sin(x)")
-    plt.plot(x, np.real(d.apply_to(y)), label="d/dx cos(x)", linestyle="--")
+    plt.plot(x, np.real(z), label="d/dx cos(x)", linestyle="--")
+    
+    assert np.allclose(np.imag(z), 0)
     plt.legend()
     plt.show()

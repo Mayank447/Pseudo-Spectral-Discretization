@@ -20,9 +20,12 @@ if __name__ == "__main__":
     x = np.linspace(0, L, num_lattice_points, endpoint=False)
     y = function(np.sin, x)
     y_ = derivative(np.cos, x)
+    z = d.apply_to(y)
 
     plt.plot(x, y, label="sin(x)")
     plt.plot(x, y_, label="cos(x)")
-    plt.plot(x, np.real(d.apply_to(y)), label="d/dx sin(x)", linestyle="--")
+    plt.plot(x, np.real(z), label="d/dx sin(x)", linestyle="--")
+    
+    assert np.allclose(np.imag(z), 0)
     plt.legend()
     plt.show()

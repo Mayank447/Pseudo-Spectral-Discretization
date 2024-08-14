@@ -26,7 +26,6 @@ class Derivative1D:
         """
         return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a))
 
-
     def eigenfunction(self, index: np.ndarray):
         """
         Function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
@@ -37,8 +36,7 @@ class Derivative1D:
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.num_lattice_points)
-
+            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.L)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -50,11 +48,11 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            return scipy.fft.fft(input_vector, norm="ortho")
+            return scipy.fft.fft(input_vector, norm="ortho") * np.sqrt(self.a)
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return scipy.fft.ifft(input_vector, norm="ortho")
+            return scipy.fft.ifft(input_vector, norm="ortho") / np.sqrt(self.a)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
@@ -98,4 +96,4 @@ class Derivative1D:
         # (that's why rhs @ lhs and not lhs @ rhs).
         # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
         # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
-        return rhs @ lhs.transpose(-1, -2).conjugate()
+        return rhs @ lhs.transpose(-1, -2).conjugate() * self.a

@@ -62,6 +62,8 @@ class FreeFermions2D:
         self._eta_12 = self.p_x/self._norm_2
         self._eta_22 = (-self.sqrt - self.p_t_mu)/self._norm_2
         self._eta_11[self.p_x == 0] = 1 
+        self._eta_12[self.p_x == 0] = 0 
+        self._eta_21[self.p_x == 0] = 0 
         self._eta_22[self.p_x == 0] = 1
 
     def _eigenvalues(self):
@@ -147,22 +149,21 @@ class FreeFermions2D:
             f, g = input_vector[0::2], input_vector[1::2]
 
             # Transform the two halves to spectral space
-            f = self._real_to_spectral(f, self._eta_11, self._eta_12)
-            g = self._real_to_spectral(g, self._eta_21, self._eta_22)
+            f = self._real_to_spectral(f)
+            g = self._real_to_spectral(g)
 
             # Post multiplication by block diagonalized eigenvector matrix transpose
-            f, g = np.repeat(f, 2), np.repeat(g,2)
-            f = np.ravel([self._eta_11 * f[0::2], self._eta_12 * f[1::2]], 'F')
-            g = np.ravel([self._eta_21 * g[0::2], self._eta_22 * g[1::2]], 'F')
+            f = np.ravel([self._eta_11 * f, self._eta_12 * f], 'F')
+            g = np.ravel([self._eta_21 * g, self._eta_22 * g], 'F')
             return f + g
         
 
         elif input_basis == "spectral" and output_basis == "real":
             
             # Block diagonal multiplication of eigenvector matrix
-            f, g = input_vector[0::2], input_vector[1::2]
-            f = self._eta_11 * f + self._eta_12 * g
-            g = self._eta_21 * f + self._eta_22 * g
+            f = self._eta_11 * input_vector[::2] + self._eta_12 * input_vector[1::2]
+            g = self._eta_21 * input_vector[::2] + self._eta_22 * input_vector[1::2]
+            print(np.linalg.norm(np.ravel([f,g], 'F')))
 
             # Transform the two halves to spectral space
             f = self._spectral_to_real(f)
@@ -253,5 +254,6 @@ if __name__ == "__main__":
     print(np.linalg.norm(s1))
     e1_ = fermion.transform(s1, "spectral", "real")
     print(np.linalg.norm(e1_))
-    print(e1_ - e1)
+    print(e1)
+    print(e1_)
     print(np.linalg.norm(e1_ - e1))

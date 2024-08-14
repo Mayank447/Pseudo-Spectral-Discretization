@@ -40,10 +40,3 @@ def arbitrary_single_coefficient():
     Python fixture to initialize the single coefficient for the tests.
     """
     return np.random.randn()
-
-
-def arbitrary_multiple_coefficients(length=1):
-    """
-    Python fixture to initialize the arbitrary coefficients for the tests.
-    """
-    return np.random.randn(length)

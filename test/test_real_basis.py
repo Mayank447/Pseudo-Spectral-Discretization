@@ -8,6 +8,9 @@ import pytest
 num_single_eigenfunction_testrun = 10
 num_eigenfunctions_superposition_testrun = 10
 
+## Some Fixtures like Spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions
+## are defined in the conftest.py file.and imported in all the test files automatically.
+
 
 ########################################## HELPER_FUNCTIONS ##########################################
 def arbitrary_multiple_coefficients(length=1):
@@ -35,7 +38,7 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_
 
 
 @pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions", range(num_eigenfunctions_superposition_testrun), indirect=True)
-def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_index_multiple_eigenfunctions):
+def test_application_to_superposition_of_eigenfunctions(spectrum, arbitrary_index_multiple_eigenfunctions):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
@@ -43,10 +46,13 @@ def test_application_to_superposition_of_two_eigenfunctions(spectrum, arbitrary_
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
     sample_points = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
-    eigenfunctions = spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(sample_points.reshape(-1, 1)) * arbitrary_coefficients
-    expected = eigenfunctions @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
+    superposition = (
+        arbitrary_coefficients * 
+        spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(sample_points.reshape(-1, 1))
+    )
+    expected = superposition @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
 
-    result = operator.apply_to(np.sum(eigenfunctions, axis=1), input_basis="real", output_basis="real")
+    result = operator.apply_to(np.sum(superposition, axis=1), input_basis="real", output_basis="real")
     assert np.isclose(result, expected).all()
 
 

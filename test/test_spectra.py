@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
 
+## Some Fixtures like Spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions
+## are defined in the conftest.py file.and imported in all the test files automatically.
+
 
 @pytest.fixture()
 def eigenfunctions(spectrum):

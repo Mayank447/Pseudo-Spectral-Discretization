@@ -62,6 +62,7 @@ class FreeFermions2D:
         self._eta_12 = self.p_x/self._norm_2
         self._eta_22 = (-self.sqrt - self.p_t_mu)/self._norm_2
         self._eta_11[self.p_x == 0] = 1 
+        print(self._eta_21[self.p_x==0])
         self._eta_12[self.p_x == 0] = 0 
         self._eta_21[self.p_x == 0] = 0 
         self._eta_22[self.p_x == 0] = 1
@@ -199,11 +200,11 @@ class FreeFermions2D:
             premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
         )
         coeff = (
-            premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_x, -1)
+            premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_t, self.n_x).transpose()
         )
 
         # Reshaping to 2D and performing the 2D discrete Fast Fourier transform to go from real to spectral space
-        coeff = coeff.reshape(self.n_x, self.n_t)
+        coeff = coeff.transpose().reshape(self.n_x, self.n_t)
         coeff = scipy.fft.fft2(coeff, norm="ortho").flatten()
         return coeff
     
@@ -215,7 +216,7 @@ class FreeFermions2D:
 
         # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
         coeff = coeff.reshape(self.n_x, self.n_t)
-        coeff = scipy.fft.ifft2(coeff, norm="ortho").flatten()
+        coeff = scipy.fft.ifft2(coeff, norm="ortho")
 
         # Reversing premultiplication in variable t, x since the boundary conditions may not be periodic
         inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
@@ -224,10 +225,10 @@ class FreeFermions2D:
             inv_premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
         )
         coeff = (
-            inv_premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_x, -1)
+            inv_premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_t, self.n_x).transpose()
         )
 
-        return coeff
+        return coeff.transpose().flatten()
     
 
     def _operate(f,g, p_t, p_x):

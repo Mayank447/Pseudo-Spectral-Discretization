@@ -26,7 +26,7 @@ class Derivative1D:
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-       return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a))
+        return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a))
 
 
     def eigenfunction(self, index: np.ndarray):

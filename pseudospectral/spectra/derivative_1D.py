@@ -19,7 +19,6 @@ class Derivative1D:
         self.a = L / num_lattice_points
         self.eigenvalues = self._eigenvalues()
 
-
     def _eigenvalues(self):
         """
         Private function to return the eigenvalues of the 1D derivative operator

@@ -11,10 +11,11 @@ import scipy
 num_single_eigenfunction_testrun = 10
 num_eigenfunctions_superposition_testrun = 10
 
+
 ########################################## HELPER_FUNCTIONS ##########################################
 def arbitrary_multiple_coefficients(length=1):
     """
-    Python function to initialize a numpy array of the given length 
+    Python function to initialize a numpy array of the given length
     with arbitrary coefficients sampled from a normal distribution for the tests.
     """
     return np.random.randn(length)
@@ -43,10 +44,7 @@ def test_application_to_superposition_of_eigenfunctions(spectrum, arbitrary_inde
     operator = DiracOperator(spectrum)
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    superposition = (
-        arbitrary_coefficients * 
-        np.eye(spectrum.num_lattice_points)[arbitrary_index_multiple_eigenfunctions].transpose()
-    )
+    superposition = arbitrary_coefficients * np.eye(spectrum.num_lattice_points)[arbitrary_index_multiple_eigenfunctions].transpose()
     expected = superposition @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
 
     result = operator.apply_to(

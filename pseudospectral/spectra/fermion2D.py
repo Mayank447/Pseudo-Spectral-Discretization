@@ -38,9 +38,9 @@ class FreeFermions2D:
         self.a_t = L_t/n_t
         self.a_x = L_x/n_x
 
-        self._lattice_t = scipy.fft.fftfreq(n_t, d=self.a_t)
-        self._lattice_x = scipy.fft.fftfreq(n_x, d=self.a_x)
-        X, T = np.meshgrid(self._lattice_x, self._lattice_t)
+        self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
+        self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
+        X, T = np.meshgrid(self._freq_x, self._freq_t)
         X = X.flatten()
         T = T.flatten()
 
@@ -69,7 +69,14 @@ class FreeFermions2D:
 
     def _eigenvalues(self):
         """
-        Private function to return the list of eigenvalues (the diagonal of the eigenvalue matrix) of the 2D Free Fermion operator 
+        Private function to return the list of eigenvalues (the diagonal of the eigenvalue matrix)
+        of the 2D Free Fermion operator 
+        
+        Args:
+            None
+            
+        Returns:
+            numpy.ndarray: 1D array of eigenvalues
         """
         return (
             (np.kron(self.sqrt, [1, -1])) + self.m
@@ -122,6 +129,58 @@ class FreeFermions2D:
                 / np.sqrt(self.n_t * self.n_x)
             , array)
         )
+    
+
+    def _real_to_spectral(self, coeff):
+        """
+        Private function to transform a vector from real space to spectral space.
+        Use by the public transform function.
+
+        Args:
+            coeff (numpy.ndarray): input vector in real space
+            [Note: The input vector must be a 1D array of size n_t * n_x.]
+        
+        Returns:
+            vector in spectral space
+        """
+        
+        # Premultiplication factor in variable t, x since the boundary conditions may not be periodic
+        premultiplier_t = np.exp(-I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
+        premultiplier_x = np.exp(-I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
+        coeff = (
+            premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
+        )
+        coeff = (
+            premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_t, self.n_x).transpose()
+        )
+
+        # Reshaping to 2D and performing the 2D discrete Fast Fourier transform to go from real to spectral space
+        coeff = coeff.transpose().reshape(self.n_x, self.n_t)
+        coeff = scipy.fft.fft2(coeff, norm="ortho").flatten()
+        return coeff
+    
+
+    def _spectral_to_real(self, coeff):
+        """
+        Private function to transform a vector in spectral space to real space
+        """
+
+        # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
+        coeff = coeff.reshape(self.n_x, self.n_t)
+        coeff = scipy.fft.ifft2(coeff, norm="ortho")
+
+        # Reversing premultiplication in variable t, x since the boundary conditions may not be periodic
+        inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
+        inv_premultiplier_x = np.exp(I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
+        coeff = (
+            inv_premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
+        )
+        coeff = (
+            inv_premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_t, self.n_x).transpose()
+        )
+
+        return coeff.transpose().flatten()
+
 
 
     def transform(self, input_vector, input_basis, output_basis):
@@ -179,58 +238,6 @@ class FreeFermions2D:
             )
 
 
-    def _real_to_spectral(self, coeff):
-        """
-        Private function to transform a vector from real space to spectral space.
-
-        Args:
-            coeff: input vector in real space
-            eta_1, eta_2: block diagonalized eigenvector matrix
-        
-        Returns:
-            vector in spectral space
-
-        Note: The input vector must be a 1D array of size n_t * n_x.
-        """
-        
-        # Premultiplication factor in variable t, x since the boundary conditions may not be periodic
-        premultiplier_t = np.exp(-I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
-        premultiplier_x = np.exp(-I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
-        coeff = (
-            premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
-        )
-        coeff = (
-            premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_t, self.n_x).transpose()
-        )
-
-        # Reshaping to 2D and performing the 2D discrete Fast Fourier transform to go from real to spectral space
-        coeff = coeff.transpose().reshape(self.n_x, self.n_t)
-        coeff = scipy.fft.fft2(coeff, norm="ortho").flatten()
-        return coeff
-    
-
-    def _spectral_to_real(self, coeff):
-        """
-        Private function to transform a vector in spectral space to real space
-        """
-
-        # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
-        coeff = coeff.reshape(self.n_x, self.n_t)
-        coeff = scipy.fft.ifft2(coeff, norm="ortho")
-
-        # Reversing premultiplication in variable t, x since the boundary conditions may not be periodic
-        inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
-        inv_premultiplier_x = np.exp(I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
-        coeff = (
-            inv_premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
-        )
-        coeff = (
-            inv_premultiplier_x[:, np.newaxis] * coeff.reshape(self.n_t, self.n_x).transpose()
-        )
-
-        return coeff.transpose().flatten()
-    
-
     def _operate(f,g, p_t, p_x):
         return (p_t * f + p_x * g, p_x * f - p_t * g) 
 
@@ -238,6 +245,43 @@ class FreeFermions2D:
         for i in range(self.n_t * self.n_x):
             vector[i, i+1] = self._operate(vector[i], vector[i+1], self.p_t_mu[i], self.p_x[i])
         return vector
+    
+    def scalar_product(self, lhs, rhs, input_basis="real"):
+        """
+        Function to compute the scalar product of two vectors in the specified basis.
+        
+        Args:
+            lhs: left hand side vector
+            rhs: right hand side vector
+            input_basis: basis of the input vectors (real/spectral)
+        """
+
+        return np.sum(lhs * rhs.conjugate()) * self.a_t * self.a_x
+
+
+    def lattice(self, output_basis):
+        """
+        Function to return the lattice points in the specified output basis.
+        
+        Args:
+            output_basis: basis of the output lattice points (real/spectral)
+        
+        Returns:
+            (numpy.ndarray): lattice points in the specified output basis
+        
+        Raises:
+        ValueError: If the output space is not 'real' or 'space'.
+        """
+
+        if output_basis == "real":
+            return np.meshgrid(
+                np.linspace(0, self.L_x, self.n_x,), 
+                np.linspace(0, self.L_t, self.n_t,)    
+            )
+        elif output_basis == "spectral":
+            return self.eigenvalues
+        else:
+            raise ValueError(f"Unsupported output space - {output_basis}.")
 
 
 if __name__ == "__main__":
@@ -249,12 +293,7 @@ if __name__ == "__main__":
     )
     t = t.flatten()
     x = x.flatten()
-    e1 = fermion.eigenfunctions([0, 0], 1)(t,x)
+    e1 = fermion.eigenfunctions([1, 3], -1)(t,x)
     s1 = fermion.transform(e1, "real", "spectral")
-    print(np.linalg.norm(e1))
-    print(np.linalg.norm(s1))
     e1_ = fermion.transform(s1, "spectral", "real")
-    print(np.linalg.norm(e1_))
-    print(e1)
-    print(e1_)
     print(np.linalg.norm(e1_ - e1))

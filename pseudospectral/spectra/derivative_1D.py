@@ -64,7 +64,7 @@ class Derivative1D:
 
     def lattice(self, output_basis):
         """
-        Return the lattice of the Dirac operator as per the given output space.
+        Return the lattice of the Derivative 1D operator as per specified given output space.
 
         Parameters:
         output_basis (str): The space for which to generate the lattice.

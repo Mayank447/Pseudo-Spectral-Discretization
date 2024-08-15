@@ -57,7 +57,7 @@ class Derivative1D:
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
 
-    def lattice(self, output_basis):
+    def lattice(self, output_basis="real"):
         """
         Return the lattice of the Dirac operator as per the given output space.
 
@@ -96,4 +96,9 @@ class Derivative1D:
         # (that's why rhs @ lhs and not lhs @ rhs).
         # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
         # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
-        return rhs @ lhs.transpose(-1, -2).conjugate() * self.a
+        if input_basis == "real":
+            return rhs @ lhs.transpose(-1, -2).conjugate() * self.a
+        elif input_basis == "spectral":
+            return rhs @ lhs.transpose().conjugate()
+        else:
+            raise ValueError(f"Unsupported input space - {input_basis}.")

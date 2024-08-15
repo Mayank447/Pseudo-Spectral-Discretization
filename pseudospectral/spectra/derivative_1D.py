@@ -97,7 +97,7 @@ class Derivative1D:
         # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
         # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
         if input_basis == "real":
-            return rhs @ lhs.transpose(-1, -2).conjugate() * self.a
+            return rhs @ lhs.transpose().conjugate() * self.a
         elif input_basis == "spectral":
             return rhs @ lhs.transpose().conjugate()
         else:

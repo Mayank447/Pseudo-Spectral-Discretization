@@ -101,6 +101,8 @@ class FreeFermion2D:
              x = x.flatten()
         """
         
+        index = np.atleast_1d(index)
+
         if (index >= 2 * self.n_t * self.n_x).any() or (index < -2 * self.n_t * self.n_x).any():
             raise ValueError(f"Index {index} out of bounds.")
         

@@ -30,7 +30,7 @@ def test_application_to_a_single_eigenfunction(spectrum_fermion2D, arbitrary_ind
     index_t, index_x, sign = arbitrary_index_single_eigenfunction_fermion2D
     index = 2 * (spectrum_fermion2D.n_x * index_t + index_x) + int(0.5*(1-sign))
 
-    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum_fermion2D.num_lattice_points)[index, :]
+    eigenfunction = arbitrary_single_coefficient * np.eye(2 * spectrum_fermion2D.n_x * spectrum_fermion2D.n_t)[index, :]
     expected = eigenfunction * spectrum_fermion2D.eigenvalues[index]
 
     result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")

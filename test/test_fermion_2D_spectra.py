@@ -10,7 +10,6 @@ def eigenfunctions(spectrum_fermion2D):
     x,t = np.meshgrid(np.arange(0, spectrum_fermion2D.n_x), 
                     np.arange(0, spectrum_fermion2D.n_t))
     sign = np.tile([1,-1], spectrum_fermion2D.n_t * spectrum_fermion2D.n_x)
-    print(sign)
 
     return spectrum_fermion2D.eigenfunction(
         (t.flatten(), x.flatten()), sign)(*spectrum_fermion2D.lattice(output_basis="real"))

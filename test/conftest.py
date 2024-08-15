@@ -60,3 +60,13 @@ def arbitrary_index_single_eigenfunction_fermion2D(spectrum_fermion2D):
             # np.random.randint(0, spectrum_fermion2D.n_x), 
             # np.random.choice([-1, 1]))
     return (1, 2, 1)
+
+@pytest.fixture
+def arbitrary_index_multiple_eigenfunctions_fermion_2D(
+    spectrum_fermion2D,
+):
+    """
+    Python fixture to initialize the arbitrary index for the two eigenfunctions test.
+    """
+    length = 2 * spectrum_fermion2D.n_t * spectrum_fermion2D.n_x
+    return np.random.choice(length, np.random.randint(length), replace=False)

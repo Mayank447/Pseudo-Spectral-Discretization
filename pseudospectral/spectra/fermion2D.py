@@ -81,9 +81,16 @@ class FreeFermion2D:
         return (
             (np.kron(self.sqrt, [1, -1])) + self.m
         )
+    
+    def index_eigenvalue(self, index_t, index_x, sign):
+        """
+        Function to return the index of the eigenvalue in the 2D free fermions operator
+        given the 2D index of the eigenfunction and the sign.
+        """
+        
+        return 2 * (self.n_x * index_t + index_x) + int(0.5 * (1 - sign))
 
-
-    def eigenfunction(self, index, sign):
+    def eigenfunction(self, index):
         """
         Function to return the eigenfunction of the 2D free fermions operator.
         Note: p_t, p_x used in the function are scalars and not arrays.
@@ -101,10 +108,10 @@ class FreeFermion2D:
              x = x.flatten()
         """
 
-        offset = self.n_x * index[0]
-        p_t = self.p_t[offset]
-        p_x = self.p_x[offset + index[1]]
+        p_t = self.p_t[index]
+        p_x = self.p_x[index]
         p_t_mu = p_t - self.mu
+        sign = -2 * (index % 2) + 1
 
         normalization = None
         array = np.eye(2)[int(0.5 * (sign-1))]

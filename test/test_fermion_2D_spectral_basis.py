@@ -8,7 +8,7 @@ import pytest
 ## are defined in the conftest.py file.and imported in all the test files automatically.
 
 num_single_eigenfunction_testrun = 10
-num_eigenfunctions_superposition_testrun = 10
+spectral_basis_num_eigenfunction_superposition_testruns = 10
 
 
 ########################################## HELPER_FUNCTIONS ##########################################
@@ -26,14 +26,34 @@ def test_application_to_a_single_eigenfunction(spectrum_fermion2D, arbitrary_ind
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
     operator = DiracOperator(spectrum_fermion2D)
-    sign = 1
-    index_t, index_x, sign = arbitrary_index_single_eigenfunction_fermion2D
-    index = 2 * (spectrum_fermion2D.n_x * index_t + index_x) + int(0.5*(1-sign))
-
+    index = 10
     eigenfunction = arbitrary_single_coefficient * np.eye(2 * spectrum_fermion2D.n_x * spectrum_fermion2D.n_t)[index, :]
     expected = eigenfunction * spectrum_fermion2D.eigenvalues[index]
 
     result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")
+    assert np.isclose(result, expected).all()
+
+
+@pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions_fermion_2D", range(spectral_basis_num_eigenfunction_superposition_testruns), indirect=True)
+def test_application_to_multiple_eigenfunctions(spectrum_fermion2D, 
+                                                arbitrary_index_multiple_eigenfunctions_fermion_2D):
+    """
+    Python test function to test the application of the Dirac operator to multiple eigenfunctions in real space.
+    """
+    operator = DiracOperator(spectrum_fermion2D)
+    arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions_fermion_2D))
+
+    superposition = (
+        arbitrary_coefficients * 
+        np.eye(2 * spectrum_fermion2D.n_t * spectrum_fermion2D.n_x )[arbitrary_index_multiple_eigenfunctions_fermion_2D].transpose()
+    )
+    expected = superposition @ spectrum_fermion2D.eigenvalues[arbitrary_index_multiple_eigenfunctions_fermion_2D]
+
+    result = operator.apply_to(
+        np.sum(superposition, axis=1),
+        input_basis="spectral",
+        output_basis="spectral",
+    )
     assert np.isclose(result, expected).all()
 
 

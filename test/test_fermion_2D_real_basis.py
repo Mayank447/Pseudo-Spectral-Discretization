@@ -13,12 +13,11 @@ def test_application_to_a_single_eigenfunction(spectrum_fermion2D,
     """
     operator = DiracOperator(spectrum_fermion2D)
     index = 10
-    
-    print(spectrum_fermion2D.lattice(output_basis='real'))
+
     eigenfunction = (
         spectrum_fermion2D.eigenfunction(index)(*spectrum_fermion2D.lattice(output_basis='real'))
     )
-    print(eigenfunction)
+    print("Eigenfunction", eigenfunction)
     result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
     assert np.isclose(eigenfunction, result).all()
     print(result)

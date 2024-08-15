@@ -5,7 +5,7 @@ I2PI = 1j * 2 * np.pi
 
 
 class FreeFermion2D:
-    """
+    r"""
     Spectrum class to represent the spectrum (eigenfunction, eigenvalues) of the 2D free fermions operator.
     Operator = (\sigma_z \partial_{t} + \sigma_x \partial_{x}) + (m * \Identity) - (\mu * \sigma_z)
                 , where the sigmas are the Pauli matrices.
@@ -37,6 +37,7 @@ class FreeFermion2D:
         self.n_x = n_x
         self.a_t = L_t/n_t
         self.a_x = L_x/n_x
+        self.vector_length = 2 * n_t * n_x
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
@@ -81,14 +82,6 @@ class FreeFermion2D:
         return (
             (np.kron(self.sqrt, [1, -1])) + self.m
         )
-    
-    def index_eigenvalue(self, index_t, index_x, sign):
-        """
-        Function to return the index of the eigenvalue in the 2D free fermions operator
-        given the 2D index of the eigenfunction and the sign.
-        """
-        
-        return 2 * (self.n_x * index_t + index_x) + int(0.5 * (1 - sign))
 
     def eigenfunction(self, index):
         """
@@ -107,34 +100,55 @@ class FreeFermion2D:
              t = t.flatten()
              x = x.flatten()
         """
-
-        p_t = self.p_t[index]
-        p_x = self.p_x[index]
+        
+        if (index >= 2 * self.n_t * self.n_x).any() or (index < -2 * self.n_t * self.n_x).any():
+            raise ValueError(f"Index {index} out of bounds.")
+        
+        p_t = self.p_t[index//2]
+        p_x = self.p_x[index//2]
         p_t_mu = p_t - self.mu
-        sign = -2 * (index % 2) + 1
 
-        normalization = None
-        array = np.eye(2)[int(0.5 * (sign-1))]
+        normalization = np.ones(len(index))
+        sign = np.array(1 - 2*(index % 2))
+        eta = np.eye(2)[(0.5 * (sign-1)).astype(int)]
+        
+        sq = np.sqrt(p_t_mu**2 + p_x**2)
+        normalization =  np.sqrt(
+            2 * sq 
+            * (sq - (sign * p_t_mu))
+        )
 
-        if p_x != 0:
-            normalization = np.sqrt(
-                2 * np.sqrt(p_t_mu**2 + p_x**2) 
-                * (np.sqrt(p_t_mu**2 + p_x**2) - sign * p_t_mu)
-            )
-
-            array = np.array([p_x, 
-                              sign * np.sqrt(p_t_mu**2 + p_x**2) - p_t_mu
-                              ]) / normalization
+        mask = (p_x == 0)
+        normalization[mask] = 1
+        
+        eta = np.array([p_x/ normalization, 
+                        (sign * sq - p_t_mu)/ normalization
+                    ]).transpose()
+        eta[np.logical_and(mask, sign==1)] = np.array([1, 0])
+        eta[np.logical_and(mask, sign==-1)] = np.array([0, 1])
 
         return (
-            lambda t, x: np.kron(
-                np.exp(
-                    p_t * t +  p_x * x
-                )
-                / np.sqrt(self.L_t * self.L_x)
-            , array).flatten()
+            lambda t, x: self._return_eigenfunction(t, x, index, eta, p_t, p_x)
         )
     
+    def _return_eigenfunction(self, t, x, index, eta, p_t, p_x):
+        """
+        Return function when eigenfucntion method is called.
+        """
+
+        #This part {np.kron(p_t, t)} can be done more efficiently since some values of p_x, p_t repeat
+        exp = np.exp(
+                (np.kron(p_t, t) +  np.kron(p_x, x)) / np.sqrt(self.L_t * self.L_x)
+            ).reshape(len(index), -1)
+        
+        # Initialize the return array
+        ret = [0]*len(index) 
+        for i in range(len(index)):
+             # Kronecker product between each spinor array and corresponding exponential part
+            ret[i] = np.kron(exp[i], eta[i])
+        
+        return np.array(ret)
+
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -214,8 +228,8 @@ class FreeFermion2D:
 
         # Performing the 2D discrete Fast Fourier transform to go from real to spectral space
         coeff = coeff.reshape(self.n_t, self.n_x)
-        coeff = scipy.fft.fft2(coeff, norm="ortho").flatten()
-        return coeff
+        coeff = scipy.fft.fft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
+        return coeff.flatten()
     
 
     def _spectral_to_real(self, coeff):
@@ -225,7 +239,7 @@ class FreeFermion2D:
 
         # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
         coeff = coeff.reshape(self.n_t, self.n_x)
-        coeff = scipy.fft.ifft2(coeff, norm="ortho")
+        coeff = scipy.fft.ifft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
 
         # Reversing premultiplication in variable t, x since the boundary conditions may not be periodic
         inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
@@ -256,11 +270,17 @@ class FreeFermion2D:
             rhs: right hand side vector
             input_basis: basis of the input vectors (real/spectral)
         """
+        if input_basis == "real":
+            return lhs @ rhs.transpose(-1,-2).conjugate() * self.a_t * self.a_x
+        
+        elif input_basis == "spectral":
+            return np.sum(lhs.conjugate * rhs)
+        
+        else:
+            raise ValueError(f"Unsupported input space - {input_basis}.")
 
-        return lhs @ rhs.transpose(-1,-2).conjugate() * self.a_t * self.a_x
 
-
-    def lattice(self, output_basis):
+    def lattice(self, output_basis='real'):
         """
         Function to return the lattice points in the specified output basis.
         
@@ -277,8 +297,8 @@ class FreeFermion2D:
         if output_basis == "real":
             t, x = np.meshgrid(
                 np.linspace(0, self.L_t, self.n_t, endpoint=False), 
-                np.linspace(0, self.L_x, self.n_x, endpoint=False)    
-            , indexing="ij")
+                np.linspace(0, self.L_x, self.n_x, endpoint=False), indexing="ij"
+            )
             return t.flatten(), x.flatten()
         
         elif output_basis == "spectral":

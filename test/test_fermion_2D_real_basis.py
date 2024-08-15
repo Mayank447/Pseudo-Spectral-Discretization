@@ -2,16 +2,6 @@ from pseudospectral import DiracOperator, FreeFermion2D
 import numpy as np
 import pytest
 
-@pytest.fixture
-def arbitrary_index_single_eigenfunction_fermion2D(spectrum_fermion2D):
-    """
-    Python fixture to initialize the arbitrary index for the single eigenfunction test.
-    """
-    # return (np.random.randint(0, spectrum_fermion2D.n_t), 
-            # np.random.randint(0, spectrum_fermion2D.n_x), 
-            # np.random.choice([-1, 1]))
-    return (1, 2, 1)
-
 
 ############################################ TEST FUNCTION ############################################
 def test_application_to_a_single_eigenfunction(spectrum_fermion2D, 

@@ -63,5 +63,5 @@ def test_lattice_spectral_basis(spectrum_fermion2D):
     Python test function to test the lattice of the Dirac operator in spectral space.
     """
     result = spectrum_fermion2D.lattice(output_basis="spectral")
-    expected = (np.kron(spectrum_fermion2D.sqrt, [1, -1])) + spectrum_fermion2D.m
+    expected = (np.kron(spectrum_fermion2D.norm_p, [1, -1])) + spectrum_fermion2D.m
     assert np.equal(result, expected).all()

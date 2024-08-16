@@ -13,7 +13,7 @@ class Derivative1D:
         theta: Real number in [0,1] as per the boundary condition (e.g. 0 for periodic, 0.5 for anti-periodic)
     """
 
-    def __init__(self, num_lattice_points, L=1):
+    def __init__(self, num_lattice_points, L=1.0):
         self.num_lattice_points = num_lattice_points
         self.L = L
         self.a = L / num_lattice_points

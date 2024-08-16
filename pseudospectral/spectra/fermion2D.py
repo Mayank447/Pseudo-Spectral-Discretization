@@ -49,19 +49,19 @@ class FreeFermion2D:
         self.p_x = I2PI * (X + (self.theta_x/self.L_x))
         self.p_t_mu = self.p_t - self.mu
 
-        self.sqrt = np.sqrt(self.p_t_mu**2 + self.p_x**2)
+        self.norm_p = np.sqrt(self.p_t_mu**2 + self.p_x**2)
         self.eigenvalues = self._eigenvalues()
 
         # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
-        self._norm_1 = np.sqrt(2 * self.sqrt * (self.sqrt - self.p_t_mu))
-        self._norm_2 = np.sqrt(2 * self.sqrt * (self.sqrt + self.p_t_mu))
+        self._norm_1 = np.sqrt(2 * self.norm_p * (self.norm_p - self.p_t_mu))
+        self._norm_2 = np.sqrt(2 * self.norm_p * (self.norm_p + self.p_t_mu))
         self._norm_1[self.p_x == 0] = 1
         self._norm_2[self.p_x == 0] = 1
 
         self._eta_11 = self.p_x/self._norm_1
-        self._eta_21 = (self.sqrt - self.p_t_mu)/self._norm_1
+        self._eta_21 = (self.norm_p - self.p_t_mu)/self._norm_1
         self._eta_12 = self.p_x/self._norm_2
-        self._eta_22 = (-self.sqrt - self.p_t_mu)/self._norm_2
+        self._eta_22 = (-self.norm_p - self.p_t_mu)/self._norm_2
         self._eta_11[self.p_x == 0] = 1 
         # print(self._eta_21[self.p_x==0]) [Review this line in the future]
         self._eta_12[self.p_x == 0] = 0 
@@ -80,13 +80,12 @@ class FreeFermion2D:
             numpy.ndarray: 1D array of eigenvalues
         """
         return (
-            (np.kron(self.sqrt, [1, -1])) + self.m
+            (np.kron(self.norm_p, [1, -1])) + self.m
         )
 
     def eigenfunction(self, index):
         """
         Function to return the eigenfunction of the 2D free fermions operator.
-        Note: p_t, p_x used in the function are scalars and not arrays.
         
         Args:
             index: array of indices of the eigenfunctions to be returned
@@ -107,24 +106,24 @@ class FreeFermion2D:
         
         p_t = self.p_t[index//2] # Since two eigenvalues exist due to spinor structure
         p_x = self.p_x[index//2]
-        sign = np.array(1 - 2*(index % 2))
         p_t_mu = p_t - self.mu
+        sign = 1 - 2*(index % 2)
 
         mask = (p_x == 0)
-        sq = np.sqrt(p_t_mu**2 + p_x**2)
+        norm_p = np.sqrt(p_t_mu**2 + p_x**2)
         
         normalization =  np.sqrt(
-            2 * sq 
-            * (sq - (sign * p_t_mu))
+            2 * norm_p 
+            * (norm_p - (sign * p_t_mu))
         )
         normalization[mask] = 1
         
         # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix
         eta = np.array([p_x/ normalization, 
-                        (sign * sq - p_t_mu)/ normalization
+                        (sign * norm_p - p_t_mu)/ normalization
                     ]).transpose()
-        eta[np.logical_and(mask, sign==1)] = np.array([1, 0])
-        eta[np.logical_and(mask, sign==-1)] = np.array([0, 1])
+        eta[mask & (sign==1)] = np.array([1, 0])
+        eta[mask & (sign==-1)] = np.array([0, 1])
 
         return (
             lambda t, x: self._return_eigenfunction(t, x, len(index), eta, p_t, p_x)

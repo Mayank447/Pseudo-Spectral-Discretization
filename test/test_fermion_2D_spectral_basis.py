@@ -21,7 +21,11 @@ def arbitrary_multiple_coefficients(length=1):
 
 
 ########################################### TEST FUNCTION ############################################
-def test_application_to_a_single_eigenfunction(spectrum_fermion2D, arbitrary_index_single_eigenfunction_fermion2D, arbitrary_single_coefficient):
+def test_application_to_a_single_eigenfunction(
+    spectrum_fermion2D, 
+    arbitrary_index_single_eigenfunction_fermion2D, 
+    arbitrary_single_coefficient
+):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
@@ -35,8 +39,10 @@ def test_application_to_a_single_eigenfunction(spectrum_fermion2D, arbitrary_ind
 
 
 @pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions_fermion_2D", range(spectral_basis_num_eigenfunction_superposition_testruns), indirect=True)
-def test_application_to_multiple_eigenfunctions(spectrum_fermion2D, 
-                                                arbitrary_index_multiple_eigenfunctions_fermion_2D):
+def test_application_to_multiple_eigenfunctions(
+    spectrum_fermion2D, 
+    arbitrary_index_multiple_eigenfunctions_fermion_2D
+):
     """
     Python test function to test the application of the Dirac operator to multiple eigenfunctions in real space.
     """

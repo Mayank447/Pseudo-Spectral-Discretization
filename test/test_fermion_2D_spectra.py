@@ -12,12 +12,6 @@ def eigenfunctions(spectrum_fermion2D):
 
 
 def test_orthonormality(spectrum_fermion2D, eigenfunctions):
-    print(spectrum_fermion2D.eigenvalues)
-    print(spectrum_fermion2D.p_t)
-    print(spectrum_fermion2D.p_x)
-    print(eigenfunctions[0])
-    print(eigenfunctions[2])
-    print(spectrum_fermion2D.scalar_product(eigenfunctions[0], eigenfunctions[2]))
     assert np.allclose(
         spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
         np.eye(spectrum_fermion2D.vector_length),

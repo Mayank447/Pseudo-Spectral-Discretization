@@ -13,10 +13,11 @@ def arbitrary_multiple_coefficients(length=1):
 
 
 ############################################ TEST FUNCTION ############################################
-def test_transforms_from_real_to_spectral_basis(spectrum_fermion2D, 
-                                                arbitrary_index_single_eigenfunction_fermion2D, 
-                                                arbitrary_single_coefficient
-                                                ):
+def test_transforms_from_real_to_spectral_basis(
+    spectrum_fermion2D, 
+    arbitrary_index_single_eigenfunction_fermion2D, 
+    arbitrary_single_coefficient
+):
     """
     Python test function to test the transformation of an eigenvector
     from real space to spectral space.
@@ -30,12 +31,14 @@ def test_transforms_from_real_to_spectral_basis(spectrum_fermion2D,
 
     length = 2 * spectrum_fermion2D.n_t * spectrum_fermion2D.n_x
     expected = arbitrary_single_coefficient * np.eye(length)[arbitrary_index_single_eigenfunction_fermion2D, :]
-    assert np.isclose(expected, result).all()
+    assert np.allclose(expected, result)
 
 
 
-def test_transforms_multiple_components_from_real_to_spectral_basis(spectrum_fermion2D, 
-                                                                    arbitrary_index_multiple_eigenfunctions_fermion_2D):
+def test_transforms_multiple_components_from_real_to_spectral_basis(
+    spectrum_fermion2D, 
+    arbitrary_index_multiple_eigenfunctions_fermion_2D
+):
     """
     Python test function to test the transformation of linear combination
     of eigenvectors from real space to spectral space.
@@ -56,9 +59,10 @@ def test_transforms_multiple_components_from_real_to_spectral_basis(spectrum_fer
 
 
 def test_transforms_from_spectral_to_real_basis(
-        spectrum_fermion2D, arbitrary_single_coefficient, 
-        arbitrary_index_single_eigenfunction_fermion2D
-    ):
+    spectrum_fermion2D, 
+    arbitrary_single_coefficient, 
+    arbitrary_index_single_eigenfunction_fermion2D
+):
     """
     Python test function to test the transformation of spectral coefficients
     with a single component from spectral space to real space.
@@ -71,11 +75,14 @@ def test_transforms_from_spectral_to_real_basis(
                                             )
 
     expected = 1 * spectrum_fermion2D.eigenfunction(arbitrary_index_single_eigenfunction_fermion2D)(*spectrum_fermion2D.lattice())
-    assert np.isclose(expected, result).all()
+    assert np.allclose(expected, result)
 
 
 
-def test_transforms_multiple_components_from_spectral_to_real_basis(spectrum_fermion2D, arbitrary_index_multiple_eigenfunctions_fermion_2D):
+def test_transforms_multiple_components_from_spectral_to_real_basis(
+    spectrum_fermion2D, 
+    arbitrary_index_multiple_eigenfunctions_fermion_2D
+):
     """
     Python test function to test the transformation of linear combination of eigenvectors
     in spectral space with arbitrary coefficients to real space.
@@ -92,4 +99,4 @@ def test_transforms_multiple_components_from_spectral_to_real_basis(spectrum_fer
     t, x = spectrum_fermion2D.lattice()
     eigenfunctions = spectrum_fermion2D.eigenfunction(arbitrary_index_multiple_eigenfunctions_fermion_2D)(t.reshape(-1, 1), x.reshape(-1, 1))
     expected = eigenfunctions * arbitrary_coefficients[:, np.newaxis]
-    assert np.isclose(expected, result).all()
+    assert np.allclose(expected, result)

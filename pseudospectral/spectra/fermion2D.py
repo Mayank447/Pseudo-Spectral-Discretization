@@ -63,7 +63,7 @@ class FreeFermion2D:
         self._eta_12 = self.p_x/self._norm_2
         self._eta_22 = (-self.sqrt - self.p_t_mu)/self._norm_2
         self._eta_11[self.p_x == 0] = 1 
-        # print(self._eta_21[self.p_x==0])
+        # print(self._eta_21[self.p_x==0]) [Review this line in the future]
         self._eta_12[self.p_x == 0] = 0 
         self._eta_21[self.p_x == 0] = 0 
         self._eta_22[self.p_x == 0] = 1
@@ -312,17 +312,3 @@ class FreeFermion2D:
             return self.eigenvalues
         else:
             raise ValueError(f"Unsupported output space - {output_basis}.")
-
-
-if __name__ == "__main__":
-    fermion = FreeFermion2D(n_t=3, n_x=3, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0)
-    
-    t,x = fermion.lattice()
-    e1 = fermion.eigenfunction(0)(t,x).flatten()
-    s1 = fermion.transform(e1, "real", "spectral")
-    e1_ = fermion.transform(s1, "spectral", "real")
-    print(e1)
-    print(s1)
-    print(e1_)
-    # assert np.isclose(e1, e1_).all()
-    print(np.linalg.norm(e1_ - e1))

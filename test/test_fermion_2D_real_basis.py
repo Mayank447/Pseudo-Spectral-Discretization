@@ -1,7 +1,5 @@
 from pseudospectral import DiracOperator
 import numpy as np
-import pytest
-
 
 ########################################## HELPER_FUNCTIONS ##########################################
 def arbitrary_multiple_coefficients(length=1):

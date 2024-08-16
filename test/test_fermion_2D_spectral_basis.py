@@ -2,13 +2,9 @@
 
 from pseudospectral import DiracOperator
 import numpy as np
-import pytest
 
 ## Some Fixtures like spectrum_fermion2D, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions
 ## are defined in the conftest.py file.and imported in all the test files automatically.
-
-num_single_eigenfunction_testrun = 10
-spectral_basis_num_eigenfunction_superposition_testruns = 10
 
 
 ########################################## HELPER_FUNCTIONS ##########################################
@@ -35,10 +31,9 @@ def test_application_to_a_single_eigenfunction(
     expected = eigenfunction * spectrum_fermion2D.eigenvalues[index]
 
     result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")
-    assert np.isclose(result, expected).all()
+    assert np.allclose(result, expected)
 
 
-@pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions_fermion_2D", range(spectral_basis_num_eigenfunction_superposition_testruns), indirect=True)
 def test_application_to_multiple_eigenfunctions(
     spectrum_fermion2D, 
     arbitrary_index_multiple_eigenfunctions_fermion_2D
@@ -60,7 +55,7 @@ def test_application_to_multiple_eigenfunctions(
         input_basis="spectral",
         output_basis="spectral",
     )
-    assert np.isclose(result, expected).all()
+    assert np.allclose(result, expected)
 
 
 def test_lattice_spectral_basis(spectrum_fermion2D):

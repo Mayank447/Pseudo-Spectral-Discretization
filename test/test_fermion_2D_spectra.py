@@ -19,14 +19,13 @@ def test_orthonormality(spectrum_fermion2D, eigenfunctions):
 
 
 def test_back_and_forth_transform_is_identity(spectrum_fermion2D, eigenfunctions):
-    e = eigenfunctions
     assert np.allclose(
         spectrum_fermion2D.transform(
-            spectrum_fermion2D.transform(e, input_basis="real", output_basis="spectral"),
+            spectrum_fermion2D.transform(eigenfunctions, input_basis="real", output_basis="spectral"),
             input_basis="spectral",
             output_basis="real",
         ),
-        e,
+        eigenfunctions,
     )
 
 

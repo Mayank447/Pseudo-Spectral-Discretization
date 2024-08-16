@@ -31,7 +31,10 @@ def arbitrary_index_multiple_eigenfunctions(
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.choice(spectrum.num_lattice_points, np.random.randint(spectrum.num_lattice_points), replace=False)
+    return np.random.choice(
+        spectrum.num_lattice_points, 
+        1 + np.random.randint(spectrum.num_lattice_points - 1), 
+    replace=False)
 
 
 @pytest.fixture
@@ -68,6 +71,6 @@ def arbitrary_index_multiple_eigenfunctions_fermion_2D(
     """
     return np.random.choice(
         spectrum_fermion2D.vector_length, 
-        np.random.randint(spectrum_fermion2D.vector_length), 
+        1 + np.random.randint(spectrum_fermion2D.vector_length-1), 
         replace=False
     )

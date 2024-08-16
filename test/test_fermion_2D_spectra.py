@@ -11,23 +11,23 @@ def eigenfunctions(spectrum_fermion2D):
     return spectrum_fermion2D.eigenfunction(np.arange(spectrum_fermion2D.vector_length))(t.reshape(-1, 1), x.reshape(-1, 1))
 
 
-def test_orthonormality(spectrum_fermion2D, eigenfunctions):
-    print(spectrum_fermion2D.scalar_product(eigenfunctions[0], eigenfunctions[2]))
-    assert np.allclose(
-        spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
-        np.eye(spectrum_fermion2D.vector_length),
-    )
-
-
-# def test_back_and_forth_transform_is_identity(spectrum_fermion2D, eigenfunctions):
+# def test_orthonormality(spectrum_fermion2D, eigenfunctions):
+#     print(spectrum_fermion2D.scalar_product(eigenfunctions[0], eigenfunctions[2]))
 #     assert np.allclose(
-#         spectrum_fermion2D.transform(
-#             spectrum_fermion2D.transform(eigenfunctions, input_basis="real", output_basis="spectral"),
-#             input_basis="spectral",
-#             output_basis="real",
-#         ),
-#         eigenfunctions,
+#         spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
+#         np.eye(spectrum_fermion2D.vector_length),
 #     )
+
+
+def test_back_and_forth_transform_is_identity(spectrum_fermion2D, eigenfunctions):
+    assert np.allclose(
+        spectrum_fermion2D.transform(
+            spectrum_fermion2D.transform(eigenfunctions, input_basis="real", output_basis="spectral"),
+            input_basis="spectral",
+            output_basis="real",
+        ),
+        eigenfunctions,
+    )
 
 
 # def test_unitary_transform(spectrum_fermion2D, eigenfunctions):

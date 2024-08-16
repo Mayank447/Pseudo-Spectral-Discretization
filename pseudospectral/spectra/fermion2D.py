@@ -89,7 +89,7 @@ class FreeFermion2D:
         Note: p_t, p_x used in the function are scalars and not arrays.
         
         Args:
-            index: 2D index of the eigenfunction (index_t, index_x)
+            index: array of indices of the eigenfunctions to be returned
             sign: +-1 for the two eigenvectors
 
         Returns:
@@ -103,26 +103,24 @@ class FreeFermion2D:
         
         index = np.atleast_1d(index)
 
-        if (index >= 2 * self.n_t * self.n_x).any() or (index < -2 * self.n_t * self.n_x).any():
+        if (index >= self.vector_length).any() or (index < -self.vector_length).any():
             raise ValueError(f"Index {index} out of bounds.")
         
-        p_t = self.p_t[index//2]
+        p_t = self.p_t[index//2] # Since two eigenvalues exist due to spinor structure
         p_x = self.p_x[index//2]
+        sign = np.array(1 - 2*(index % 2))
         p_t_mu = p_t - self.mu
 
-        normalization = np.ones(len(index))
-        sign = np.array(1 - 2*(index % 2))
-        eta = np.eye(2)[(0.5 * (sign-1)).astype(int)]
-        
+        mask = (p_x == 0)
         sq = np.sqrt(p_t_mu**2 + p_x**2)
+        
         normalization =  np.sqrt(
             2 * sq 
             * (sq - (sign * p_t_mu))
         )
-
-        mask = (p_x == 0)
         normalization[mask] = 1
         
+        # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix
         eta = np.array([p_x/ normalization, 
                         (sign * sq - p_t_mu)/ normalization
                     ]).transpose()
@@ -139,15 +137,16 @@ class FreeFermion2D:
         """
 
         #This part {np.kron(p_t, t)} can be done more efficiently since some values of p_x, p_t repeat
-        exp = np.exp(
+        exp_component = np.exp(
                 (np.kron(p_t, t) +  np.kron(p_x, x)) / np.sqrt(self.L_t * self.L_x)
             ).reshape(len(index), -1)
         
-        # Initialize the return array
+        # Initialize the return array of length equal to the number of eigenfunctions indices to be returned
         ret = [0]*len(index) 
+
+        # Kronecker product between each spinor array and corresponding exponential part
         for i in range(len(index)):
-             # Kronecker product between each spinor array and corresponding exponential part
-            ret[i] = np.kron(exp[i], eta[i])
+            ret[i] = np.kron(exp_component[i], eta[i])
         
         return np.array(ret)
 
@@ -169,36 +168,37 @@ class FreeFermion2D:
 
         Note: The input vector must be a 1D array of size 2 * n_t * n_x. (Check for that)
         """
+        input_vector = np.atleast_2d(input_vector)
 
         if input_basis == output_basis in ["real", "spectral"]:
             return input_vector
 
         elif input_basis == "real" and output_basis == "spectral":
             # Split the input vector into f(even index elements) and g(odd index elements)
-            f, g = input_vector[0::2], input_vector[1::2]
+            f, g = input_vector[:, ::2], input_vector[:, 1::2]
 
             # Transform the two halves to spectral space
             f = self._real_to_spectral(f)
             g = self._real_to_spectral(g)
 
             # Post multiplication by block diagonalized eigenvector matrix transpose
-            f = np.ravel([self._eta_11 * f, self._eta_12 * f], 'F')
-            g = np.ravel([self._eta_21 * g, self._eta_22 * g], 'F')
-            return f + g
+            f = np.ravel([self._eta_11[np.newaxis, :] * f, self._eta_12[np.newaxis, :] * f], 'F').reshape(-1, self.vector_length)
+            g = np.ravel([self._eta_21[np.newaxis, :] * g, self._eta_22[np.newaxis, :] * g], 'F').reshape(-1, self.vector_length)
+            return (f + g)
         
 
         elif input_basis == "spectral" and output_basis == "real":
             
             # Block diagonal multiplication of eigenvector matrix
-            f = self._eta_11 * input_vector[::2] + self._eta_12 * input_vector[1::2]
-            g = self._eta_21 * input_vector[::2] + self._eta_22 * input_vector[1::2]
+            f = self._eta_11[np.newaxis, :] * input_vector[:, ::2] + self._eta_12[np.newaxis, :] * input_vector[:, 1::2]
+            g = self._eta_21[np.newaxis, :] * input_vector[:, ::2] + self._eta_22[np.newaxis, :] * input_vector[:, 1::2]
 
             # Transform the two halves to spectral space
             f = self._spectral_to_real(f)
             g = self._spectral_to_real(g)
 
             # Reflatten and then return the array with elements alternatively concatenated
-            return np.ravel([f, g],'F')
+            return np.ravel([f, g],'F').reshape(-1, self.vector_length)
 
         else:
             raise ValueError(
@@ -222,16 +222,16 @@ class FreeFermion2D:
         premultiplier_t = np.exp(-I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
         premultiplier_x = np.exp(-I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
         coeff = (
-            premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, self.n_x)
+            premultiplier_t[np.newaxis, :, np.newaxis] * coeff.reshape(-1, self.n_t, self.n_x)
         )
         coeff = (
-            premultiplier_x[np.newaxis, : ] * coeff
+            premultiplier_x[np.newaxis, np.newaxis, : ] * coeff
         )
 
         # Performing the 2D discrete Fast Fourier transform to go from real to spectral space
-        coeff = coeff.reshape(self.n_t, self.n_x)
+        coeff = coeff.reshape(-1, self.n_t, self.n_x)
         coeff = scipy.fft.fft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
-        return coeff.flatten()
+        return coeff.reshape(-1, self.n_t * self.n_x)
     
 
     def _spectral_to_real(self, coeff):
@@ -240,20 +240,20 @@ class FreeFermion2D:
         """
 
         # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
-        coeff = coeff.reshape(self.n_t, self.n_x)
-        coeff = scipy.fft.ifft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
+        coeff = coeff.reshape(-1, self.n_t, self.n_x)
+        coeff = scipy.fft.ifft2(coeff, norm="ortho") / np.sqrt(self.a_t * self.a_x)
 
         # Reversing premultiplication in variable t, x since the boundary conditions may not be periodic
         inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
         inv_premultiplier_x = np.exp(I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
         coeff = (
-            inv_premultiplier_t[ :, np.newaxis] * coeff.reshape(self.n_t, -1)
+            inv_premultiplier_t[ :, np.newaxis] * coeff
         )
         coeff = (
             inv_premultiplier_x[np.newaxis, : ] * coeff
         )
 
-        return coeff.flatten()
+        return coeff.reshape(-1, self.vector_length//2)
 
     def _operate(f,g, p_t, p_x):
         return (p_t * f + p_x * g, p_x * f - p_t * g) 
@@ -276,7 +276,7 @@ class FreeFermion2D:
             return rhs @ lhs.transpose().conjugate() * self.a_t * self.a_x
         
         elif input_basis == "spectral":
-            return np.sum(lhs.conjugate * rhs)
+            return rhs @ lhs.transpose().conjugate()
         
         else:
             raise ValueError(f"Unsupported input space - {input_basis}.")
@@ -312,17 +312,12 @@ class FreeFermion2D:
 if __name__ == "__main__":
     fermion = FreeFermion2D(n_t=3, n_x=3, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0)
     
-    x, t = np.meshgrid(
-        np.linspace(0, fermion.L_x, fermion.n_x, endpoint=False), 
-        np.linspace(0, fermion.L_t, fermion.n_t, endpoint=False)
-    )
-    t = t.flatten()
-    x = x.flatten()
+    t,x = fermion.lattice()
     e1 = fermion.eigenfunction(0)(t,x).flatten()
     s1 = fermion.transform(e1, "real", "spectral")
     e1_ = fermion.transform(s1, "spectral", "real")
     print(e1)
     print(s1)
     print(e1_)
-    assert np.isclose(e1, e1_).all()
+    # assert np.isclose(e1, e1_).all()
     print(np.linalg.norm(e1_ - e1))

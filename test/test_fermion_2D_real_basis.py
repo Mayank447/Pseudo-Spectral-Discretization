@@ -22,19 +22,15 @@ def test_application_to_a_single_eigenfunction(
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
     operator = DiracOperator(spectrum_fermion2D)
-
     eigenfunction = (
         arbitrary_single_coefficient * spectrum_fermion2D.eigenfunction(arbitrary_index_single_eigenfunction_fermion2D)(*spectrum_fermion2D.lattice())
     )
-    print("Eigenfunction", eigenfunction)
-    result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
 
+    result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
     expected = (
         operator.spectrum.eigenvalues[arbitrary_index_single_eigenfunction_fermion2D] 
         * eigenfunction
     )
-    print(operator.spectrum.eigenvalues[arbitrary_index_single_eigenfunction_fermion2D])
-    print(expected)
     assert np.allclose(result, expected)
 
 
@@ -53,7 +49,11 @@ def test_application_to_superposition_of_eigenfunctions(
         arbitrary_coefficients[:, np.newaxis] * 
         spectrum_fermion2D.eigenfunction(arbitrary_index_multiple_eigenfunctions_fermion_2D)(*spectrum_fermion2D.lattice())
     )
-    expected = superposition @ spectrum_fermion2D.eigenvalues[arbitrary_index_multiple_eigenfunctions_fermion_2D]
+
+    expected = np.sum(
+        (spectrum_fermion2D.eigenvalues[arbitrary_index_multiple_eigenfunctions_fermion_2D])[:, np.newaxis]
+        * superposition, axis=0
+    )
 
     result = operator.apply_to(np.sum(superposition, axis=0), input_basis="real", output_basis="real")
     assert np.allclose(result, expected)

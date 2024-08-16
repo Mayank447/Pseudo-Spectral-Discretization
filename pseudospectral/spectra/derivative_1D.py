@@ -50,12 +50,12 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            premultiplier =  np.exp(-I2PI * (self.theta/self.L) * self.lattice(output_basis="real"))
+            premultiplier =  np.exp(-I2PI * (self.theta/self.L) * np.arange(self.num_lattice_points))
             return premultiplier * scipy.fft.fft(input_vector, norm="ortho") * np.sqrt(self.a)
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            inv_premultiplier = np.exp(I2PI * (self.theta/self.L) * self.lattice(output_basis="spectral"))
+            inv_premultiplier = np.exp(I2PI * (self.theta/self.L) * np.arange(self.num_lattice_points))
             return scipy.fft.ifft(inv_premultiplier * input_vector, norm="ortho") / np.sqrt(self.a)
 
         else:

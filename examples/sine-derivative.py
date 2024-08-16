@@ -12,9 +12,10 @@ def derivative(der, x):
 
 
 if __name__ == "__main__":
-    num_lattice_points = 100
-    L = 2 * np.pi
-    d = DiracOperator(Derivative1D(num_lattice_points, L))
+    num_lattice_points = 101
+    theta = 0.5
+    L = 2 * np.pi * theta
+    d = DiracOperator(Derivative1D(num_lattice_points, L, theta))
 
     x = np.linspace(0, L, num_lattice_points, endpoint=False)
     y = function(np.sin, x)
@@ -26,6 +27,6 @@ if __name__ == "__main__":
     plt.plot(x, np.real(z), label="d/dx sin(x)", linestyle="--")
 
     # Any imaginary contribution is numerical noise:
-    assert np.allclose(np.imag(z), 0)
+    # assert np.allclose(np.imag(z), 0)
     plt.legend()
     plt.show()

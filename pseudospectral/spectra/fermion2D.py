@@ -10,7 +10,7 @@ class FreeFermion2D:
     Operator = (\sigma_z \partial_{t} + \sigma_x \partial_{x}) + (m * \Identity) - (\mu * \sigma_z)
                 , where the sigmas are the Pauli matrices.
 
-    The operator is discretized on p_t 2D lattice with n_t lattice points in the time axis and n_x lattice points in the x axis.
+    The operator is discretized on a 2D lattice with n_t lattice points in the time axis and n_x lattice points in the x axis.
     We assume periodic boundary conditions in both directions with lengths L_t and L_x respectively.
 
     Args:
@@ -90,13 +90,12 @@ class FreeFermion2D:
         
         Args:
             index: array of indices of the eigenfunctions to be returned
-            sign: +-1 for the two eigenvectors
 
         Returns:
             lambda function (t,x) of the eigenfunction at the specified index
 
-        Note: t,x passed to the returned lambda function must be flattened out meshgrid.
-        e.g. x, t = np.meshgrid(array_x, array_t)
+        Note: t,x passed to the returned lambda function must be scalars or 1D arrays, e.g., flattened out meshgrid.
+            x, t = np.meshgrid(array_x, array_t)
              t = t.flatten()
              x = x.flatten()
         """

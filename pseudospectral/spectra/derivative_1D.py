@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.fft
 
-I2PI = 1j * 2 * np.pi
 
 class Derivative1D:
     """

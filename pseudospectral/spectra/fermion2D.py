@@ -182,13 +182,20 @@ class FreeFermion2D:
             g = self._real_to_spectral(g)
 
             # Post multiplication by block diagonalized eigenvector matrix transpose
-            f = np.ravel([self._eta_11[np.newaxis, :] * f, self._eta_12[np.newaxis, :] * f], 'F').reshape(-1, self.vector_length)
-            g = np.ravel([self._eta_21[np.newaxis, :] * g, self._eta_22[np.newaxis, :] * g], 'F').reshape(-1, self.vector_length)
+            f = np.ravel([
+                (self._eta_11[np.newaxis, :] * f).flatten(),
+                (self._eta_12[np.newaxis, :] * f).flatten()
+            ], 'F').reshape(-1, self.vector_length)
+            
+            g = np.ravel([
+                (self._eta_21[np.newaxis, :] * g).flatten(),
+                (self._eta_22[np.newaxis, :] * g).flatten()
+            ], 'F').reshape(-1, self.vector_length)
+            print(f+g)
             return (f + g)
         
 
         elif input_basis == "spectral" and output_basis == "real":
-            
             # Block diagonal multiplication of eigenvector matrix
             f = self._eta_11[np.newaxis, :] * input_vector[:, ::2] + self._eta_12[np.newaxis, :] * input_vector[:, 1::2]
             g = self._eta_21[np.newaxis, :] * input_vector[:, ::2] + self._eta_22[np.newaxis, :] * input_vector[:, 1::2]
@@ -197,8 +204,11 @@ class FreeFermion2D:
             f = self._spectral_to_real(f)
             g = self._spectral_to_real(g)
 
+            print("f", f)
+            print("g", g)
+
             # Reflatten and then return the array with elements alternatively concatenated
-            return np.ravel([f, g],'F').reshape(-1, self.vector_length)
+            return np.ravel([f.flatten(), g.flatten()],'F').reshape(-1, self.vector_length)
 
         else:
             raise ValueError(
@@ -217,7 +227,7 @@ class FreeFermion2D:
         Returns:
             vector in spectral space
         """
-        
+
         # Premultiplication factor in variable t, x since the boundary conditions may not be periodic
         premultiplier_t = np.exp(-I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
         premultiplier_x = np.exp(-I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
@@ -247,10 +257,10 @@ class FreeFermion2D:
         inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
         inv_premultiplier_x = np.exp(I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
         coeff = (
-            inv_premultiplier_t[ :, np.newaxis] * coeff
+            inv_premultiplier_t[np.newaxis, :, np.newaxis] * coeff
         )
         coeff = (
-            inv_premultiplier_x[np.newaxis, : ] * coeff
+            inv_premultiplier_x[np.newaxis, np.newaxis, : ] * coeff
         )
 
         return coeff.reshape(-1, self.vector_length//2)

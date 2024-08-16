@@ -6,8 +6,8 @@ import pytest
 
 
 @pytest.fixture()
-def eigenfunctions(spectrum):
-    return spectrum.eigenfunction(np.arange(spectrum.num_lattice_points).reshape(-1, 1))(spectrum.lattice(output_basis="real"))
+def eigenfunctions(spectrum, sample_points):
+    return spectrum.eigenfunction(np.arange(spectrum.num_lattice_points).reshape(-1, 1))(sample_points)
 
 
 def test_orthonormality(spectrum, eigenfunctions):
@@ -29,7 +29,10 @@ def test_back_and_forth_transform_is_identity(spectrum, eigenfunctions):
 
 
 def test_unitary_transform(spectrum, eigenfunctions):
-    after_transform = spectrum.transform(eigenfunctions, input_basis="real", output_basis="spectral")
+    after_transform = spectrum.transform(eigenfunctions, 
+                                         input_basis="real", 
+                                         output_basis="spectral"
+                                        )
 
     # It suffices to test the forward transformation because if the forward
     # transformation is unitary and the other test ensures that back and forth

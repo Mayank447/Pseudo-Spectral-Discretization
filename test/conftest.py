@@ -74,3 +74,10 @@ def arbitrary_index_multiple_eigenfunctions_fermion_2D(
         1 + np.random.randint(spectrum_fermion2D.vector_length-1), 
         replace=False
     )
+
+@pytest.fixture
+def sample_points(spectrum, output_basis="real"):
+    """
+    Python fixture to initialize the sample points for the superposition test.
+    """
+    return spectrum.lattice(output_basis=output_basis)

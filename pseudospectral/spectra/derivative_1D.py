@@ -20,14 +20,12 @@ class Derivative1D:
         self.a = L / num_lattice_points
         self.eigenvalues = self._eigenvalues()
 
-
     def _eigenvalues(self):
         """
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
         return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a))
-
 
     def eigenfunction(self, index: np.ndarray):
         """
@@ -39,8 +37,7 @@ class Derivative1D:
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.num_lattice_points)
-
+            return lambda x: np.exp(self.eigenvalues[index] * x) / np.sqrt(self.L)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -52,17 +49,16 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            return scipy.fft.fft(input_vector, norm="ortho")
+            return scipy.fft.fft(input_vector, norm="ortho") * np.sqrt(self.a)
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return scipy.fft.ifft(input_vector, norm="ortho")
-          
+            return scipy.fft.ifft(input_vector, norm="ortho") / np.sqrt(self.a)
+
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
 
-
-    def lattice(self, output_basis):
+    def lattice(self, output_basis="real"):
         """
         Return the lattice of the Derivative 1D operator as per specified given output space.
 
@@ -101,4 +97,9 @@ class Derivative1D:
         # (that's why rhs @ lhs and not lhs @ rhs).
         # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
         # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
-        return rhs @ lhs.transpose(-1, -2).conjugate()
+        if input_basis == "real":
+            return rhs @ lhs.transpose().conjugate() * self.a
+        elif input_basis == "spectral":
+            return rhs @ lhs.transpose().conjugate()
+        else:
+            raise ValueError(f"Unsupported input space - {input_basis}.")

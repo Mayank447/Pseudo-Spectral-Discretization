@@ -40,3 +40,11 @@ def arbitrary_single_coefficient():
     Python fixture to initialize the single coefficient for the tests.
     """
     return np.random.randn()
+
+
+@pytest.fixture
+def sample_points(spectrum, output_basis="real"):
+    """
+    Python fixture to initialize the sample points for the superposition test.
+    """
+    return spectrum.lattice(output_basis=output_basis)

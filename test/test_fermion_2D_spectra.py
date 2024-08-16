@@ -31,14 +31,14 @@ def test_back_and_forth_transform_is_identity(spectrum_fermion2D, eigenfunctions
     )
 
 
-# def test_unitary_transform(spectrum_fermion2D, eigenfunctions):
-#     after_transform = spectrum_fermion2D.transform(eigenfunctions, input_basis="real", output_basis="spectral")
+def test_unitary_transform(spectrum_fermion2D, eigenfunctions):
+    after_transform = spectrum_fermion2D.transform(eigenfunctions, input_basis="real", output_basis="spectral")
 
-#     # It suffices to test the forward transformation because if the forward
-#     # transformation is unitary and the other test ensures that back and forth
-#     # transformation is an identity, we can conclude that the inverse
-#     # transformation is also unitary.
-#     assert np.allclose(
-#         spectrum_fermion2D.scalar_product(after_transform, after_transform, input_basis="spectral"),
-#         spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
-#     )
+    # It suffices to test the forward transformation because if the forward
+    # transformation is unitary and the other test ensures that back and forth
+    # transformation is an identity, we can conclude that the inverse
+    # transformation is also unitary.
+    assert np.allclose(
+        spectrum_fermion2D.scalar_product(after_transform, after_transform, input_basis="spectral"),
+        spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
+    )

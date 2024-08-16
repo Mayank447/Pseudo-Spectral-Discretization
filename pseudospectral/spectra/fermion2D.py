@@ -103,26 +103,24 @@ class FreeFermion2D:
         if (index >= self.vector_length).any() or (index < -self.vector_length).any():
             raise ValueError(f"Index {index} out of bounds.")
         
+        sign = 1 - 2*(index % 2)
         p_t = self.p_t[index//2] # Since two eigenvalues exist due to spinor structure
         p_x = self.p_x[index//2]
-        p_t_mu = p_t - self.mu
-        sign = 1 - 2*(index % 2)
+        p_t_mu = self.p_t_mu[index//2]
+        norm_p = self.norm_p[index//2]
 
-        mask = (p_x == 0)
-        norm_p = np.sqrt(p_t_mu**2 + p_x**2)
-        
         normalization =  np.sqrt(
             2 * norm_p 
             * (norm_p - (sign * p_t_mu))
         )
+        mask = (p_x == 0)
         normalization[mask] = 1
-        
-        # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix
-        eta = np.array([p_x/ normalization, 
-                        (sign * norm_p - p_t_mu)/ normalization
-                    ]).transpose()
-        eta[mask & (sign==1)] = np.array([1, 0])
-        eta[mask & (sign==-1)] = np.array([0, 1])
+        normalization = normalization[:,np.newaxis]
+
+        # Normalized eigenvector for the ((p_t, p_x), (p_x, -p_t)) matrix
+        eta = np.array([p_x, 
+                        sign * norm_p - p_t_mu]).transpose() / normalization
+        eta[mask] = np.eye(2)[index[mask]%2]
 
         return (
             lambda t, x: self._return_eigenfunction(t, x, len(index), eta, p_t, p_x)
@@ -133,9 +131,10 @@ class FreeFermion2D:
         Return function when eigenfucntion method is called.
         """
         #This part {np.kron(p_t, t)} can be done more efficiently since some values of p_x, p_t repeat
-        exp_component = np.exp(
-                (np.kron(p_t, t) +  np.kron(p_x, x))
-            ).reshape(num_eigenfunction, -1) / np.sqrt(self.L_t * self.L_x)
+        exp_component = (
+            np.exp(np.kron(p_t, t) +  np.kron(p_x, x)).reshape(num_eigenfunction, -1) 
+            / np.sqrt(self.L_t * self.L_x)
+        )
 
         # Initialize the return array of length equal to the number of eigenfunctions indices to be returned
         ret = np.zeros((num_eigenfunction, self.vector_length), dtype=np.complex128) 
@@ -176,15 +175,14 @@ class FreeFermion2D:
             g = self._real_to_spectral(g)
 
             # Post multiplication by block diagonalized eigenvector matrix transpose
-            f = np.ravel([
-                (self._eta_11[np.newaxis, :] * f).flatten(),
-                (self._eta_12[np.newaxis, :] * f).flatten()
-            ], 'F').reshape(-1, self.vector_length)
+            f = np.ravel([(self._eta_11[np.newaxis, :] * f).flatten(),
+                          (self._eta_12[np.newaxis, :] * f).flatten()
+                         ], 'F').reshape(-1, self.vector_length)
             
-            g = np.ravel([
-                (self._eta_21[np.newaxis, :] * g).flatten(),
-                (self._eta_22[np.newaxis, :] * g).flatten()
-            ], 'F').reshape(-1, self.vector_length)
+            g = np.ravel([(self._eta_21[np.newaxis, :] * g).flatten(),
+                          (self._eta_22[np.newaxis, :] * g).flatten()
+                         ], 'F').reshape(-1, self.vector_length)
+            
             return (f + g)
         
 

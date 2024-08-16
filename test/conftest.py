@@ -66,7 +66,8 @@ def arbitrary_index_multiple_eigenfunctions_fermion_2D(
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.choice(spectrum_fermion2D.vector_length, 
-                            np.random.randint(spectrum_fermion2D.vector_length), 
-                            replace=False
-                            )
+    return np.random.choice(
+        spectrum_fermion2D.vector_length, 
+        np.random.randint(spectrum_fermion2D.vector_length), 
+        replace=False
+    )

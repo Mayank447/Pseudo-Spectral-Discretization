@@ -13,27 +13,26 @@ def arbitrary_multiple_coefficients(length=1):
 
 
 ############################################ TEST FUNCTION ############################################
-# def test_transforms_from_real_to_spectral_basis(
-#     spectrum_fermion2D, 
-#     arbitrary_index_single_eigenfunction_fermion2D, 
-#     arbitrary_single_coefficient
-# ):
-#     """
-#     Python test function to test the transformation of an eigenvector
-#     from real space to spectral space.
-#     """
+def test_transforms_from_real_to_spectral_basis(
+    spectrum_fermion2D, 
+    arbitrary_index_single_eigenfunction_fermion2D, 
+    arbitrary_single_coefficient
+):
+    """
+    Python test function to test the transformation of an eigenvector
+    from real space to spectral space.
+    """
 
-#     eigenfunction = (arbitrary_single_coefficient * 
-#                     spectrum_fermion2D.eigenfunction(
-#                         arbitrary_index_single_eigenfunction_fermion2D)(*spectrum_fermion2D.lattice(output_basis="real"))
-#                     ).flatten()
-#     result = spectrum_fermion2D.transform(eigenfunction, input_basis="real", output_basis="spectral")
-
-#     expected = (
-#         arbitrary_single_coefficient 
-#         * np.eye(spectrum_fermion2D.vector_length)[arbitrary_index_single_eigenfunction_fermion2D, :]
-#     )
-#     assert np.allclose(expected, result)
+    eigenfunction = (arbitrary_single_coefficient 
+                     * spectrum_fermion2D.eigenfunction(arbitrary_index_single_eigenfunction_fermion2D)(*spectrum_fermion2D.lattice())
+                    )
+    
+    result = spectrum_fermion2D.transform(eigenfunction, input_basis="real", output_basis="spectral")
+    expected = (
+        arbitrary_single_coefficient 
+        * np.eye(spectrum_fermion2D.vector_length)[arbitrary_index_single_eigenfunction_fermion2D, :]
+    )
+    assert np.allclose(expected, result)
 
 
 

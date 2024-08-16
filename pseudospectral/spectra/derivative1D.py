@@ -17,9 +17,9 @@ class Derivative1D:
         self.num_lattice_points = num_lattice_points
         self.L = L
         self.a = L / num_lattice_points
-        self.eigenvalues = self._eigenvalues()
 
-    def _eigenvalues(self):
+    @property
+    def eigenvalues(self):
         """
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L

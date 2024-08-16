@@ -48,9 +48,7 @@ class FreeFermion2D:
         self.p_t = I2PI * (T + (self.theta_t/self.L_t))
         self.p_x = I2PI * (X + (self.theta_x/self.L_x))
         self.p_t_mu = self.p_t - self.mu
-
         self.norm_p = np.sqrt(self.p_t_mu**2 + self.p_x**2)
-        self.eigenvalues = self._eigenvalues()
 
         # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
         self._norm_1 = np.sqrt(2 * self.norm_p * (self.norm_p - self.p_t_mu))
@@ -68,7 +66,8 @@ class FreeFermion2D:
         self._eta_21[self.p_x == 0] = 0 
         self._eta_22[self.p_x == 0] = 1
 
-    def _eigenvalues(self):
+    @property
+    def eigenvalues(self):
         """
         Private function to return the list of eigenvalues (the diagonal of the eigenvalue matrix)
         of the 2D Free Fermion operator 

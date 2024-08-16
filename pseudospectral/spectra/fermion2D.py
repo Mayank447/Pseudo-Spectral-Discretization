@@ -135,12 +135,11 @@ class FreeFermion2D:
         """
         Return function when eigenfucntion method is called.
         """
-
         #This part {np.kron(p_t, t)} can be done more efficiently since some values of p_x, p_t repeat
         exp_component = np.exp(
-                (np.kron(p_t, t) +  np.kron(p_x, x)) / np.sqrt(self.L_t * self.L_x)
-            ).reshape(len(index), -1)
-        
+                (np.kron(p_t, t) +  np.kron(p_x, x))
+            ).reshape(len(index), -1) / np.sqrt(self.L_t * self.L_x)
+
         # Initialize the return array of length equal to the number of eigenfunctions indices to be returned
         ret = [0]*len(index) 
 
@@ -191,7 +190,6 @@ class FreeFermion2D:
                 (self._eta_21[np.newaxis, :] * g).flatten(),
                 (self._eta_22[np.newaxis, :] * g).flatten()
             ], 'F').reshape(-1, self.vector_length)
-            print(f+g)
             return (f + g)
         
 
@@ -203,9 +201,6 @@ class FreeFermion2D:
             # Transform the two halves to spectral space
             f = self._spectral_to_real(f)
             g = self._spectral_to_real(g)
-
-            print("f", f)
-            print("g", g)
 
             # Reflatten and then return the array with elements alternatively concatenated
             return np.ravel([f.flatten(), g.flatten()],'F').reshape(-1, self.vector_length)

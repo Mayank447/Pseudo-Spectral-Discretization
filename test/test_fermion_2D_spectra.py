@@ -8,15 +8,20 @@ import pytest
 @pytest.fixture()
 def eigenfunctions(spectrum_fermion2D):
     t, x = spectrum_fermion2D.lattice()
-    return spectrum_fermion2D.eigenfunction(np.arange(spectrum_fermion2D.vector_length))(t.reshape(-1, 1), x.reshape(-1, 1))
+    return spectrum_fermion2D.eigenfunction(np.arange(spectrum_fermion2D.vector_length))(t, x)
 
 
-# def test_orthonormality(spectrum_fermion2D, eigenfunctions):
-#     print(spectrum_fermion2D.scalar_product(eigenfunctions[0], eigenfunctions[2]))
-#     assert np.allclose(
-#         spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
-#         np.eye(spectrum_fermion2D.vector_length),
-#     )
+def test_orthonormality(spectrum_fermion2D, eigenfunctions):
+    print(spectrum_fermion2D.eigenvalues)
+    print(spectrum_fermion2D.p_t)
+    print(spectrum_fermion2D.p_x)
+    print(eigenfunctions[0])
+    print(eigenfunctions[2])
+    print(spectrum_fermion2D.scalar_product(eigenfunctions[0], eigenfunctions[2]))
+    assert np.allclose(
+        spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
+        np.eye(spectrum_fermion2D.vector_length),
+    )
 
 
 def test_back_and_forth_transform_is_identity(spectrum_fermion2D, eigenfunctions):

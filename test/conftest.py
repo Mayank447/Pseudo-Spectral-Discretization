@@ -58,6 +58,7 @@ def arbitrary_index_single_eigenfunction_fermion2D(spectrum_fermion2D):
     """
     return np.random.randint(spectrum_fermion2D.vector_length)
 
+
 @pytest.fixture
 def arbitrary_index_multiple_eigenfunctions_fermion_2D(
     spectrum_fermion2D,

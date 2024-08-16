@@ -36,27 +36,27 @@ def test_transforms_from_real_to_spectral_basis(
 
 
 
-# def test_transforms_multiple_components_from_real_to_spectral_basis(
-#     spectrum_fermion2D, 
-#     arbitrary_index_multiple_eigenfunctions_fermion_2D
-# ):
-#     """
-#     Python test function to test the transformation of linear combination
-#     of eigenvectors from real space to spectral space.
-#     """
+def test_transforms_multiple_components_from_real_to_spectral_basis(
+    spectrum_fermion2D, 
+    arbitrary_index_multiple_eigenfunctions_fermion_2D
+):
+    """
+    Python test function to test the transformation of linear combination
+    of eigenvectors from real space to spectral space.
+    """
 
-#     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions_fermion_2D))
+    arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions_fermion_2D))
+    eigenfunctions = spectrum_fermion2D.eigenfunction(arbitrary_index_multiple_eigenfunctions_fermion_2D)(*spectrum_fermion2D.lattice())
+    
+    result = spectrum_fermion2D.transform(
+                np.sum(arbitrary_coefficients[:, np.newaxis] * eigenfunctions, axis = 0), 
+                input_basis="real", 
+                output_basis="spectral"
+             )
 
-#     t, x = spectrum_fermion2D.lattice()
-#     eigenfunctions = spectrum_fermion2D.eigenfunction(arbitrary_index_multiple_eigenfunctions_fermion_2D)(t.reshape(-1, 1), x.reshape(-1, 1))
-#     result = spectrum_fermion2D.transform(
-#                 np.sum(arbitrary_coefficients[:, np.newaxis] * eigenfunctions, axis = 0), 
-#                 input_basis="real", output_basis="spectral"
-#             )
-
-#     expected = np.zeros(spectrum_fermion2D.vector_length)
-#     expected[arbitrary_index_multiple_eigenfunctions_fermion_2D] = arbitrary_coefficients
-#     assert np.allclose(expected, result)
+    expected = np.zeros(spectrum_fermion2D.vector_length)
+    expected[arbitrary_index_multiple_eigenfunctions_fermion_2D] = arbitrary_coefficients
+    assert np.allclose(expected, result)
 
 
 def test_transforms_from_spectral_to_real_basis(

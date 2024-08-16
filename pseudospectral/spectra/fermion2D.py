@@ -273,7 +273,7 @@ class FreeFermion2D:
             input_basis: basis of the input vectors (real/spectral)
         """
         if input_basis == "real":
-            return lhs @ rhs.transpose(-1,-2).conjugate() * self.a_t * self.a_x
+            return rhs @ lhs.transpose().conjugate() * self.a_t * self.a_x
         
         elif input_basis == "spectral":
             return np.sum(lhs.conjugate * rhs)
@@ -310,7 +310,7 @@ class FreeFermion2D:
 
 
 if __name__ == "__main__":
-    fermion = FreeFermion2D(n_t=7, n_x=5, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0)
+    fermion = FreeFermion2D(n_t=3, n_x=3, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0)
     
     x, t = np.meshgrid(
         np.linspace(0, fermion.L_x, fermion.n_x, endpoint=False), 
@@ -318,8 +318,11 @@ if __name__ == "__main__":
     )
     t = t.flatten()
     x = x.flatten()
-    e1 = fermion.eigenfunction([1, 3], -1)(t,x)
+    e1 = fermion.eigenfunction(0)(t,x).flatten()
     s1 = fermion.transform(e1, "real", "spectral")
     e1_ = fermion.transform(s1, "spectral", "real")
+    print(e1)
+    print(s1)
+    print(e1_)
     assert np.isclose(e1, e1_).all()
     print(np.linalg.norm(e1_ - e1))

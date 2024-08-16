@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.fft
 
+I2PI = 1j * 2 * np.pi
 
 class Derivative1D:
     """
@@ -13,10 +14,11 @@ class Derivative1D:
         theta: Real number in [0,1] as per the boundary condition (e.g. 0 for periodic, 0.5 for anti-periodic)
     """
 
-    def __init__(self, num_lattice_points, L=1):
+    def __init__(self, num_lattice_points, L=1, theta=0):
         self.num_lattice_points = num_lattice_points
         self.L = L
         self.a = L / num_lattice_points
+        self.theta = theta
         self.eigenvalues = self._eigenvalues()
 
     def _eigenvalues(self):
@@ -24,7 +26,7 @@ class Derivative1D:
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a))
+        return I2PI * (np.fft.fftfreq(self.num_lattice_points, d=self.a) + self.theta/self.L) 
 
     def eigenfunction(self, index: np.ndarray):
         """
@@ -48,14 +50,17 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            return scipy.fft.fft(input_vector, norm="ortho") * np.sqrt(self.a)
+            premultiplier =  np.exp(-I2PI * (self.theta/self.L) * self.lattice(output_basis="real"))
+            return premultiplier * scipy.fft.fft(input_vector, norm="ortho") * np.sqrt(self.a)
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return scipy.fft.ifft(input_vector, norm="ortho") / np.sqrt(self.a)
+            inv_premultiplier = np.exp(I2PI * (self.theta/self.L) * self.lattice(output_basis="spectral"))
+            return scipy.fft.ifft(inv_premultiplier * input_vector, norm="ortho") / np.sqrt(self.a)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
+
 
     def lattice(self, output_basis="real"):
         """
@@ -79,6 +84,7 @@ class Derivative1D:
 
         else:
             raise ValueError("Unsupported output space.")
+
 
     def scalar_product(self, lhs, rhs, input_basis="real"):
         """

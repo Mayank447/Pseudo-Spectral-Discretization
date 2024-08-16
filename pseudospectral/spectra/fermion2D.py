@@ -127,26 +127,26 @@ class FreeFermion2D:
         eta[np.logical_and(mask, sign==-1)] = np.array([0, 1])
 
         return (
-            lambda t, x: self._return_eigenfunction(t, x, index, eta, p_t, p_x)
+            lambda t, x: self._return_eigenfunction(t, x, len(index), eta, p_t, p_x)
         )
     
-    def _return_eigenfunction(self, t, x, index, eta, p_t, p_x):
+    def _return_eigenfunction(self, t, x, num_eigenfunction, eta, p_t, p_x):
         """
         Return function when eigenfucntion method is called.
         """
         #This part {np.kron(p_t, t)} can be done more efficiently since some values of p_x, p_t repeat
         exp_component = np.exp(
                 (np.kron(p_t, t) +  np.kron(p_x, x))
-            ).reshape(len(index), -1) / np.sqrt(self.L_t * self.L_x)
+            ).reshape(num_eigenfunction, -1) / np.sqrt(self.L_t * self.L_x)
 
         # Initialize the return array of length equal to the number of eigenfunctions indices to be returned
-        ret = [0]*len(index) 
-
+        ret = np.zeros((num_eigenfunction, self.vector_length), dtype=np.complex128) 
+        
         # Kronecker product between each spinor array and corresponding exponential part
-        for i in range(len(index)):
+        for i in range(num_eigenfunction):
             ret[i] = np.kron(exp_component[i], eta[i])
         
-        return np.array(ret)
+        return ret
 
 
     def transform(self, input_vector, input_basis, output_basis):
@@ -163,8 +163,6 @@ class FreeFermion2D:
 
         Raises:
             ValueError: if the input_basis or output_basis is not supported.    
-
-        Note: The input vector must be a 1D array of size 2 * n_t * n_x. (Check for that)
         """
         input_vector = np.atleast_2d(input_vector)
 
@@ -235,7 +233,7 @@ class FreeFermion2D:
         # Performing the 2D discrete Fast Fourier transform to go from real to spectral space
         coeff = coeff.reshape(-1, self.n_t, self.n_x)
         coeff = scipy.fft.fft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
-        return coeff.reshape(-1, self.n_t * self.n_x)
+        return coeff.reshape(-1, self.vector_length//2)
     
 
     def _spectral_to_real(self, coeff):

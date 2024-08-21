@@ -19,14 +19,9 @@ def spectrum(request):
     return request.param["type"](**request.param["config"])
 
 
-@pytest.fixture()
-def position():
-    return 0.0
-
-
-def test_eigenfunctions_obey_boundary_conditions(spectrum, position):
+def test_eigenfunctions_obey_boundary_conditions(spectrum):
     eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points).reshape(-1, 1))
-    assert np.allclose(np.exp(2.0j * np.pi * spectrum.theta * spectrum.a) * eigenfunctions(position), eigenfunctions(position + spectrum.L))
+    assert np.allclose(np.exp(2.0j * np.pi * spectrum.theta * spectrum.a) * eigenfunctions(*spectrum.lattice()), eigenfunctions(spectrum.lattice()[0] + spectrum.L))
 
 
 def test_inverse_transform_results_in_eigenfunction(spectrum):

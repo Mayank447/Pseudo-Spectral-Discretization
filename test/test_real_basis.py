@@ -64,13 +64,3 @@ def test_application_to_superposition_of_eigenfunctions(
 
     result = operator.apply_to(np.sum(superposition, axis=0), input_basis="real", output_basis="real")
     assert np.allclose(result, expected)
-
-
-# def test_lattice_real_basis(spectrum):
-#     """
-#     Python test function to test the lattice method of the Spectrum class in the real space.
-#     """
-
-#     lattice = spectrum.lattice(output_basis="real")
-#     excepted = np.linspace(0, spectrum.L, spectrum.total_num_lattice_points, endpoint=False)
-#     assert np.equal(lattice, excepted).all()

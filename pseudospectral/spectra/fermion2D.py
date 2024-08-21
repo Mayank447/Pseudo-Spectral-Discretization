@@ -61,6 +61,13 @@ class FreeFermion2D:
         self._eta_22[self.p_x == 0] = 1
 
     @property
+    def dimension(self):
+        """
+        The dimension of the spectrum.
+        """
+        return 2
+
+    @property
     def eigenvalues(self):
         """
         Private function to return the list of eigenvalues (the diagonal of the eigenvalue matrix)

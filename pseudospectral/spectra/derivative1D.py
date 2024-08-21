@@ -19,6 +19,13 @@ class Derivative1D:
         self.a = L / total_num_lattice_points
 
     @property
+    def dimension(self):
+        """
+        The dimension of the spectrum.
+        """
+        return 1
+
+    @property
     def eigenvalues(self):
         """
         Private function to return the eigenvalues of the 1D derivative operator

@@ -66,12 +66,3 @@ def test_application_to_superposition_of_eigenfunctions(
         output_basis="spectral",
     )
     assert np.allclose(result, expected)
-
-
-# def test_lattice_spectral_basis(spectrum):
-#     """
-#     Python test function to test the lattice of the Dirac operator in spectral space.
-#     """
-#     result = spectrum.lattice(output_basis="spectral")
-#     expected = 2j * np.pi * (scipy.fft.fftfreq(spectrum.total_num_lattice_points, d=spectrum.a))
-#     assert np.equal(result, expected).all()

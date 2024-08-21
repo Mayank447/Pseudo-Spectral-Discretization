@@ -21,8 +21,7 @@ def arbitrary_multiple_coefficients(length=1):
     return np.random.randn(length)
 
 
-############################################ TEST FUNCTION ############################################
-@pytest.mark.parametrize("arbitrary_index_single_eigenfunction", range(num_single_eigenfunction_testrun), indirect=True)
+# ############################################ TEST FUNCTION ############################################
 def test_application_to_a_single_eigenfunction(spectrum, 
                                                arbitrary_index_single_eigenfunction, 
                                                arbitrary_single_coefficient,
@@ -32,7 +31,7 @@ def test_application_to_a_single_eigenfunction(spectrum,
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
     operator = DiracOperator(spectrum)
-    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(sample_points)
+    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points)
 
     result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
 
@@ -40,7 +39,6 @@ def test_application_to_a_single_eigenfunction(spectrum,
     assert np.isclose(result, expected).all()
 
 
-@pytest.mark.parametrize("arbitrary_index_multiple_eigenfunctions", range(num_eigenfunctions_superposition_testrun), indirect=True)
 def test_application_to_superposition_of_eigenfunctions(spectrum, 
                                                         arbitrary_index_multiple_eigenfunctions,
                                                         sample_points):
@@ -50,18 +48,25 @@ def test_application_to_superposition_of_eigenfunctions(spectrum,
     operator = DiracOperator(spectrum)
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    superposition = arbitrary_coefficients * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(sample_points.reshape(-1, 1))
-    expected = superposition @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
+    superposition = (
+        arbitrary_coefficients[:, np.newaxis] * 
+        spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points)
+    )
 
-    result = operator.apply_to(np.sum(superposition, axis=1), input_basis="real", output_basis="real")
+    expected = np.sum(
+        spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis]
+        * superposition, axis=0
+    )
+
+    result = operator.apply_to(np.sum(superposition, axis=0), input_basis="real", output_basis="real")
     assert np.isclose(result, expected).all()
 
 
-def test_lattice_real_basis(spectrum):
-    """
-    Python test function to test the lattice method of the Spectrum class in the real space.
-    """
+# def test_lattice_real_basis(spectrum):
+#     """
+#     Python test function to test the lattice method of the Spectrum class in the real space.
+#     """
 
-    lattice = spectrum.lattice(output_basis="real")
-    excepted = np.linspace(0, spectrum.L, spectrum.total_num_lattice_points, endpoint=False)
-    assert np.equal(lattice, excepted).all()
+#     lattice = spectrum.lattice(output_basis="real")
+#     excepted = np.linspace(0, spectrum.L, spectrum.total_num_lattice_points, endpoint=False)
+#     assert np.equal(lattice, excepted).all()

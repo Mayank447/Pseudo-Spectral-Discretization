@@ -18,11 +18,11 @@ def spectrum(request):
 
 
 @pytest.fixture
-def arbitrary_index_single_eigenfunction_fermion2D(spectrum_fermion2D):
+def arbitrary_index_single_eigenfunction(spectrum):
     """
     Python fixture to initialize the arbitrary index for the single eigenfunction test.
     """
-    return np.random.randint(spectrum_fermion2D.total_num_lattice_points)
+    return np.random.randint(spectrum.total_num_lattice_points, size=1)
 
 
 @pytest.fixture

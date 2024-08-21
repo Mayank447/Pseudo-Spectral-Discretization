@@ -280,6 +280,6 @@ class FreeFermion2D:
             return t.flatten(), x.flatten()
         
         elif output_basis == "spectral":
-            return self.eigenvalues
+            return (self.p_t, self.p_x)
         else:
             raise ValueError(f"Unsupported output space - {output_basis}.")

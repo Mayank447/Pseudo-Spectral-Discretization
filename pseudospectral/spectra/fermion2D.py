@@ -20,10 +20,6 @@ class FreeFermion2D:
         L_x: length of the system in the x axis
         n_t: number of lattice points in the time axis (odd)
         n_x: number of lattice points in the x axis (odd)
-
-    # array_t = [-(N-1)/2, ..., -1/2 , 1/2 , ..., (N-1)/2]
-    # array_x = [-(N-1)/2, ..., -1, 0, 1, ..., (N-1)/2]
-    sign = +-1
     """
 
     def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):

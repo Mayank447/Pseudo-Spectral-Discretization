@@ -34,3 +34,8 @@ def test_inverse_transform_results_in_eigenfunction(spectrum):
     real_space_representation = spectrum.transform(spectral_representation, "spectral", "real")
     eigenfunction = spectrum.eigenfunction([1])
     assert np.allclose(eigenfunction(*spectrum.lattice()), real_space_representation)
+
+
+def test_transform_with_correct_boundary_conditions(spectrum):
+    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points).reshape(-1, 1))
+    assert np.allclose(spectrum.transform(eigenfunctions(*spectrum.lattice()), "real", "spectral"), np.eye(spectrum.total_num_lattice_points))

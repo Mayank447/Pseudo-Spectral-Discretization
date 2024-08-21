@@ -45,9 +45,7 @@ class Derivative1D:
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(
-                np.kron(self.eigenvalues[index], x)
-            ).reshape(len(index), -1) / np.sqrt(self.L)
+            return lambda x: np.exp(np.kron(self.eigenvalues[index], x)).reshape(len(index), -1) / np.sqrt(self.L)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -63,11 +61,10 @@ class Derivative1D:
 
         # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return scipy.fft.ifft(input_vector, norm="ortho") / np.sqrt(self.a)
+            return np.exp(I2PI * self.theta / self.total_num_lattice_points * self.lattice("real")[0]) * scipy.fft.ifft(input_vector, norm="ortho") / np.sqrt(self.a)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
-
 
     def lattice(self, output_basis="real"):
         """
@@ -84,14 +81,13 @@ class Derivative1D:
         ValueError: If the output space is not 'real' or 'space'.
         """
         if output_basis == "real":
-            return (np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False), )
+            return (np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False),)
 
         elif output_basis == "spectral":
-            return (self.eigenvalues, )
+            return (self.eigenvalues,)
 
         else:
             raise ValueError("Unsupported output space.")
-
 
     def scalar_product(self, lhs, rhs, input_basis="real"):
         """

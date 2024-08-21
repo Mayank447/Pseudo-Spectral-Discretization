@@ -22,11 +22,12 @@ def arbitrary_multiple_coefficients(length=1):
 
 
 # ############################################ TEST FUNCTION ############################################
-def test_application_to_a_single_eigenfunction(spectrum, 
-                                               arbitrary_index_single_eigenfunction, 
-                                               arbitrary_single_coefficient,
-                                               sample_points
-                                            ):
+def test_application_to_a_single_eigenfunction(
+    spectrum, 
+    arbitrary_index_single_eigenfunction, 
+    arbitrary_single_coefficient,
+    sample_points
+):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
@@ -39,9 +40,11 @@ def test_application_to_a_single_eigenfunction(spectrum,
     assert np.isclose(result, expected).all()
 
 
-def test_application_to_superposition_of_eigenfunctions(spectrum, 
-                                                        arbitrary_index_multiple_eigenfunctions,
-                                                        sample_points):
+def test_application_to_superposition_of_eigenfunctions(
+    spectrum, 
+    arbitrary_index_multiple_eigenfunctions,
+    sample_points
+):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """

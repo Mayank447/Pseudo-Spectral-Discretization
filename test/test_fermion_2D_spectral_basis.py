@@ -26,7 +26,6 @@
 #     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
 #     """
 #     operator = DiracOperator(spectrum_fermion2D)
-#     index = 10
 #     eigenfunction = arbitrary_single_coefficient * np.eye(spectrum_fermion2D.total_num_lattice_points)[index, :]
 #     expected = eigenfunction * spectrum_fermion2D.eigenvalues[index]
 

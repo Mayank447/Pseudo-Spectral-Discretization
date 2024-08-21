@@ -10,8 +10,19 @@ SPECTRA = [
     {"type": FreeFermion2D, "config": {"n_t":3, "n_x":3, "L_t":1, "L_x":1, "mu":0, "m":0}}
 ]
 
+############################# Pytest settings ######################
+def pytest_addoption(parser):
+    parser.addoption('--repeat', default=1, 
+                     type=int, metavar='repeat', 
+                     help='Run each test the specified number of times')
+    
 
-################## Common Fixtures for PyTests ######################
+def pytest_collection_modifyitems(session, config, items):
+    count = config.option.repeat
+    items[:] = items * count  # add each test multiple times
+
+
+############################# Common Fixtures for PyTests ######################
 @pytest.fixture(params=SPECTRA)
 def spectrum(request):
     return request.param["type"](**request.param["config"])

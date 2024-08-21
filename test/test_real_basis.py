@@ -37,7 +37,7 @@ def test_application_to_a_single_eigenfunction(
     result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
 
     expected = eigenfunction * operator.spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
-    assert np.isclose(result, expected).all()
+    assert np.allclose(result, expected)
 
 
 def test_application_to_superposition_of_eigenfunctions(
@@ -58,11 +58,12 @@ def test_application_to_superposition_of_eigenfunctions(
 
     expected = np.sum(
         spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis]
-        * superposition, axis=0
+        * superposition, 
+        axis=0
     )
 
     result = operator.apply_to(np.sum(superposition, axis=0), input_basis="real", output_basis="real")
-    assert np.isclose(result, expected).all()
+    assert np.allclose(result, expected)
 
 
 # def test_lattice_real_basis(spectrum):

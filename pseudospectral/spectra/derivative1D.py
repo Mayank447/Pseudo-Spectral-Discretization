@@ -3,6 +3,7 @@ import scipy.fft
 
 I2PI = 2j * np.pi
 
+
 class Derivative1D:
     """
     Class to represent the eigenfunctions, eigenvalues of a 1D Derivative operator
@@ -13,10 +14,11 @@ class Derivative1D:
         L (float): Length of the periodic 1D domain
     """
 
-    def __init__(self, total_num_lattice_points, L=1.0):
+    def __init__(self, total_num_lattice_points, L=1.0, theta=0.0):
         self.total_num_lattice_points = total_num_lattice_points
         self.L = L
         self.a = L / total_num_lattice_points
+        self.theta = theta
 
     @property
     def dimension(self):
@@ -31,7 +33,7 @@ class Derivative1D:
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        return I2PI * (np.fft.fftfreq(self.total_num_lattice_points, d=self.a))
+        return I2PI * (np.fft.fftfreq(self.total_num_lattice_points, d=self.a) + self.theta / self.total_num_lattice_points)
 
     def eigenfunction(self, index: np.ndarray):
         """

@@ -26,11 +26,9 @@ class FreeFermion2D:
     sign = +-1
     """
 
-    def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0, theta_t=0.5, theta_x=0):
+    def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
         self.mu = mu
         self.m = m
-        self.theta_t = theta_t
-        self.theta_x = theta_x
         self.L_t = L_t
         self.L_x = L_x
         self.n_t = n_t
@@ -45,8 +43,8 @@ class FreeFermion2D:
         X = X.flatten()
         T = T.flatten()
 
-        self.p_t = I2PI * (T + (self.theta_t/self.L_t))
-        self.p_x = I2PI * (X + (self.theta_x/self.L_x))
+        self.p_t = I2PI * (T)
+        self.p_x = I2PI * (X)
         self.p_t_mu = self.p_t - self.mu
         self.norm_p = np.sqrt(self.p_t_mu**2 + self.p_x**2)
 
@@ -216,16 +214,6 @@ class FreeFermion2D:
             vector in spectral space
         """
 
-        # Premultiplication factor in variable t, x since the boundary conditions may not be periodic
-        premultiplier_t = np.exp(-I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
-        premultiplier_x = np.exp(-I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
-        coeff = (
-            premultiplier_t[np.newaxis, :, np.newaxis] * coeff.reshape(-1, self.n_t, self.n_x)
-        )
-        coeff = (
-            premultiplier_x[np.newaxis, np.newaxis, : ] * coeff
-        )
-
         # Performing the 2D discrete Fast Fourier transform to go from real to spectral space
         coeff = coeff.reshape(-1, self.n_t, self.n_x)
         coeff = scipy.fft.fft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
@@ -240,16 +228,6 @@ class FreeFermion2D:
         # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
         coeff = coeff.reshape(-1, self.n_t, self.n_x)
         coeff = scipy.fft.ifft2(coeff, norm="ortho") / np.sqrt(self.a_t * self.a_x)
-
-        # Reversing premultiplication in variable t, x since the boundary conditions may not be periodic
-        inv_premultiplier_t = np.exp(I2PI * (self.theta_t/self.L_t) * np.arange(self.n_t))
-        inv_premultiplier_x = np.exp(I2PI * (self.theta_x/self.L_x) * np.arange(self.n_x))
-        coeff = (
-            inv_premultiplier_t[np.newaxis, :, np.newaxis] * coeff
-        )
-        coeff = (
-            inv_premultiplier_x[np.newaxis, np.newaxis, : ] * coeff
-        )
 
         return coeff.reshape(-1, self.vector_length//2)
 

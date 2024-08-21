@@ -52,7 +52,7 @@ def spectrum_fermion2D():
     """
     Python fixture to create an instance of the FreeFermions2D class for the tests.
     """
-    return FreeFermion2D(n_t=3, n_x=3, L_t=1, L_x=1, mu=0, m=0, theta_t=0, theta_x=0)
+    return FreeFermion2D(n_t=3, n_x=3, L_t=1, L_x=1, mu=0, m=0)
 
 @pytest.fixture
 def arbitrary_index_single_eigenfunction_fermion2D(spectrum_fermion2D):

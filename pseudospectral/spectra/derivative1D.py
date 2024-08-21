@@ -10,7 +10,6 @@ class Derivative1D:
     Args:
         num_lattice_points (int): Number of lattice points in the 1D domain
         L (float): Length of the periodic 1D domain
-        theta: Real number in [0,1] as per the boundary condition (e.g. 0 for periodic, 0.5 for anti-periodic)
     """
 
     def __init__(self, num_lattice_points, L=1.0):

@@ -2,7 +2,6 @@
 
 from pseudospectral import DiracOperator
 import numpy as np
-import pytest
 
 
 num_single_eigenfunction_testrun = 10

@@ -32,6 +32,7 @@ class FreeFermion2D:
         self.a_t = L_t/n_t
         self.a_x = L_x/n_x
         self.total_num_lattice_points = 2 * n_t * n_x
+        self._eigenvalues = None
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
@@ -62,16 +63,11 @@ class FreeFermion2D:
 
     @property
     def eigenvalues(self):
-        """
-        Private function to return the list of eigenvalues (the diagonal of the eigenvalue matrix)
-        of the 2D Free Fermion operator 
-        
-        Args:
-            None
-            
-        Returns:
-            numpy.ndarray: 1D array of eigenvalues
-        """
+        if self._eigenvalues is None:
+            self._eigenvalues = self._compute_eigenvalues()
+        return self._eigenvalues
+
+    def _compute_eigenvalues(self):
         return (
             (np.kron(self.norm_p, [1, -1])) + self.m
         )

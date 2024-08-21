@@ -29,7 +29,7 @@ def test_transforms_from_real_to_spectral_basis(
     result = spectrum_fermion2D.transform(eigenfunction, input_basis="real", output_basis="spectral")
     expected = (
         arbitrary_single_coefficient 
-        * np.eye(spectrum_fermion2D.vector_length)[arbitrary_index_single_eigenfunction_fermion2D, :]
+        * np.eye(spectrum_fermion2D.total_num_lattice_points)[arbitrary_index_single_eigenfunction_fermion2D, :]
     )
     assert np.allclose(expected, result)
 
@@ -53,7 +53,7 @@ def test_transforms_multiple_components_from_real_to_spectral_basis(
                 output_basis="spectral"
              )
 
-    expected = np.zeros(spectrum_fermion2D.vector_length)
+    expected = np.zeros(spectrum_fermion2D.total_num_lattice_points)
     expected[arbitrary_index_multiple_eigenfunctions_fermion_2D] = arbitrary_coefficients
     assert np.allclose(expected, result)
 
@@ -68,7 +68,7 @@ def test_transforms_from_spectral_to_real_basis(
     with a single component from spectral space to real space.
     """
 
-    spectral_vector = arbitrary_single_coefficient * np.eye(spectrum_fermion2D.vector_length)[arbitrary_index_single_eigenfunction_fermion2D, :]
+    spectral_vector = arbitrary_single_coefficient * np.eye(spectrum_fermion2D.total_num_lattice_points)[arbitrary_index_single_eigenfunction_fermion2D, :]
     result = spectrum_fermion2D.transform(
                 spectral_vector, 
                 input_basis="spectral",
@@ -90,7 +90,7 @@ def test_transforms_multiple_components_from_spectral_to_real_basis(
     """
 
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions_fermion_2D))
-    spectral_coefficients = np.zeros(spectrum_fermion2D.vector_length)
+    spectral_coefficients = np.zeros(spectrum_fermion2D.total_num_lattice_points)
     spectral_coefficients[arbitrary_index_multiple_eigenfunctions_fermion_2D] = arbitrary_coefficients
 
     # Transform from spectral space to real space

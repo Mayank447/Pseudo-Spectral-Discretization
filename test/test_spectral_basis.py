@@ -31,7 +31,7 @@ def test_application_to_a_single_eigenfunction(spectrum,
     """
     operator = DiracOperator(spectrum)
 
-    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum.num_lattice_points)[arbitrary_index_single_eigenfunction, :]
+    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
     expected = eigenfunction * spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
 
     result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")
@@ -46,7 +46,7 @@ def test_application_to_superposition_of_eigenfunctions(spectrum, arbitrary_inde
     operator = DiracOperator(spectrum)
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    superposition = arbitrary_coefficients * np.eye(spectrum.num_lattice_points)[arbitrary_index_multiple_eigenfunctions].transpose()
+    superposition = arbitrary_coefficients * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_multiple_eigenfunctions].transpose()
     expected = superposition @ spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions]
 
     result = operator.apply_to(
@@ -62,5 +62,5 @@ def test_lattice_spectral_basis(spectrum):
     Python test function to test the lattice of the Dirac operator in spectral space.
     """
     result = spectrum.lattice(output_basis="spectral")
-    expected = 2j * np.pi * (scipy.fft.fftfreq(spectrum.num_lattice_points, d=spectrum.a))
+    expected = 2j * np.pi * (scipy.fft.fftfreq(spectrum.total_num_lattice_points, d=spectrum.a))
     assert np.equal(result, expected).all()

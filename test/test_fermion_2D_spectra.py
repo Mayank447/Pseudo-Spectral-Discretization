@@ -8,13 +8,13 @@ import pytest
 @pytest.fixture()
 def eigenfunctions(spectrum_fermion2D):
     t, x = spectrum_fermion2D.lattice()
-    return spectrum_fermion2D.eigenfunction(np.arange(spectrum_fermion2D.vector_length))(t, x)
+    return spectrum_fermion2D.eigenfunction(np.arange(spectrum_fermion2D.total_num_lattice_points))(t, x)
 
 
 def test_orthonormality(spectrum_fermion2D, eigenfunctions):
     assert np.allclose(
         spectrum_fermion2D.scalar_product(eigenfunctions, eigenfunctions),
-        np.eye(spectrum_fermion2D.vector_length),
+        np.eye(spectrum_fermion2D.total_num_lattice_points),
     )
 
 

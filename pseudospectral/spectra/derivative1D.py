@@ -8,14 +8,14 @@ class Derivative1D:
     on a finite interval with periodic boundary conditions.
 
     Args:
-        num_lattice_points (int): Number of lattice points in the 1D domain
+        total_num_lattice_points (int): Number of lattice points in the 1D domain
         L (float): Length of the periodic 1D domain
     """
 
-    def __init__(self, num_lattice_points, L=1.0):
-        self.num_lattice_points = num_lattice_points
+    def __init__(self, total_num_lattice_points, L=1.0):
+        self.total_num_lattice_points = total_num_lattice_points
         self.L = L
-        self.a = L / num_lattice_points
+        self.a = L / total_num_lattice_points
 
     @property
     def eigenvalues(self):
@@ -23,7 +23,7 @@ class Derivative1D:
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        return 2j * np.pi * (np.fft.fftfreq(self.num_lattice_points, d=self.a))
+        return 2j * np.pi * (np.fft.fftfreq(self.total_num_lattice_points, d=self.a))
 
     def eigenfunction(self, index: np.ndarray):
         """
@@ -31,7 +31,7 @@ class Derivative1D:
         """
         index = np.asarray(index)
 
-        if (index >= self.num_lattice_points).any() or (index < -self.num_lattice_points).any():
+        if (index >= self.total_num_lattice_points).any() or (index < -self.total_num_lattice_points).any():
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
@@ -71,7 +71,7 @@ class Derivative1D:
         ValueError: If the output space is not 'real' or 'space'.
         """
         if output_basis == "real":
-            return np.linspace(0, self.L, self.num_lattice_points, endpoint=False)
+            return np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False)
 
         elif output_basis == "spectral":
             return self.eigenvalues

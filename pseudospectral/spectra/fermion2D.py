@@ -35,7 +35,7 @@ class FreeFermion2D:
         self.n_x = n_x
         self.a_t = L_t/n_t
         self.a_x = L_x/n_x
-        self.vector_length = 2 * n_t * n_x
+        self.total_num_lattice_points = 2 * n_t * n_x
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
@@ -98,7 +98,7 @@ class FreeFermion2D:
         
         index = np.atleast_1d(index)
 
-        if (index >= self.vector_length).any() or (index < -self.vector_length).any():
+        if (index >= self.total_num_lattice_points).any() or (index < -self.total_num_lattice_points).any():
             raise ValueError(f"Index {index} out of bounds.")
         
         sign = 1 - 2*(index % 2)
@@ -135,7 +135,7 @@ class FreeFermion2D:
         )
 
         # Initialize the return array of length equal to the number of eigenfunctions indices to be returned
-        ret = np.zeros((num_eigenfunction, self.vector_length), dtype=np.complex128) 
+        ret = np.zeros((num_eigenfunction, self.total_num_lattice_points), dtype=np.complex128) 
         
         # Kronecker product between each spinor array and corresponding exponential part
         for i in range(num_eigenfunction):
@@ -175,11 +175,11 @@ class FreeFermion2D:
             # Post multiplication by block diagonalized eigenvector matrix transpose
             f = np.ravel([(self._eta_11[np.newaxis, :] * f).flatten(),
                           (self._eta_12[np.newaxis, :] * f).flatten()
-                         ], 'F').reshape(-1, self.vector_length)
+                         ], 'F').reshape(-1, self.total_num_lattice_points)
             
             g = np.ravel([(self._eta_21[np.newaxis, :] * g).flatten(),
                           (self._eta_22[np.newaxis, :] * g).flatten()
-                         ], 'F').reshape(-1, self.vector_length)
+                         ], 'F').reshape(-1, self.total_num_lattice_points)
             
             return (f + g)
         
@@ -194,7 +194,7 @@ class FreeFermion2D:
             g = self._spectral_to_real(g)
 
             # Reflatten and then return the array with elements alternatively concatenated
-            return np.ravel([f.flatten(), g.flatten()],'F').reshape(-1, self.vector_length)
+            return np.ravel([f.flatten(), g.flatten()],'F').reshape(-1, self.total_num_lattice_points)
 
         else:
             raise ValueError(
@@ -217,7 +217,7 @@ class FreeFermion2D:
         # Performing the 2D discrete Fast Fourier transform to go from real to spectral space
         coeff = coeff.reshape(-1, self.n_t, self.n_x)
         coeff = scipy.fft.fft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
-        return coeff.reshape(-1, self.vector_length//2)
+        return coeff.reshape(-1, self.total_num_lattice_points//2)
     
 
     def _spectral_to_real(self, coeff):
@@ -229,7 +229,7 @@ class FreeFermion2D:
         coeff = coeff.reshape(-1, self.n_t, self.n_x)
         coeff = scipy.fft.ifft2(coeff, norm="ortho") / np.sqrt(self.a_t * self.a_x)
 
-        return coeff.reshape(-1, self.vector_length//2)
+        return coeff.reshape(-1, self.total_num_lattice_points//2)
 
     def _operate(f,g, p_t, p_x):
         return (p_t * f + p_x * g, p_x * f - p_t * g) 

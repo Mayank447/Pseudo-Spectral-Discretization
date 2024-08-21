@@ -27,7 +27,7 @@ def test_application_to_a_single_eigenfunction(
     """
     operator = DiracOperator(spectrum_fermion2D)
     index = 10
-    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum_fermion2D.vector_length)[index, :]
+    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum_fermion2D.total_num_lattice_points)[index, :]
     expected = eigenfunction * spectrum_fermion2D.eigenvalues[index]
 
     result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")

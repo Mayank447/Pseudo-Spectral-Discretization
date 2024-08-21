@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture()
 def eigenfunctions(spectrum, sample_points):
-    return spectrum.eigenfunction(np.arange(spectrum.num_lattice_points).reshape(-1, 1))(sample_points)
+    return spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points).reshape(-1, 1))(sample_points)
 
 
 def test_orthonormality(spectrum, eigenfunctions):

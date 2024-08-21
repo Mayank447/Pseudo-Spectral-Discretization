@@ -4,10 +4,10 @@ from pseudospectral import DiracOperator, Derivative1D
 
 
 if __name__ == "__main__":
-    num_lattice_points = 101
+    total_num_lattice_points = 101
     L = 2 * np.pi
-    d = DiracOperator(Derivative1D(num_lattice_points, L))
-    x = np.linspace(0, L, num_lattice_points, endpoint=False)
+    d = DiracOperator(Derivative1D(total_num_lattice_points, L))
+    x = np.linspace(0, L, total_num_lattice_points, endpoint=False)
     y = np.cos(x)
     z = d.apply_to(y)
 

@@ -63,5 +63,5 @@ def test_lattice_real_basis(spectrum):
     """
 
     lattice = spectrum.lattice(output_basis="real")
-    excepted = np.linspace(0, spectrum.L, spectrum.num_lattice_points, endpoint=False)
+    excepted = np.linspace(0, spectrum.L, spectrum.total_num_lattice_points, endpoint=False)
     assert np.equal(lattice, excepted).all()

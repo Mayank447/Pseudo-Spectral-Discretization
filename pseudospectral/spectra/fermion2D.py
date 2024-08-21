@@ -18,7 +18,7 @@ class FreeFermion2D:
         m: mass parameter
         L_t: length of the system in the time axis
         L_x: length of the system in the x axis
-        n_t: number of lattice points in the time axis (even)
+        n_t: number of lattice points in the time axis (odd)
         n_x: number of lattice points in the x axis (odd)
 
     # array_t = [-(N-1)/2, ..., -1/2 , 1/2 , ..., (N-1)/2]

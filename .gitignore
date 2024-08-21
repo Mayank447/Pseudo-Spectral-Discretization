@@ -5,6 +5,7 @@ __pycache__/
 pseudo_spectral_discretization.egg-info/
 .cph/
 .ruff_cache
+.DS_Store
 
 # C extensions
 *.so

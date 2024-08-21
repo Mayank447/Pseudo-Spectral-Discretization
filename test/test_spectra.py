@@ -7,10 +7,16 @@ import pytest
 
 @pytest.fixture()
 def eigenfunctions(spectrum, sample_points):
-    return spectrum.eigenfunction(np.arange(spectrum.num_lattice_points).reshape(-1, 1))(sample_points)
+    """
+    Pytest fixture to generate eigenfunctions for the Spectrum class.
+    """
+    return spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points))(*sample_points)
 
 
 def test_orthonormality(spectrum, eigenfunctions):
+    """
+    Pytest to test the orthonormality of the eigenfunctions in the Spectrum class.
+    """
     assert np.allclose(
         spectrum.scalar_product(eigenfunctions, eigenfunctions),
         np.eye(*eigenfunctions.shape),
@@ -18,6 +24,10 @@ def test_orthonormality(spectrum, eigenfunctions):
 
 
 def test_back_and_forth_transform_is_identity(spectrum, eigenfunctions):
+    """
+    Pytest to test the back and forth transformation i.e real to spectral
+    and spectral to real is an identity in the Spectrum class.
+    """
     assert np.allclose(
         spectrum.transform(
             spectrum.transform(eigenfunctions, input_basis="real", output_basis="spectral"),
@@ -29,6 +39,10 @@ def test_back_and_forth_transform_is_identity(spectrum, eigenfunctions):
 
 
 def test_unitary_transform(spectrum, eigenfunctions):
+    """
+    Pytest to test the unitarity of the transformation function in the Spectrum class.
+    """
+    
     after_transform = spectrum.transform(eigenfunctions, 
                                          input_basis="real", 
                                          output_basis="spectral"

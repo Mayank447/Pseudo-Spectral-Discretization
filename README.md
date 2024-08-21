@@ -16,8 +16,8 @@ This codebase contains the implementation of the DiracOperator class, which is u
     ├── __init__.py
     ├── dirac_operator.py
     └──  spectra
-        ├── derivative_1D.py
-        └──  free_fermions_2D.py
+        ├── derivative1D.py
+        └── fermion2D.py
 ├── pyproject.toml
 ├── README.md
 ├── tutorial.md
@@ -29,7 +29,7 @@ This codebase contains the implementation of the DiracOperator class, which is u
     ├── test_real_basis.py
     ├── test_spectral_basis.py
     ├── test_transform.py
-    └──  test_spectra.py
+    └── test_spectra.py
 </pre>
 
 #### Setup
@@ -43,4 +43,4 @@ This codebase contains the implementation of the DiracOperator class, which is u
 - After setting up the package, you can import the classes and methods from `pseudospectral` module in your code as follows:
   ``from pseudospectral import DiracOperator, FreeFermions2D``
 - You may further refer to:
-  - `example_scripts` folder for example script usage of the DiracOperator, Spectrum classes, methods and a boilerplate to begin with.
+  - `examples` folder for example script usage of the DiracOperator, Spectrum classes, methods and a boilerplate to begin with.

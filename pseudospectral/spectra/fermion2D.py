@@ -61,6 +61,8 @@ class FreeFermion2D:
         self._eta_21[self.p_x == 0] = 0
         self._eta_22[self.p_x == 0] = 1
 
+        self.L = np.asarray([self.L_t, self.L_x])
+
     @property
     def dimension(self):
         """

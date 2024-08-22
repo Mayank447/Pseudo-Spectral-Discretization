@@ -39,7 +39,7 @@ class FreeFermion2D:
         _norm_1[self.p_x == 0] = 1
         _norm_2[self.p_x == 0] = 1
 
-        self.eta = np.moveaxis(np.asarray([[self.p_x / _norm_1, (self.norm_p - self.p_t_mu) / _norm_1], [self.p_x / _norm_2, (-self.norm_p - self.p_t_mu) / _norm_2]]), -1, 0)
+        self.eta = np.moveaxis(np.asarray([[self.p_x / _norm_1, self.p_x / _norm_2], [(self.norm_p - self.p_t_mu) / _norm_1, (-self.norm_p - self.p_t_mu) / _norm_2]]), -1, 0)
         self.eta[self.p_x == 0, 0, 0] = 1
         # primnt(self._eta_21[self.p_x==0]) [Review this line in the future]
         self.eta[self.p_x == 0, 0, 1] = 0
@@ -65,11 +65,11 @@ class FreeFermion2D:
 
     @property
     def _eta_12(self):
-        return self.eta[:, 1, 0]
+        return self.eta[:, 0, 1]
 
     @property
     def _eta_21(self):
-        return self.eta[:, 0, 1]
+        return self.eta[:, 1, 0]
 
     @property
     def _eta_22(self):

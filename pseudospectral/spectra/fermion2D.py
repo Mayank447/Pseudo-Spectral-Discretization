@@ -26,13 +26,11 @@ class FreeFermion2D:
     def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
         self.mu = mu
         self.m = m
-        self.L_t = L_t
-        self.L_x = L_x
-        self.n_t = n_t
-        self.n_x = n_x
-        self.a_t = L_t / n_t
-        self.a_x = L_x / n_x
         self.total_num_lattice_points = 2 * n_t * n_x
+
+        self.L = np.asarray([L_t, L_x])
+        self.num_points = np.asarray([n_t, n_x])
+        self.a = self.L / self.num_points
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
@@ -61,9 +59,29 @@ class FreeFermion2D:
         self._eta_21[self.p_x == 0] = 0
         self._eta_22[self.p_x == 0] = 1
 
-        self.L = np.asarray([L_t, L_x])
-        self.num_points = np.asarray([n_t, n_x])
-        self.a = self.L / self.num_points
+    @property
+    def L_t(self):
+        return self.L[0]
+
+    @property
+    def L_x(self):
+        return self.L[1]
+
+    @property
+    def n_t(self):
+        return self.num_points[0]
+
+    @property
+    def n_x(self):
+        return self.num_points[1]
+
+    @property
+    def a_t(self):
+        return self.a[0]
+
+    @property
+    def a_x(self):
+        return self.a[1]
 
     @property
     def dimension(self):

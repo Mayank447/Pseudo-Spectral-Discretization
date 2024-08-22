@@ -7,16 +7,15 @@ SPECTRA = [
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "L": 3}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101, "L": 42}},
-    {"type": FreeFermion2D, "config": {"n_t":3, "n_x":3, "L_t":1, "L_x":1, "mu":0, "m":0}},
-    {"type": FreeFermion2D, "config": {"n_t":3, "n_x":70, "L_t":2, "L_x":7, "mu":0, "m":0}}
+    {"type": FreeFermion2D, "config": {"n_t": 3, "n_x": 3, "L_t": 1, "L_x": 1, "mu": 0, "m": 0}},
+    {"type": FreeFermion2D, "config": {"n_t": 3, "n_x": 70, "L_t": 2, "L_x": 7, "mu": 0, "m": 0}},
 ]
+
 
 ############################# Pytest settings ######################
 def pytest_addoption(parser):
-    parser.addoption('--repeat', default=1, 
-                     type=int, metavar='repeat', 
-                     help='Run each test the specified number of times')
-    
+    parser.addoption("--repeat", default=1, type=int, metavar="repeat", help="Run each test the specified number of times")
+
 
 def pytest_collection_modifyitems(session, config, items):
     count = config.option.repeat
@@ -44,11 +43,7 @@ def arbitrary_index_multiple_eigenfunctions(
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.choice(
-        spectrum.total_num_lattice_points, 
-        size = 1 + np.random.randint(spectrum.total_num_lattice_points - 1), 
-        replace=False
-    )
+    return np.random.choice(spectrum.total_num_lattice_points, size=1 + np.random.randint(spectrum.total_num_lattice_points - 1), replace=False)
 
 
 @pytest.fixture

@@ -2,7 +2,6 @@
 
 from pseudospectral import DiracOperator
 import numpy as np
-import pytest
 
 
 num_single_eigenfunction_testrun = 10
@@ -22,12 +21,7 @@ def arbitrary_multiple_coefficients(length=1):
 
 
 # ############################################ TEST FUNCTION ############################################
-def test_application_to_a_single_eigenfunction(
-    spectrum, 
-    arbitrary_index_single_eigenfunction, 
-    arbitrary_single_coefficient,
-    sample_points
-):
+def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, sample_points):
     """
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
@@ -40,27 +34,16 @@ def test_application_to_a_single_eigenfunction(
     assert np.allclose(result, expected)
 
 
-def test_application_to_superposition_of_eigenfunctions(
-    spectrum, 
-    arbitrary_index_multiple_eigenfunctions,
-    sample_points
-):
+def test_application_to_superposition_of_eigenfunctions(spectrum, arbitrary_index_multiple_eigenfunctions, sample_points):
     """
     Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
     """
     operator = DiracOperator(spectrum)
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    superposition = (
-        arbitrary_coefficients[:, np.newaxis] * 
-        spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points)
-    )
+    superposition = arbitrary_coefficients[:, np.newaxis] * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points)
 
-    expected = np.sum(
-        spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis]
-        * superposition, 
-        axis=0
-    )
+    expected = np.sum(spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis] * superposition, axis=0)
 
     result = operator.apply_to(np.sum(superposition, axis=0), input_basis="real", output_basis="real")
     assert np.allclose(result, expected)

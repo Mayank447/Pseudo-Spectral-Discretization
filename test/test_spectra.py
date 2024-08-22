@@ -42,11 +42,8 @@ def test_unitary_transform(spectrum, eigenfunctions):
     """
     Pytest to test the unitarity of the transformation function in the Spectrum class.
     """
-    
-    after_transform = spectrum.transform(eigenfunctions, 
-                                         input_basis="real", 
-                                         output_basis="spectral"
-                                        )
+
+    after_transform = spectrum.transform(eigenfunctions, input_basis="real", output_basis="spectral")
 
     # It suffices to test the forward transformation because if the forward
     # transformation is unitary and the other test ensures that back and forth

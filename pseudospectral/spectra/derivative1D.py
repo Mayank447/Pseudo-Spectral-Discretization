@@ -3,6 +3,7 @@ import scipy.fft
 
 I2PI = 2j * np.pi
 
+
 class Derivative1D:
     """
     Class to represent the eigenfunctions, eigenvalues of a 1D Derivative operator
@@ -43,9 +44,7 @@ class Derivative1D:
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(
-                np.kron(self.eigenvalues[index], x)
-            ).reshape(len(index), -1) / np.sqrt(self.L)
+            return lambda x: np.exp(np.kron(self.eigenvalues[index], x)).reshape(len(index), -1) / np.sqrt(self.L)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -66,7 +65,6 @@ class Derivative1D:
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
 
-
     def lattice(self, output_basis="real"):
         """
         Return the lattice of the Derivative 1D operator as per specified given output space.
@@ -82,14 +80,13 @@ class Derivative1D:
         ValueError: If the output space is not 'real' or 'space'.
         """
         if output_basis == "real":
-            return (np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False), )
+            return (np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False),)
 
         elif output_basis == "spectral":
-            return (self.eigenvalues, )
+            return (self.eigenvalues,)
 
         else:
             raise ValueError("Unsupported output space.")
-
 
     def scalar_product(self, lhs, rhs, input_basis="real"):
         """

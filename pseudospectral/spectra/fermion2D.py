@@ -28,7 +28,7 @@ class FreeFermion2D:
         self._compute_grids()
 
         self.p_t_mu = self.p_t - self.mu
-        self.norm_p = np.sqrt(self.p_t_mu**2 + self.p_x**2)
+        self.norm_p = 1.0j * np.linalg.norm([self.p_t_mu, self.p_x], axis=0)
 
         # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
         self._norm_1 = np.sqrt(2 * self.norm_p * (self.norm_p - self.p_t_mu))
@@ -36,15 +36,12 @@ class FreeFermion2D:
         self._norm_1[self.p_x == 0] = 1
         self._norm_2[self.p_x == 0] = 1
 
-        self._eta_11 = self.p_x / self._norm_1
-        self._eta_21 = (self.norm_p - self.p_t_mu) / self._norm_1
-        self._eta_12 = self.p_x / self._norm_2
-        self._eta_22 = (-self.norm_p - self.p_t_mu) / self._norm_2
-        self._eta_11[self.p_x == 0] = 1
-        # print(self._eta_21[self.p_x==0]) [Review this line in the future]
-        self._eta_12[self.p_x == 0] = 0
-        self._eta_21[self.p_x == 0] = 0
-        self._eta_22[self.p_x == 0] = 1
+        self.eta = np.moveaxis(np.asarray([[self.p_x / self._norm_1, (self.norm_p - self.p_t_mu) / self._norm_1], [self.p_x / self._norm_2, (-self.norm_p - self.p_t_mu) / self._norm_2]]), -1, 0)
+        self.eta[self.p_x == 0, 0, 0] = 1
+        # primnt(self._eta_21[self.p_x==0]) [Review this line in the future]
+        self.eta[self.p_x == 0, 0, 1] = 0
+        self.eta[self.p_x == 0, 1, 0] = 0
+        self.eta[self.p_x == 0, 1, 1] = 1
 
     def _initialise_members(self, num_points, L, mu, m):
         self.mu = mu
@@ -58,6 +55,22 @@ class FreeFermion2D:
     def _compute_grids(self):
         self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points))))
         self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
+
+    @property
+    def _eta_11(self):
+        return self.eta[:, 0, 0]
+
+    @property
+    def _eta_12(self):
+        return self.eta[:, 1, 0]
+
+    @property
+    def _eta_21(self):
+        return self.eta[:, 0, 1]
+
+    @property
+    def _eta_22(self):
+        return self.eta[:, 1, 1]
 
     @property
     def p_t(self):

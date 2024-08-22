@@ -24,13 +24,7 @@ class FreeFermion2D:
     """
 
     def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
-        self.mu = mu
-        self.m = m
-        self.total_num_lattice_points = 2 * n_t * n_x
-
-        self.L = np.asarray([L_t, L_x])
-        self.num_points = np.asarray([n_t, n_x])
-        self.a = self.L / self.num_points
+        self._initialise_members([n_t, n_x], [L_t, L_x], mu, m)
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
@@ -58,6 +52,15 @@ class FreeFermion2D:
         self._eta_12[self.p_x == 0] = 0
         self._eta_21[self.p_x == 0] = 0
         self._eta_22[self.p_x == 0] = 1
+
+    def _initialise_members(self, num_points, L, mu, m):
+        self.mu = mu
+        self.m = m
+        self.num_points = np.asarray(num_points)
+        self.L = np.asarray(L)
+        self.a = self.L / self.num_points
+        self.dof_spinor = 2
+        self.total_num_lattice_points = self.dof_spinor * self.num_points.prod()
 
     @property
     def L_t(self):

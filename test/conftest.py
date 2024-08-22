@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from pseudospectral import Derivative1D, FreeFermion2D
 import pytest
 import numpy as np

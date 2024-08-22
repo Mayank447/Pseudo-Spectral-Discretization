@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 
 ## Some Fixtures like Spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions

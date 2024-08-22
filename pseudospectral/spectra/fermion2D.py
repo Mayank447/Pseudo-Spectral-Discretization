@@ -27,6 +27,7 @@ class FreeFermion2D:
         self._initialise_members([n_t, n_x], [L_t, L_x], mu, m)
 
         self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points))))
+        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)

@@ -30,13 +30,16 @@ class FreeFermion2D:
         self.p_t_mu = self.p_t - self.mu
         self.norm_p = 1.0j * np.linalg.norm([self.p_t_mu, self.p_x], axis=0)
 
-        # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
-        self._norm_1 = np.sqrt(2 * self.norm_p * (self.norm_p - self.p_t_mu))
-        self._norm_2 = np.sqrt(2 * self.norm_p * (self.norm_p + self.p_t_mu))
-        self._norm_1[self.p_x == 0] = 1
-        self._norm_2[self.p_x == 0] = 1
+        self._solve_spectral_problem_in_spinor_space()
 
-        self.eta = np.moveaxis(np.asarray([[self.p_x / self._norm_1, (self.norm_p - self.p_t_mu) / self._norm_1], [self.p_x / self._norm_2, (-self.norm_p - self.p_t_mu) / self._norm_2]]), -1, 0)
+    def _solve_spectral_problem_in_spinor_space(self):
+        # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
+        _norm_1 = np.sqrt(2 * self.norm_p * (self.norm_p - self.p_t_mu))
+        _norm_2 = np.sqrt(2 * self.norm_p * (self.norm_p + self.p_t_mu))
+        _norm_1[self.p_x == 0] = 1
+        _norm_2[self.p_x == 0] = 1
+
+        self.eta = np.moveaxis(np.asarray([[self.p_x / _norm_1, (self.norm_p - self.p_t_mu) / _norm_1], [self.p_x / _norm_2, (-self.norm_p - self.p_t_mu) / _norm_2]]), -1, 0)
         self.eta[self.p_x == 0, 0, 0] = 1
         # primnt(self._eta_21[self.p_x==0]) [Review this line in the future]
         self.eta[self.p_x == 0, 0, 1] = 0

@@ -25,18 +25,8 @@ class FreeFermion2D:
 
     def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
         self._initialise_members([n_t, n_x], [L_t, L_x], mu, m)
+        self._compute_grids()
 
-        self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points))))
-        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
-
-        self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
-        self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)
-        X, T = np.meshgrid(self._freq_x, self._freq_t)
-        X = X.flatten()
-        T = T.flatten()
-
-        self.p_t = I2PI * (T)
-        self.p_x = I2PI * (X)
         self.p_t_mu = self.p_t - self.mu
         self.norm_p = np.sqrt(self.p_t_mu**2 + self.p_x**2)
 
@@ -64,6 +54,18 @@ class FreeFermion2D:
         self.a = self.L / self.num_points
         self.dof_spinor = 2
         self.total_num_lattice_points = self.dof_spinor * self.num_points.prod()
+
+    def _compute_grids(self):
+        self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points))))
+        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
+
+    @property
+    def p_t(self):
+        return self.p[0].transpose().reshape(-1)
+
+    @property
+    def p_x(self):
+        return self.p[1].transpose().reshape(-1)
 
     @property
     def L_t(self):

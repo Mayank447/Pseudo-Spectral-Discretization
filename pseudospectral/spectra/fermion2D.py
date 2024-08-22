@@ -261,14 +261,6 @@ class FreeFermion2D:
 
         return coeff.reshape(-1, self.total_num_lattice_points // 2)
 
-    def _operate(f, g, p_t, p_x):
-        return (p_t * f + p_x * g, p_x * f - p_t * g)
-
-    def direct_apply(self, vector):
-        for i in range(self.n_t * self.n_x):
-            vector[i, i + 1] = self._operate(vector[i], vector[i + 1], self.p_t_mu[i], self.p_x[i])
-        return vector
-
     def scalar_product(self, lhs, rhs, input_basis="real"):
         """
         Function to compute the scalar product of two vectors in the specified basis.

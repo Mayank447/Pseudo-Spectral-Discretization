@@ -28,4 +28,4 @@ def test_exposes_x(num_points, L):
 def test_exposes_momenta(num_points, L):
     p_t = 2.0j * np.pi * np.fft.fftfreq(num_points[0], L[0] / num_points[0])
     p_x = 2.0j * np.pi * np.fft.fftfreq(num_points[1], L[1] / num_points[1])
-    assert np.allclose(FreeFermion2D(*num_points, *L).p, np.array(np.meshgrid(p_t, p_x)))
+    assert np.allclose(FreeFermion2D(*num_points, *L).p, np.array(np.meshgrid(p_t, p_x, indexing="ij")))

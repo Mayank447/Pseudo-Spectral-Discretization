@@ -56,15 +56,15 @@ class FreeFermion2D:
 
     def _compute_grids(self):
         self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points)), indexing="ij"))
-        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
+        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)), indexing="ij"))
 
     @property
     def p_t(self):
-        return self.p[0].transpose().reshape(-1)
+        return self.p[0].reshape(-1)
 
     @property
     def p_x(self):
-        return self.p[1].transpose().reshape(-1)
+        return self.p[1].reshape(-1)
 
     @property
     def L_t(self):
@@ -234,6 +234,7 @@ class FreeFermion2D:
             return self.x.reshape(self.dimension, -1)
 
         elif output_basis == "spectral":
-            return (self.p_t, self.p_x)
+            return self.p.reshape(self.dimension, -1)
+
         else:
             raise ValueError(f"Unsupported output space - {output_basis}.")

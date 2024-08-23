@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import numpy as np
-import scipy
 
 I2PI = 1j * 2 * np.pi
 
@@ -58,22 +57,6 @@ class FreeFermion2D:
     def _compute_grids(self):
         self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points))))
         self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
-
-    @property
-    def _eta_11(self):
-        return self.eta[:, 0, 0]
-
-    @property
-    def _eta_12(self):
-        return self.eta[:, 0, 1]
-
-    @property
-    def _eta_21(self):
-        return self.eta[:, 1, 0]
-
-    @property
-    def _eta_22(self):
-        return self.eta[:, 1, 1]
 
     @property
     def p_t(self):
@@ -197,7 +180,7 @@ class FreeFermion2D:
         Raises:
             ValueError: if the input_basis or output_basis is not supported.
         """
-        input_vector = np.atleast_2d(input_vector)
+        input_vector = np.asarray(input_vector)
 
         if input_basis == output_basis in ["real", "spectral"]:
             return input_vector
@@ -209,29 +192,11 @@ class FreeFermion2D:
 
         elif input_basis == "spectral" and output_basis == "real":
             # Block diagonal multiplication of eigenvector matrix
-            f = self._eta_11[np.newaxis, :] * input_vector[:, ::2] + self._eta_12[np.newaxis, :] * input_vector[:, 1::2]
-            g = self._eta_21[np.newaxis, :] * input_vector[:, ::2] + self._eta_22[np.newaxis, :] * input_vector[:, 1::2]
-
-            # Transform the two halves to spectral space
-            f = self._spectral_to_real(f)
-            g = self._spectral_to_real(g)
-
-            # Reflatten and then return the array with elements alternatively concatenated
-            return np.ravel([f.flatten(), g.flatten()], "F").reshape(-1, self.total_num_lattice_points)
+            input_in_uniform_spinor_basis = np.einsum("ijk,lik->lij", self.eta, input_vector.reshape(-1, np.prod(self.num_points), self.dof_spinor))
+            return (np.fft.ifft2(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") / np.sqrt(self.a_t * self.a_x)).reshape(*input_vector.shape)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
-
-    def _spectral_to_real(self, coeff):
-        """
-        Private function to transform a vector in spectral space to real space
-        """
-
-        # Reshaping to 2D and performing the 2D discrete Inverse FFT to go from spectral to real space
-        coeff = coeff.reshape(-1, self.n_t, self.n_x)
-        coeff = scipy.fft.ifft2(coeff, norm="ortho") / np.sqrt(self.a_t * self.a_x)
-
-        return coeff.reshape(-1, self.total_num_lattice_points // 2)
 
     def scalar_product(self, lhs, rhs, input_basis="real"):
         """

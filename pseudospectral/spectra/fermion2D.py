@@ -204,11 +204,7 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             # Split the input vector into f(even index elements) and g(odd index elements)
-            f, g = input_vector[:, ::2], input_vector[:, 1::2]
-
-            # Transform the two halves to spectral space
-            f = self._real_to_spectral(f)
-            g = self._real_to_spectral(g)
+            f, g = np.moveaxis(np.fft.fft2(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") * np.sqrt(self.a_t * self.a_x), -1, 0).reshape(self.dof_spinor, -1, np.prod(self.num_points))
 
             # Post multiplication by block diagonalized eigenvector matrix transpose
             f = np.ravel([(self._eta_11[np.newaxis, :] * f).flatten(), (self._eta_12[np.newaxis, :] * f).flatten()], "F").reshape(-1, self.total_num_lattice_points)
@@ -231,24 +227,6 @@ class FreeFermion2D:
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
-
-    def _real_to_spectral(self, coeff):
-        """
-        Private function to transform a vector from real space to spectral space.
-        Use by the public transform function.
-
-        Args:
-            coeff (numpy.ndarray): input vector in real space
-            [Note: The input vector must be a 1D array of size n_t * n_x.]
-
-        Returns:
-            vector in spectral space
-        """
-
-        # Performing the 2D discrete Fast Fourier transform to go from real to spectral space
-        coeff = coeff.reshape(-1, self.n_t, self.n_x)
-        coeff = scipy.fft.fft2(coeff, norm="ortho") * np.sqrt(self.a_t * self.a_x)
-        return coeff.reshape(-1, self.total_num_lattice_points // 2)
 
     def _spectral_to_real(self, coeff):
         """

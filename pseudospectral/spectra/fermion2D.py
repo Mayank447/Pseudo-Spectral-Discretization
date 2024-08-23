@@ -55,7 +55,7 @@ class FreeFermion2D:
         self.total_num_lattice_points = self.dof_spinor * self.num_points.prod()
 
     def _compute_grids(self):
-        self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points))))
+        self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points)), indexing="ij"))
         self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a))))
 
     @property
@@ -231,8 +231,7 @@ class FreeFermion2D:
         """
 
         if output_basis == "real":
-            t, x = np.meshgrid(np.linspace(0, self.L_t, self.n_t, endpoint=False), np.linspace(0, self.L_x, self.n_x, endpoint=False), indexing="ij")
-            return t.flatten(), x.flatten()
+            return self.x.reshape(self.dimension, -1)
 
         elif output_basis == "spectral":
             return (self.p_t, self.p_x)

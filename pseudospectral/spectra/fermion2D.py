@@ -27,10 +27,6 @@ class FreeFermion2D:
     def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
         self._initialise_members([n_t, n_x], [L_t, L_x], mu, m)
         self._compute_grids()
-
-        self.p_t_mu = self.p_t - self.mu
-        self.norm_p = 1.0j * np.linalg.norm([self.p_t_mu, self.p_x], axis=0)
-
         self._solve_spectral_problem_in_spinor_space()
 
     def _solve_spectral_problem_in_spinor_space(self):
@@ -41,8 +37,9 @@ class FreeFermion2D:
         mu_vectorfield = self.mu * np.eye(self.p.shape[0])[0].reshape(-1, *(np.ones(self.dimension, dtype=int)))
         self.matrix_in_momentum_space = np.sum(self.gamma[..., *(self.dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.dimension * [np.newaxis])]
         self.matrix_in_momentum_space = self.matrix_in_momentum_space.transpose(*[list(range(-self.dimension, 0)) + [0, 1]])
-        _, self.eta = np.linalg.eig(self.matrix_in_momentum_space)
+        self.eigenvalues, self.eta = np.linalg.eig(self.matrix_in_momentum_space)
         self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
+        self.eigenvalues = self.eigenvalues.reshape(-1)
 
     def _initialise_members(self, num_points, L, mu, m):
         self.mu = mu
@@ -58,33 +55,11 @@ class FreeFermion2D:
         self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)), indexing="ij"))
 
     @property
-    def p_t(self):
-        return self.p[0].reshape(-1)
-
-    @property
-    def p_x(self):
-        return self.p[1].reshape(-1)
-
-    @property
     def dimension(self):
         """
         The dimension of the spectrum.
         """
         return 2
-
-    @property
-    def eigenvalues(self):
-        """
-        Private function to return the list of eigenvalues (the diagonal of the eigenvalue matrix)
-        of the 2D Free Fermion operator
-
-        Args:
-            None
-
-        Returns:
-            numpy.ndarray: 1D array of eigenvalues
-        """
-        return (np.kron(self.norm_p, [1, -1])) + self.m
 
     def eigenfunction(self, index):
         """

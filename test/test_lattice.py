@@ -30,6 +30,6 @@ def test_lattice_spectral_basis(spectrum):
         expected = spectrum.eigenvalues
 
     elif spectrum.dimension == 2:
-        expected = (spectrum.p_t, spectrum.p_x)
+        expected = spectrum.p.reshape(spectrum.dimension, -1)
 
     assert np.equal(result, expected).all()

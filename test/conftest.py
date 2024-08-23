@@ -8,8 +8,8 @@ SPECTRA = [
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "L": 3}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101, "L": 42}},
-    {"type": FreeFermion2D, "config": {"n_t": 3, "n_x": 3, "L_t": 1, "L_x": 1, "mu": 0, "m": 0}},
-    {"type": FreeFermion2D, "config": {"n_t": 3, "n_x": 70, "L_t": 2, "L_x": 7, "mu": 0, "m": 0}},
+    {"type": FreeFermion2D, "config": {"num_points": [3, 3], "L": [1, 1], "mu": 0, "m": 0}},
+    {"type": FreeFermion2D, "config": {"num_points": [3, 70], "L": [2, 7], "mu": 0, "m": 0}},
 ]
 
 

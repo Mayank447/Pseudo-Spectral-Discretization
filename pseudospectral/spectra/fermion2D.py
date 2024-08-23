@@ -127,27 +127,16 @@ class FreeFermion2D:
              x = x.flatten()
         """
 
-        index = np.atleast_1d(index)
+        index = np.asarray(index)
 
         if (index >= self.total_num_lattice_points).any() or (index < -self.total_num_lattice_points).any():
             raise ValueError(f"Index {index} out of bounds.")
 
-        sign = 1 - 2 * (index % 2)
-        p_t = self.p_t[index // 2]  # Since two eigenvalues exist due to spinor structure
-        p_x = self.p_x[index // 2]
-        p_t_mu = self.p_t_mu[index // 2]
-        norm_p = self.norm_p[index // 2]
+        # Since two eigenvalues exist due to spinor structure
+        spacetime_index = index // self.dof_spinor
+        eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)[spacetime_index, :, index % self.dof_spinor]
 
-        normalization = np.sqrt(2 * norm_p * (norm_p - (sign * p_t_mu)))
-        mask = p_x == 0
-        normalization[mask] = 1
-        normalization = normalization[:, np.newaxis]
-
-        # Normalized eigenvector for the ((p_t, p_x), (p_x, -p_t)) matrix
-        eta = np.array([p_x, sign * norm_p - p_t_mu]).transpose() / normalization
-        eta[mask] = np.eye(2)[index[mask] % 2]
-
-        return lambda t, x: self._return_eigenfunction(t, x, len(index), eta, p_t, p_x)
+        return lambda t, x: self._return_eigenfunction(t, x, len(index), eta, *self.p.reshape(self.dimension, -1)[:, spacetime_index])
 
     def _return_eigenfunction(self, t, x, num_eigenfunction, eta, p_t, p_x):
         """

@@ -204,14 +204,8 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             # Split the input vector into f(even index elements) and g(odd index elements)
-            f, g = np.moveaxis(np.fft.fft2(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") * np.sqrt(self.a_t * self.a_x), -1, 0).reshape(self.dof_spinor, -1, np.prod(self.num_points))
-
-            # Post multiplication by block diagonalized eigenvector matrix transpose
-            f = np.ravel([(self._eta_11[np.newaxis, :] * f).flatten(), (self._eta_12[np.newaxis, :] * f).flatten()], "F").reshape(-1, self.total_num_lattice_points)
-
-            g = np.ravel([(self._eta_21[np.newaxis, :] * g).flatten(), (self._eta_22[np.newaxis, :] * g).flatten()], "F").reshape(-1, self.total_num_lattice_points)
-
-            return f + g
+            input_in_momentum_space = np.fft.fft2(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") * np.sqrt(self.a_t * self.a_x)
+            return np.einsum("ikj,lik->lij", self.eta, input_in_momentum_space.reshape(-1, np.prod(self.num_points), self.dof_spinor)).reshape(*input_vector.shape)
 
         elif input_basis == "spectral" and output_basis == "real":
             # Block diagonal multiplication of eigenvector matrix

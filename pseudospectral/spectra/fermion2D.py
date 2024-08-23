@@ -27,16 +27,20 @@ class FreeFermion2D:
     def __init__(self, n_t, n_x, L_t=1, L_x=1, mu=0, m=0):
         self._initialise_members([n_t, n_x], [L_t, L_x], mu, m)
         self._compute_grids()
+        self._setup_spinor_structure()
         self._solve_spectral_problem_in_spinor_space()
 
-    def _solve_spectral_problem_in_spinor_space(self):
+    def _setup_spinor_structure(self):
         if self.dimension not in [2, 3]:
             raise NotImplementedError(f"We do not have gamma matrices for dimension {self.dimension}.")
         self.gamma = PAULI_MATRICES[1 : self.dimension + 1]
         self.dof_spinor = self.gamma.shape[-1]
-        mu_vectorfield = self.mu * np.eye(self.p.shape[0])[0].reshape(-1, *(np.ones(self.dimension, dtype=int)))
-        self.matrix_in_momentum_space = np.sum(self.gamma[..., *(self.dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.dimension * [np.newaxis])]
-        self.matrix_in_momentum_space = self.matrix_in_momentum_space.transpose(*[list(range(-self.dimension, 0)) + [0, 1]])
+
+    def _solve_spectral_problem_in_spinor_space(self):
+        mu_vectorfield = self.mu * np.eye(self.dimension)[0].reshape(-1, *(np.ones(self.dimension, dtype=int)))
+        self.matrix_in_momentum_space = (np.sum(self.gamma[..., *(self.dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.dimension * [np.newaxis])]).transpose(
+            np.roll(np.arange(self.dimension + 2), 2)
+        )
         self.eigenvalues, self.eta = np.linalg.eig(self.matrix_in_momentum_space)
         self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
         self.eigenvalues = self.eigenvalues.reshape(-1)

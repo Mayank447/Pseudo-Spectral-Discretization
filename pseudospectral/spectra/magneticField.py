@@ -2,6 +2,7 @@ import numpy as np
 from scipy import special
 
 I2PI = 2j * np.pi
+K = 100
 
 class MagneticField:
     """
@@ -38,6 +39,9 @@ class MagneticField:
         self._n_x = self.nu
         self._n_y = self.N
 
+    @property
+    def dimension(self):
+        return self._dimension
 
     @property
     def eigenvalues(self):
@@ -84,19 +88,31 @@ class MagneticField:
         )
 
     def eigenfunction(self, index):
-        omega = self.omega[index // ((2* self.N - 1) * self.mu)]
-        lamda = (index % ((2* self.N - 1) * self.mu) + self.mu)
-        n = self.n[lamda // (2*self.mu)]
-        p = self.p[lamda % (2*self.mu)]
-        mu = np.sqrt(omega**2 + self.lamda_value(n)**2)
+        omega = self.omega[index // ((2* self.N - 1) * self.nu)]
+        lamda = (index % (self.nu * (2* self.N - 1))) + self.nu
+        n = self.n[lamda // (2*self.nu)]
+        p = self.p[lamda % (2*self.nu)]
+        
+        sign = (-1**(index%2)) 
+        mu = sign * np.sqrt(omega**2 + self.lamda_value(n)**2)
 
-        lambda t, x, y: (
-            np.exp(1j * omega * t) / np.sqrt(2 * self.beta * mu * (mu - omega)) *
-            np.ravel([
-                (mu - omega) * self.phi(n, p)(x, y, 100),
-                self.lamda_value(n) * self.phi(n-1, p)(x, y, 100)
-            ], 'F')
-        )
+        if sign == 1:
+            return lambda t, x, y: (
+                np.exp(1j * omega * t) / np.sqrt(2 * self.beta * mu * (mu - sign * omega)) *
+                np.ravel([
+                    (mu - omega) * self.phi(n, p)(x, y, K),
+                    self.lamda_value(n) * self.phi(n-1, p)(x, y, K)
+                ], 'F')
+            )
+        
+        else:
+            return lambda t, x, y: (
+                np.exp(1j * omega * t) / np.sqrt(2 * self.beta * mu * (mu + sign * omega)) *
+                np.ravel([
+                    self.lamda_value(n) * self.phi(n, p)(x, y, K),
+                    (mu + omega) * self.phi(n-1, p)(x, y, K)
+                ], 'F')
+            )
 
 
     def transform(self, coefficients, input_basis, output_basis):
@@ -107,6 +123,7 @@ class MagneticField:
             return coefficients
         
         elif input_basis == "real" and output_basis == "spectral":
+            
             return self.real_to_spectral(coefficients)
         
         elif input_basis == "spectral" and output_basis == "real":
@@ -116,8 +133,16 @@ class MagneticField:
             raise ValueError("Invalid input_basis or output_basis.")
 
 
-    def inner_product(self, f, g):
-        return g @ f.transpose().conjugate()
+    def inner_product(self, f, g, output_basis="real"):
+        if output_basis == "real":
+            pass
+
+        elif output_basis == "spectral":
+            return g @ f.transpose().conjugate()
+        
+        else:
+            raise ValueError(f"Invalid output_basis {output_basis}.")
+
 
     def lattice(self, output_basis="real"):
         """
@@ -127,7 +152,7 @@ class MagneticField:
             t = np.arange(self.Nt)
             x = np.linspace(0, self.L, self._n_x, endpoint=False)
             y = np.linspace(0, self.L, self._n_y, endpoint=False)
-            t, x, y = np.meshgrid(t, x, y, indexing="ijk")
+            t, x, y = np.meshgrid(t, x, y, indexing="ij")
             return t.flatten(), x.flatten(), y.flatten()
 
         elif output_basis == "spectral":
@@ -136,13 +161,9 @@ class MagneticField:
         else:
             raise ValueError(f"Invalid output_basis {output_basis}.")
 
-    @property
-    def dimension(self):
-        return self._dimension
-
 
 if __name__ == "__main__":
     M = MagneticField(3, 3, 10)
-    print(M.eigenvalues)
+    print(M.eigenfunction(0)(*M.lattice("real")))
     # v = M.phi(2, 1)(np.array([0,1,2]), np.array([1,1,1]), 100)
     # print(v)

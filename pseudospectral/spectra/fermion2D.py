@@ -136,16 +136,15 @@ class FreeFermion2D:
         spacetime_index = index // self.dof_spinor
         eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)[spacetime_index, :, index % self.dof_spinor]
 
-        return lambda t, x: self._return_eigenfunction(t, x, len(index), eta, *self.p.reshape(self.dimension, -1)[:, spacetime_index])
+        return lambda t, x: self._return_eigenfunction(t, x, eta, self.p.reshape(self.dimension, -1)[:, spacetime_index])
 
-    def _return_eigenfunction(self, t, x, num_eigenfunction, eta, p_t, p_x):
+    def _return_eigenfunction(self, t, x, eta, p):
         """
         Return function when eigenfucntion method is called.
         """
-        # This part {np.kron(p_t, t)} can be done more efficiently since some values of p_x, p_t repeat
-        exp_component = np.exp(np.kron(p_t, t) + np.kron(p_x, x)).reshape(num_eigenfunction, -1) / np.sqrt(self.L_t * self.L_x)
+        exp_component = np.exp(np.einsum("ij,i...->j...", p, np.asarray([t, x]))).reshape(*p.shape[1:], *x.shape) / np.sqrt(np.prod(self.L))
 
-        # Initialize the return array of length equal to the number of eigenfunctions indices to be returned
+        num_eigenfunction = p.shape[-1]
         ret = np.zeros((num_eigenfunction, self.total_num_lattice_points), dtype=np.complex128)
 
         # Kronecker product between each spinor array and corresponding exponential part

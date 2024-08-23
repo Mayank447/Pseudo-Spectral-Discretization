@@ -67,30 +67,6 @@ class FreeFermion2D:
         return self.p[1].reshape(-1)
 
     @property
-    def L_t(self):
-        return self.L[0]
-
-    @property
-    def L_x(self):
-        return self.L[1]
-
-    @property
-    def n_t(self):
-        return self.num_points[0]
-
-    @property
-    def n_x(self):
-        return self.num_points[1]
-
-    @property
-    def a_t(self):
-        return self.a[0]
-
-    @property
-    def a_x(self):
-        return self.a[1]
-
-    @property
     def dimension(self):
         """
         The dimension of the spectrum.
@@ -175,13 +151,13 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             # Split the input vector into f(even index elements) and g(odd index elements)
-            input_in_momentum_space = np.fft.fft2(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") * np.sqrt(self.a_t * self.a_x)
+            input_in_momentum_space = np.fft.fft2(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") * np.sqrt(np.prod(self.a))
             return np.einsum("ikj,lik->lij", self.eta, input_in_momentum_space.reshape(-1, np.prod(self.num_points), self.dof_spinor)).reshape(*input_vector.shape)
 
         elif input_basis == "spectral" and output_basis == "real":
             # Block diagonal multiplication of eigenvector matrix
             input_in_uniform_spinor_basis = np.einsum("ijk,lik->lij", self.eta, input_vector.reshape(-1, np.prod(self.num_points), self.dof_spinor))
-            return (np.fft.ifft2(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") / np.sqrt(self.a_t * self.a_x)).reshape(*input_vector.shape)
+            return (np.fft.ifft2(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=-2 - np.arange(self.dimension), norm="ortho") / np.sqrt(np.prod(self.a))).reshape(*input_vector.shape)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
@@ -196,7 +172,7 @@ class FreeFermion2D:
             input_basis: basis of the input vectors (real/spectral)
         """
         if input_basis == "real":
-            return rhs @ lhs.transpose().conjugate() * self.a_t * self.a_x
+            return rhs @ lhs.transpose().conjugate() * np.prod(self.a)
 
         elif input_basis == "spectral":
             return rhs @ lhs.transpose().conjugate()

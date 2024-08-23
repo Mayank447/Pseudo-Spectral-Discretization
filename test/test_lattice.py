@@ -14,7 +14,7 @@ def test_lattice_real_basis(spectrum):
         expected = np.linspace(0, spectrum.L, spectrum.total_num_lattice_points, endpoint=False)
 
     elif spectrum.dimension == 2:
-        t, x = np.meshgrid(np.linspace(0, spectrum.L_t, spectrum.n_t, endpoint=False), np.linspace(0, spectrum.L_x, spectrum.n_x, endpoint=False), indexing="ij")
+        t, x = np.meshgrid(np.linspace(0, spectrum.L[0], spectrum.num_points[0], endpoint=False), np.linspace(0, spectrum.L[1], spectrum.num_points[1], endpoint=False), indexing="ij")
         expected = t.flatten(), x.flatten()
     assert np.equal(lattice, expected).all()
 

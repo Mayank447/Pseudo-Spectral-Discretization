@@ -110,15 +110,12 @@ class FreeFermion2D:
 
         # Since two eigenvalues exist due to spinor structure
         spacetime_index = index // self.dof_spinor
-        eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)[spacetime_index, :, index % self.dof_spinor]
 
-        return lambda t, x: self._return_eigenfunction(t, x, eta, self.p.reshape(self.dimension, -1)[:, spacetime_index])
-
-    def _return_eigenfunction(self, t, x, eta, p):
-        """
-        Return function when eigenfucntion method is called.
-        """
-        return np.einsum("j...,jk->j...k", np.exp(np.einsum("ij,i...->j...", p, np.asarray([t, x]))).reshape(*p.shape[1:], *x.shape) / np.sqrt(np.prod(self.L)), eta)
+        return lambda t, x: np.einsum(
+            "j...,jk->j...k",
+            np.exp(np.einsum("ij,i...->j...", self.p.reshape(self.dimension, -1)[:, spacetime_index], np.asarray([t, x]))).reshape(*index.shape, *x.shape) / np.sqrt(np.prod(self.L)),
+            self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)[spacetime_index, :, index % self.dof_spinor],
+        )
 
     def transform(self, input_vector, input_basis, output_basis):
         """

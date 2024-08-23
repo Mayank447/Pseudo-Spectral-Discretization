@@ -21,7 +21,7 @@ def test_transforms_from_real_to_spectral_basis(spectrum, arbitrary_index_single
     from real space to spectral space.
     """
 
-    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points)
+    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points).reshape(-1)
 
     expected = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
 
@@ -36,7 +36,7 @@ def test_transforms_multiple_components_from_real_to_spectral_basis(spectrum, ar
     """
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    eigenfunction = np.sum(arbitrary_coefficients[:, np.newaxis] * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points), axis=0)
+    eigenfunction = np.sum(arbitrary_coefficients[:, np.newaxis] * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points).reshape(*arbitrary_index_multiple_eigenfunctions.shape, -1), axis=0)
 
     expected = np.sum(arbitrary_coefficients[:, np.newaxis] * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_multiple_eigenfunctions, :], axis=0)
 
@@ -53,7 +53,7 @@ def test_transforms_from_spectral_to_real_basis(spectrum, arbitrary_single_coeff
     spectral_vector = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
     result = spectrum.transform(spectral_vector, input_basis="spectral", output_basis="real")
 
-    expected = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points)
+    expected = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points).reshape(-1)
     assert np.allclose(expected, result)
 
 
@@ -71,6 +71,6 @@ def test_transforms_multiple_components_from_spectral_to_real_basis(spectrum, ar
     result = spectrum.transform(spectral_superposition, input_basis="spectral", output_basis="real")
 
     # Generate expected function values in real space
-    eigenfunctions = spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points)
+    eigenfunctions = spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points).reshape(*arbitrary_index_multiple_eigenfunctions.shape, -1)
     expected = np.sum(arbitrary_coefficients[:, np.newaxis] * eigenfunctions, axis=0)
     assert np.allclose(expected, result)

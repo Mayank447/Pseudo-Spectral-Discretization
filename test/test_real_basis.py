@@ -26,7 +26,7 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_
     Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
     """
     operator = DiracOperator(spectrum)
-    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points)
+    eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points).reshape(-1)
 
     result = operator.apply_to(eigenfunction, input_basis="real", output_basis="real")
 
@@ -41,7 +41,7 @@ def test_application_to_superposition_of_eigenfunctions(spectrum, arbitrary_inde
     operator = DiracOperator(spectrum)
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    superposition = arbitrary_coefficients[:, np.newaxis] * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points)
+    superposition = arbitrary_coefficients[:, np.newaxis] * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points).reshape(*arbitrary_index_multiple_eigenfunctions.shape, -1)
 
     expected = np.sum(spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis] * superposition, axis=0)
 

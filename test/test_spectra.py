@@ -11,7 +11,7 @@ def eigenfunctions(spectrum, sample_points):
     """
     Pytest fixture to generate eigenfunctions for the Spectrum class.
     """
-    return spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points))(*sample_points)
+    return spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points))(*sample_points).reshape(spectrum.total_num_lattice_points, -1)
 
 
 def test_orthonormality(spectrum, eigenfunctions):

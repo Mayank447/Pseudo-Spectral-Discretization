@@ -118,16 +118,7 @@ class FreeFermion2D:
         """
         Return function when eigenfucntion method is called.
         """
-        exp_component = np.exp(np.einsum("ij,i...->j...", p, np.asarray([t, x]))).reshape(*p.shape[1:], *x.shape) / np.sqrt(np.prod(self.L))
-
-        num_eigenfunction = p.shape[-1]
-        ret = np.zeros((num_eigenfunction, self.total_num_lattice_points), dtype=np.complex128)
-
-        # Kronecker product between each spinor array and corresponding exponential part
-        for i in range(num_eigenfunction):
-            ret[i] = np.kron(exp_component[i], eta[i])
-
-        return ret
+        return np.einsum("j...,jk->j...k", np.exp(np.einsum("ij,i...->j...", p, np.asarray([t, x]))).reshape(*p.shape[1:], *x.shape) / np.sqrt(np.prod(self.L)), eta)
 
     def transform(self, input_vector, input_basis, output_basis):
         """

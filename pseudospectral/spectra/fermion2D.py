@@ -2,6 +2,8 @@
 import numpy as np
 
 I2PI = 1j * 2 * np.pi
+PAULI_MATRICES = np.array([[[1, 0], [0, 1]], [[1, 0], [0, -1]], [[0, 1], [1, 0]], [[0, 1.0j], [-1.0j, 0]]])
+IDENTITY = PAULI_MATRICES[0]
 
 
 class FreeFermion2D:
@@ -32,18 +34,15 @@ class FreeFermion2D:
         self._solve_spectral_problem_in_spinor_space()
 
     def _solve_spectral_problem_in_spinor_space(self):
-        # Normalized eigenvector for ((p_t, p_x), (p_x, -p_t)) matrix as 4 scalar function of (p_x, p_t)
-        _norm_1 = np.sqrt(2 * self.norm_p * (self.norm_p - self.p_t_mu))
-        _norm_2 = np.sqrt(2 * self.norm_p * (self.norm_p + self.p_t_mu))
-        _norm_1[self.p_x == 0] = 1
-        _norm_2[self.p_x == 0] = 1
-
-        self.eta = np.moveaxis(np.asarray([[self.p_x / _norm_1, self.p_x / _norm_2], [(self.norm_p - self.p_t_mu) / _norm_1, (-self.norm_p - self.p_t_mu) / _norm_2]]), -1, 0)
-        self.eta[self.p_x == 0, 0, 0] = 1
-        # primnt(self._eta_21[self.p_x==0]) [Review this line in the future]
-        self.eta[self.p_x == 0, 0, 1] = 0
-        self.eta[self.p_x == 0, 1, 0] = 0
-        self.eta[self.p_x == 0, 1, 1] = 1
+        if self.dimension not in [2, 3]:
+            raise NotImplementedError(f"We do not have gamma matrices for dimension {self.dimension}.")
+        self.gamma = PAULI_MATRICES[1 : self.dimension + 1]
+        self.dof_spinor = self.gamma.shape[-1]
+        mu_vectorfield = self.mu * np.eye(self.p.shape[0])[0].reshape(-1, *(np.ones(self.dimension, dtype=int)))
+        self.matrix_in_momentum_space = np.sum(self.gamma[..., *(self.dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.dimension * [np.newaxis])]
+        self.matrix_in_momentum_space = self.matrix_in_momentum_space.transpose(*[list(range(-self.dimension, 0)) + [0, 1]])
+        _, self.eta = np.linalg.eig(self.matrix_in_momentum_space)
+        self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
 
     def _initialise_members(self, num_points, L, mu, m):
         self.mu = mu

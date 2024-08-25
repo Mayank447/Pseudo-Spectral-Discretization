@@ -36,25 +36,25 @@ class FreeFermion2D:
         self.num_points = np.asarray(num_points)
         self.L = np.asarray(L) if L is not None else self.num_points
         self.a = self.L / self.num_points
-        self.dimension = len(self.num_points)
+        self.spacetime_dimension = len(self.num_points)
 
     def _compute_grids(self):
         self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points)), indexing="ij"))
         self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)), indexing="ij"))
 
     def _setup_spinor_structure(self):
-        if self.dimension not in [2, 3]:
-            raise NotImplementedError(f"We do not have gamma matrices for dimension {self.dimension}.")
-        self.gamma = PAULI_MATRICES[1 : self.dimension + 1]
+        if self.spacetime_dimension not in [2, 3]:
+            raise NotImplementedError(f"We do not have gamma matrices for dimension {self.spacetime_dimension}.")
+        self.gamma = PAULI_MATRICES[1 : self.spacetime_dimension + 1]
         self.dof_spinor = self.gamma.shape[-1]
-        self.total_num_lattice_points = self.dof_spinor * self.num_points.prod()
+        self.total_num_of_dof = self.dof_spinor * self.num_points.prod()
 
     def _solve_spectral_problem_in_spinor_space(self):
-        mu_vectorfield = self.mu * np.eye(self.dimension)[0].reshape(-1, *(np.ones(self.dimension, dtype=int)))
-        self.matrix_in_momentum_space = (np.sum(self.gamma[..., *(self.dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.dimension * [np.newaxis])]).transpose(
-            np.roll(np.arange(self.dimension + 2), 2)
-        )
-        self.eigenvalues, self.eta = np.linalg.eig(self.matrix_in_momentum_space)
+        mu_vectorfield = self.mu * np.eye(self.spacetime_dimension)[0].reshape(-1, *(np.ones(self.spacetime_dimension, dtype=int)))
+        matrix_in_momentum_space = (
+            np.sum(self.gamma[..., *(self.spacetime_dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.spacetime_dimension * [np.newaxis])]
+        ).transpose(np.roll(np.arange(self.spacetime_dimension + 2), 2))
+        self.eigenvalues, self.eta = np.linalg.eig(matrix_in_momentum_space)
         self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
         self.eigenvalues = self.eigenvalues.reshape(-1)
 
@@ -76,7 +76,7 @@ class FreeFermion2D:
 
         index = np.asarray(index)
 
-        if (index >= self.total_num_lattice_points).any() or (index < -self.total_num_lattice_points).any():
+        if (index >= self.total_num_of_dof).any() or (index < -self.total_num_of_dof).any():
             raise ValueError(f"Index {index} out of bounds.")
 
         # Since two eigenvalues exist due to spinor structure
@@ -84,7 +84,7 @@ class FreeFermion2D:
 
         return lambda t, x: np.einsum(
             "j...,jk->j...k",
-            np.exp(np.einsum("ij,i...->j...", self.p.reshape(self.dimension, -1)[:, spacetime_index], np.asarray([t, x]))).reshape(*index.shape, *x.shape) / np.sqrt(np.prod(self.L)),
+            np.exp(np.einsum("ij,i...->j...", self.p.reshape(self.spacetime_dimension, -1)[:, spacetime_index], np.asarray([t, x]))).reshape(*index.shape, *x.shape) / np.sqrt(np.prod(self.L)),
             self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)[spacetime_index, :, index % self.dof_spinor],
         )
 
@@ -110,13 +110,13 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             # Split the input vector into f(even index elements) and g(odd index elements)
-            input_in_momentum_space = np.fft.fftn(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.dimension), norm="ortho") * np.sqrt(np.prod(self.a))
+            input_in_momentum_space = np.fft.fftn(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.spacetime_dimension), norm="ortho") * np.sqrt(np.prod(self.a))
             return np.einsum("ikj,lik->lij", self.eta, input_in_momentum_space.reshape(-1, np.prod(self.num_points), self.dof_spinor)).reshape(*input_vector.shape)
 
         elif input_basis == "spectral" and output_basis == "real":
             # Block diagonal multiplication of eigenvector matrix
             input_in_uniform_spinor_basis = np.einsum("ijk,lik->lij", self.eta, input_vector.reshape(-1, np.prod(self.num_points), self.dof_spinor))
-            return (np.fft.ifftn(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.dimension), norm="ortho") / np.sqrt(np.prod(self.a))).reshape(*input_vector.shape)
+            return (np.fft.ifftn(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.spacetime_dimension), norm="ortho") / np.sqrt(np.prod(self.a))).reshape(*input_vector.shape)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
@@ -154,10 +154,10 @@ class FreeFermion2D:
         """
 
         if output_basis == "real":
-            return self.x.reshape(self.dimension, -1)
+            return self.x.reshape(self.spacetime_dimension, -1)
 
         elif output_basis == "spectral":
-            return self.p.reshape(self.dimension, -1)
+            return self.p.reshape(self.spacetime_dimension, -1)
 
         else:
             raise ValueError(f"Unsupported output space - {output_basis}.")

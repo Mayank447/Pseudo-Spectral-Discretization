@@ -34,7 +34,7 @@ def arbitrary_index_single_eigenfunction(spectrum):
     """
     Python fixture to initialize the arbitrary index for the single eigenfunction test.
     """
-    return np.random.randint(spectrum.total_num_lattice_points, size=1)
+    return np.random.randint(spectrum.total_num_of_dof, size=1)
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def arbitrary_index_multiple_eigenfunctions(
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.choice(spectrum.total_num_lattice_points, size=1 + np.random.randint(spectrum.total_num_lattice_points - 1), replace=False)
+    return np.random.choice(spectrum.total_num_of_dof, size=1 + np.random.randint(spectrum.total_num_of_dof - 1), replace=False)
 
 
 @pytest.fixture

@@ -23,7 +23,7 @@ def test_transforms_from_real_to_spectral_basis(spectrum, arbitrary_index_single
 
     eigenfunction = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points).reshape(-1)
 
-    expected = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
+    expected = arbitrary_single_coefficient * np.eye(spectrum.total_num_of_dof)[arbitrary_index_single_eigenfunction, :]
 
     result = spectrum.transform(eigenfunction, input_basis="real", output_basis="spectral")
     assert np.allclose(expected, result)
@@ -38,7 +38,7 @@ def test_transforms_multiple_components_from_real_to_spectral_basis(spectrum, ar
 
     eigenfunction = np.sum(arbitrary_coefficients[:, np.newaxis] * spectrum.eigenfunction(arbitrary_index_multiple_eigenfunctions)(*sample_points).reshape(*arbitrary_index_multiple_eigenfunctions.shape, -1), axis=0)
 
-    expected = np.sum(arbitrary_coefficients[:, np.newaxis] * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_multiple_eigenfunctions, :], axis=0)
+    expected = np.sum(arbitrary_coefficients[:, np.newaxis] * np.eye(spectrum.total_num_of_dof)[arbitrary_index_multiple_eigenfunctions, :], axis=0)
 
     result = spectrum.transform(eigenfunction, input_basis="real", output_basis="spectral")
     assert np.allclose(expected, result)
@@ -50,7 +50,7 @@ def test_transforms_from_spectral_to_real_basis(spectrum, arbitrary_single_coeff
     with a single component from spectral space to real space.
     """
 
-    spectral_vector = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
+    spectral_vector = arbitrary_single_coefficient * np.eye(spectrum.total_num_of_dof)[arbitrary_index_single_eigenfunction, :]
     result = spectrum.transform(spectral_vector, input_basis="spectral", output_basis="real")
 
     expected = arbitrary_single_coefficient * spectrum.eigenfunction(arbitrary_index_single_eigenfunction)(*sample_points).reshape(-1)
@@ -64,7 +64,7 @@ def test_transforms_multiple_components_from_spectral_to_real_basis(spectrum, ar
     """
 
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
-    spectral_superposition = np.zeros(spectrum.total_num_lattice_points)
+    spectral_superposition = np.zeros(spectrum.total_num_of_dof)
     spectral_superposition[arbitrary_index_multiple_eigenfunctions] = arbitrary_coefficients
 
     # Transform from spectral space to real space

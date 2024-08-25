@@ -26,7 +26,7 @@ def test_application_to_a_single_eigenfunction(spectrum, arbitrary_index_single_
     """
     operator = DiracOperator(spectrum)
 
-    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
+    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum.total_num_of_dof)[arbitrary_index_single_eigenfunction, :]
     expected = eigenfunction * spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
 
     result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")
@@ -40,7 +40,7 @@ def test_application_to_superposition_of_eigenfunctions(spectrum, arbitrary_inde
     operator = DiracOperator(spectrum)
     arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
 
-    superposition = arbitrary_coefficients[:, np.newaxis] * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_multiple_eigenfunctions]
+    superposition = arbitrary_coefficients[:, np.newaxis] * np.eye(spectrum.total_num_of_dof)[arbitrary_index_multiple_eigenfunctions]
 
     expected = np.sum(spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis] * superposition, axis=0)
 

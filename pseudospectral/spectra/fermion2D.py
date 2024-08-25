@@ -30,6 +30,18 @@ class FreeFermion2D:
         self._compute_grids()
         self._solve_spectral_problem_in_spinor_space()
 
+    def _initialise_members(self, num_points, L, mu, m):
+        self.mu = mu
+        self.m = m
+        self.num_points = np.asarray(num_points)
+        self.L = np.asarray(L) if L is not None else self.num_points
+        self.a = self.L / self.num_points
+        self.dimension = len(self.num_points)
+
+    def _compute_grids(self):
+        self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points)), indexing="ij"))
+        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)), indexing="ij"))
+
     def _setup_spinor_structure(self):
         if self.dimension not in [2, 3]:
             raise NotImplementedError(f"We do not have gamma matrices for dimension {self.dimension}.")
@@ -45,24 +57,6 @@ class FreeFermion2D:
         self.eigenvalues, self.eta = np.linalg.eig(self.matrix_in_momentum_space)
         self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
         self.eigenvalues = self.eigenvalues.reshape(-1)
-
-    def _initialise_members(self, num_points, L, mu, m):
-        self.mu = mu
-        self.m = m
-        self.num_points = np.asarray(num_points)
-        self.L = np.asarray(L) if L is not None else self.num_points
-        self.a = self.L / self.num_points
-
-    def _compute_grids(self):
-        self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points)), indexing="ij"))
-        self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)), indexing="ij"))
-
-    @property
-    def dimension(self):
-        """
-        The dimension of the spectrum.
-        """
-        return len(self.num_points)
 
     def eigenfunction(self, index):
         """

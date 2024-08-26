@@ -15,6 +15,7 @@ class Derivative1D:
 
     def __init__(self, total_num_lattice_points, L=1.0):
         self.total_num_lattice_points = total_num_lattice_points
+        self.total_num_of_dof = self.total_num_lattice_points
         self.L = L
         self.a = L / total_num_lattice_points
 

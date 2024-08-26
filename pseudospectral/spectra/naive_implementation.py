@@ -3,6 +3,13 @@ import numpy as np
 
 
 def naive_implementation_of(Spectrum):
+    """
+    Return a Spectrum class that implements transformation and scalar product naively.
+
+    Given that the Spectrum class provides eigenfunctions, eigenvalues and a lattice, the naive implementations of transform and scalar_product are added. These are O(N^2) dense matrix operations that you don't want to use in production for
+    reasons of performance and numerical stability. But they can be used to provide stubs for early development and for testing purposes.
+    """
+
     class NaiveImplementationOf(Spectrum):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)

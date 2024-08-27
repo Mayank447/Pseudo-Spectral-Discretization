@@ -24,7 +24,7 @@ class FreeFermion2D:
         n_x: number of lattice points in the x axis (odd)
     """
 
-    def __init__(self, num_points, L=None, mu=0, m=0):
+    def __init__(self, num_points, *, L=None, mu=0, m=0):
         self._initialise_members(num_points, L, mu, m)
         self._setup_spinor_structure()
         self._compute_grids()

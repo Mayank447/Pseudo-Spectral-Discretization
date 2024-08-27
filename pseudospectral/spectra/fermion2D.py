@@ -104,6 +104,8 @@ class FreeFermion2D:
             ValueError: if the input_basis or output_basis is not supported.
         """
         input_vector = np.asarray(input_vector)
+        if (found := input_vector.shape[-1]) != (expected := self.total_num_of_dof):
+            raise ValueError(f"Wrongly shaped input_vector: Expected {expected}, found {found} as size of last axis!")
 
         if input_basis == output_basis in ["real", "spectral"]:
             return input_vector

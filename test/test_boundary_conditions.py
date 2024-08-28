@@ -20,17 +20,17 @@ def spectrum(request):
 
 
 def test_eigenfunctions_obey_boundary_conditions(spectrum):
-    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points).reshape(-1, 1))
+    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points))
     assert np.allclose(np.exp(2.0j * np.pi * spectrum.theta) * eigenfunctions(*spectrum.lattice()), eigenfunctions(spectrum.lattice()[0] + spectrum.L))
 
 
 def test_inverse_transform_results_in_eigenfunction(spectrum):
-    spectral_representation = np.eye(spectrum.total_num_lattice_points)[1, :]
+    spectral_representation = np.eye(spectrum.total_num_lattice_points)
     real_space_representation = spectrum.transform(spectral_representation, "spectral", "real")
-    eigenfunction = spectrum.eigenfunction([1])
+    eigenfunction = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points))
     assert np.allclose(eigenfunction(*spectrum.lattice()), real_space_representation)
 
 
 def test_transform_with_correct_boundary_conditions(spectrum):
-    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points).reshape(-1, 1))
+    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_lattice_points))
     assert np.allclose(spectrum.transform(eigenfunctions(*spectrum.lattice()), "real", "spectral"), np.eye(spectrum.total_num_lattice_points))

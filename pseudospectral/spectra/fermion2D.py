@@ -32,6 +32,7 @@ class FreeFermion2D:
         self.a_t = L_t/n_t
         self.a_x = L_x/n_x
         self.total_num_lattice_points = 2 * n_t * n_x
+        self.total_num_of_dof = self.total_num_lattice_points
 
         self._freq_t = scipy.fft.fftfreq(n_t, d=self.a_t)
         self._freq_x = scipy.fft.fftfreq(n_x, d=self.a_x)

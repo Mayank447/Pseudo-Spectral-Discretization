@@ -16,12 +16,10 @@ class FreeFermion2D:
     We assume periodic boundary conditions in both directions with lengths L_t and L_x respectively.
 
     Args:
+        num_points: number of lattice points in each direction [n_t, n_x]
+        L: box lengths in each direction [L_t, L_x]
         mu: Chemical potential (Fermi energy)
         m: mass parameter
-        L_t: length of the system in the time axis
-        L_x: length of the system in the x axis
-        n_t: number of lattice points in the time axis (odd)
-        n_x: number of lattice points in the x axis (odd)
     """
 
     def __init__(self, num_points, *, L=None, mu=0, m=0):
@@ -31,6 +29,9 @@ class FreeFermion2D:
         self._solve_spectral_problem_in_spinor_space()
 
     def _initialise_members(self, num_points, L, mu, m):
+        """
+        Please, note that some derived quantities like self.dof_spinor are computed later!
+        """
         self.mu = mu
         self.m = m
         self.num_points = np.asarray(num_points)
@@ -45,6 +46,9 @@ class FreeFermion2D:
         self.p = I2PI * np.array(np.meshgrid(*(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)), indexing="ij"))
 
     def _setup_spinor_structure(self):
+        """
+        This includes the gamma matrices, dof_spinor and total_num_of_dof.
+        """
         if self.spacetime_dimension not in [2, 3]:
             raise NotImplementedError(f"We do not have gamma matrices for dimension {self.spacetime_dimension}.")
         self.gamma = PAULI_MATRICES[1 : self.spacetime_dimension + 1]
@@ -52,6 +56,9 @@ class FreeFermion2D:
         self.total_num_of_dof = self.dof_spinor * self.num_points.prod()
 
     def _solve_spectral_problem_in_spinor_space(self):
+        """
+        Compute eigenvalues and eigenvectors for each value of p.
+        """
         mu_vectorfield = self.mu * np.eye(self.spacetime_dimension)[0].reshape(-1, *(np.ones(self.spacetime_dimension, dtype=int)))
         matrix_in_momentum_space = (
             np.sum(self.gamma[..., *(self.spacetime_dimension * [np.newaxis])] * (self.p - mu_vectorfield)[:, np.newaxis, np.newaxis, ...], axis=0) + self.m * IDENTITY[..., *(self.spacetime_dimension * [np.newaxis])]
@@ -62,18 +69,16 @@ class FreeFermion2D:
 
     def eigenfunction(self, index):
         """
-        Function to return the eigenfunction of the 2D free fermions operator.
+        Function to return the eigenfunction(s) of the 2D free fermions operator.
+
+        The given index can be of any shape and is interpreted as one eigenfunction for each index. So, if index.shape == [1,2,3], then eigenfunction(index)(0,0).shape == [1,2,3, <internal dof>], i.e. one value per index wherein value might refer to
+        a tuple of internal degrees of freedom. The returned function takes a t- and and x-value as arguments, both of which are allowed to be arays as long as they have the same shape.
 
         Args:
             index: array of indices of the eigenfunctions to be returned
 
         Returns:
             lambda function (t,x) of the eigenfunction at the specified index
-
-        Note: t,x passed to the returned lambda function must be scalars or 1D arrays, e.g., flattened out meshgrid.
-            x, t = np.meshgrid(array_x, array_t)
-             t = t.flatten()
-             x = x.flatten()
         """
 
         index = np.asarray(index)

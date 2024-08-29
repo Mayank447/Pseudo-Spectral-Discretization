@@ -87,7 +87,7 @@ class FreeFermion2D:
 
         return lambda *x: np.einsum(
             "j...,jk->j...k",
-            np.exp(np.einsum("ij,i...->j...", p, np.asarray(x))).reshape(*index.shape, *np.shape(x)),
+            np.exp(np.einsum("ij,i...->j...", p, np.asarray(x))).reshape(*index.shape, *np.shape(x)[1:]),
             eta,
         ) / np.sqrt(self.vol)
 

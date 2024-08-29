@@ -28,15 +28,8 @@ timings = {}
 for linear_num_lattice_points in [16, 32, 64, 128, 256]:
     spectrum = create_spectrum(linear_num_lattice_points)
     shape = (num_input_vectors, total_num_of_dof(spectrum))
-    timings[linear_num_lattice_points] = np.mean(
-        timeit.repeat(
-            'spectrum.transform(input_vectors, "real","spectral")',
-            setup="input_vectors=np.random.rand(*shape)",
-            number=1,
-            repeat=2,
-            globals=globals(),
-        )
-    )
+    environment = {"np": np, "spectrum": spectrum, "shape": shape}
+    timings[linear_num_lattice_points] = np.mean(timeit.repeat('spectrum.transform(input_vectors, "real","spectral")', setup="input_vectors=np.random.rand(*shape)", number=1, repeat=2, globals=environment))
 
 print("Timings\n---------")
 for size, timing in timings.items():

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from pseudospectral import Derivative1D, FreeFermion2D
+
+from pseudospectral import Derivative1D, FreeFermion2D, naive_implementation_of
 import pytest
 import numpy as np
 
@@ -11,6 +12,8 @@ SPECTRA = [
     {"type": FreeFermion2D, "config": {"num_points": [3, 3], "L": [1, 1], "mu": 0, "m": 0}},
     {"type": FreeFermion2D, "config": {"num_points": [3, 70], "L": [2, 7], "mu": 0, "m": 0}},
 ]
+
+SPECTRA += [spec | {"type": naive_implementation_of(spec["type"])} for spec in SPECTRA]
 
 
 ############################# Pytest settings ######################

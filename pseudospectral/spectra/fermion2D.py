@@ -37,6 +37,8 @@ class FreeFermion2D:
         self.L = np.asarray(L) if L is not None else self.num_points
         self.a = self.L / self.num_points
         self.spacetime_dimension = len(self.num_points)
+        self.vol = np.prod(self.L)
+        self.volume_element = np.prod(self.a)
 
     def _compute_grids(self):
         self.x = np.array(np.meshgrid(*(np.linspace(0, L, n, endpoint=False) for L, n in zip(self.L, self.num_points)), indexing="ij"))
@@ -79,14 +81,15 @@ class FreeFermion2D:
         if (index >= self.total_num_of_dof).any() or (index < -self.total_num_of_dof).any():
             raise ValueError(f"Index {index} out of bounds.")
 
-        # Since two eigenvalues exist due to spinor structure
         spacetime_index = index // self.dof_spinor
+        p = self.p.reshape(self.spacetime_dimension, -1)[:, spacetime_index]
+        eta = self.eta[spacetime_index, :, index % self.dof_spinor]
 
-        return lambda t, x: np.einsum(
+        return lambda *x: np.einsum(
             "j...,jk->j...k",
-            np.exp(np.einsum("ij,i...->j...", self.p.reshape(self.spacetime_dimension, -1)[:, spacetime_index], np.asarray([t, x]))).reshape(*index.shape, *x.shape) / np.sqrt(np.prod(self.L)),
-            self.eta[spacetime_index, :, index % self.dof_spinor],
-        )
+            np.exp(np.einsum("ij,i...->j...", p, np.asarray(x))).reshape(*index.shape, *np.shape(x)),
+            eta,
+        ) / np.sqrt(self.vol)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -112,13 +115,13 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             # Split the input vector into f(even index elements) and g(odd index elements)
-            input_in_momentum_space = np.fft.fftn(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.spacetime_dimension), norm="ortho") * np.sqrt(np.prod(self.a))
+            input_in_momentum_space = np.fft.fftn(input_vector.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.spacetime_dimension), norm="ortho") * np.sqrt(self.volume_element)
             return np.einsum("ikj,lik->lij", self.eta, input_in_momentum_space.reshape(-1, np.prod(self.num_points), self.dof_spinor)).reshape(*input_vector.shape)
 
         elif input_basis == "spectral" and output_basis == "real":
             # Block diagonal multiplication of eigenvector matrix
             input_in_uniform_spinor_basis = np.einsum("ijk,lik->lij", self.eta, input_vector.reshape(-1, np.prod(self.num_points), self.dof_spinor))
-            return (np.fft.ifftn(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.spacetime_dimension), norm="ortho") / np.sqrt(np.prod(self.a))).reshape(*input_vector.shape)
+            return (np.fft.ifftn(input_in_uniform_spinor_basis.reshape(-1, *self.num_points, self.dof_spinor), axes=1 + np.arange(self.spacetime_dimension), norm="ortho") / np.sqrt(self.volume_element)).reshape(*input_vector.shape)
 
         else:
             raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
@@ -133,7 +136,7 @@ class FreeFermion2D:
             input_basis: basis of the input vectors (real/spectral)
         """
         if input_basis == "real":
-            return rhs @ lhs.transpose().conjugate() * np.prod(self.a)
+            return rhs @ lhs.transpose().conjugate() * self.volume_element
 
         elif input_basis == "spectral":
             return rhs @ lhs.transpose().conjugate()

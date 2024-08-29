@@ -9,16 +9,28 @@ SPECTRA = [
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "L": 3}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101, "L": 42}},
-    {"type": FreeFermion2D, "config": {"num_points": [3, 3], "L": [1, 1], "mu": 0, "m": 0}},
-    {"type": FreeFermion2D, "config": {"num_points": [3, 70], "L": [2, 7], "mu": 0, "m": 0}},
+    {
+        "type": FreeFermion2D,
+        "config": {"num_points": [3, 3], "L": [1, 1], "mu": 0, "m": 0},
+    },
+    {
+        "type": FreeFermion2D,
+        "config": {"num_points": [3, 70], "L": [2, 7], "mu": 0, "m": 0},
+    },
 ]
 
 SPECTRA += [spec | {"type": naive_implementation_of(spec["type"])} for spec in SPECTRA]
 
 
-############################# Pytest settings ######################
+# Pytest settings
 def pytest_addoption(parser):
-    parser.addoption("--repeat", default=1, type=int, metavar="repeat", help="Run each test the specified number of times")
+    parser.addoption(
+        "--repeat",
+        default=1,
+        type=int,
+        metavar="repeat",
+        help="Run each test the specified number of times",
+    )
 
 
 def pytest_collection_modifyitems(session, config, items):
@@ -26,7 +38,7 @@ def pytest_collection_modifyitems(session, config, items):
     items[:] = items * count  # add each test multiple times
 
 
-############################# Common Fixtures for PyTests ######################
+# Common Fixtures for PyTests
 @pytest.fixture(params=SPECTRA)
 def spectrum(request):
     return request.param["type"](**request.param["config"])
@@ -47,7 +59,11 @@ def arbitrary_index_multiple_eigenfunctions(
     """
     Python fixture to initialize the arbitrary index for the two eigenfunctions test.
     """
-    return np.random.choice(spectrum.total_num_of_dof, size=1 + np.random.randint(spectrum.total_num_of_dof - 1), replace=False)
+    return np.random.choice(
+        spectrum.total_num_of_dof,
+        size=1 + np.random.randint(spectrum.total_num_of_dof - 1),
+        replace=False,
+    )
 
 
 @pytest.fixture

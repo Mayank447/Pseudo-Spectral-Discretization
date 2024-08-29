@@ -35,20 +35,28 @@ class Derivative1D:
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        tmp = I2PI * (np.fft.fftfreq(self.total_num_lattice_points, d=self.a) + self.theta / self.L)
+        tmp = I2PI * (
+            np.fft.fftfreq(self.total_num_lattice_points, d=self.a)
+            + self.theta / self.L
+        )
         return tmp
 
     def eigenfunction(self, index: np.ndarray):
         """
-        Function to return the eigenfunctions of the 1D derivative operator i.e. exp(ikx)
+        Function to return the eigenfunctions of the 1D derivative operator i.e.
+        exp(ikx)
         """
         index = np.asarray(index)
 
-        if (index >= self.total_num_lattice_points).any() or (index < -self.total_num_lattice_points).any():
+        if (index >= self.total_num_lattice_points).any() or (
+            index < -self.total_num_lattice_points
+        ).any():
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(np.kron(self.eigenvalues[index], x)).reshape(len(index), -1) / np.sqrt(self.L)
+            return lambda x: np.exp(np.kron(self.eigenvalues[index], x)).reshape(
+                len(index), -1
+            ) / np.sqrt(self.L)
 
     def transform(self, input_vector, input_basis, output_basis):
         """
@@ -60,18 +68,30 @@ class Derivative1D:
 
         # Perform the discrete Fast Fourier transform to go from real to spectral space
         elif input_basis == "real" and output_basis == "spectral":
-            return scipy.fft.fft(np.exp(-I2PI * self.theta / self.L * self.lattice("real")[0]) * input_vector, norm="ortho") * np.sqrt(self.a)
+            return scipy.fft.fft(
+                np.exp(-I2PI * self.theta / self.L * self.lattice("real")[0])
+                * input_vector,
+                norm="ortho",
+            ) * np.sqrt(self.a)
 
-        # Perform the inverse discrete Fast Fourier transform to go from spectral to real space
         elif input_basis == "spectral" and output_basis == "real":
-            return np.exp(I2PI * self.theta / self.L * self.lattice("real")[0]) * scipy.fft.ifft(input_vector, norm="ortho") / np.sqrt(self.a)
+            return (
+                np.exp(I2PI * self.theta / self.L * self.lattice("real")[0])
+                * scipy.fft.ifft(input_vector, norm="ortho")
+                / np.sqrt(self.a)
+            )
 
         else:
-            raise ValueError(f"Unsupported space transformation from {input_basis} to {output_basis}.")
+            message = (
+                "Unsupported space transformation from "
+                f"{input_basis} to {output_basis}."
+            )
+            raise ValueError(message)
 
     def lattice(self, output_basis="real"):
         """
-        Return the lattice of the Derivative 1D operator as per specified given output space.
+        Return the lattice of the Derivative 1D operator as per specified given output
+        space.
 
         Parameters:
         output_basis (str): The space for which to generate the lattice.
@@ -84,7 +104,9 @@ class Derivative1D:
         ValueError: If the output space is not 'real' or 'space'.
         """
         if output_basis == "real":
-            return (np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False),)
+            return (
+                np.linspace(0, self.L, self.total_num_lattice_points, endpoint=False),
+            )
 
         elif output_basis == "spectral":
             return (self.eigenvalues,)
@@ -97,17 +119,20 @@ class Derivative1D:
         Compute <lhs, rhs> both being represented as coefficients in the `input_basis`.
         If multi-dimensional input is given,
         the last dimension gives the individual vector's entries
-        while the first dimensions (all others) are interpreted as enumerating the multiple vectors.
+        while the first dimensions (all others) are interpreted as enumerating the
+        multiple vectors.
         """
         # For this case the quadrature (and thereby the scalar product) is trivial.
         # Also, it's the same for both spaces.
         #
-        # The unexpected ordering takes care of the indexing convention mentioned in the docstring:
-        # We are considering lhs, rhs as row vectors in a matrix (or higher-dimensional object).
-        # For this reason, we must commute them with respect to the normal interpretation as column vectors
-        # (that's why rhs @ lhs and not lhs @ rhs).
-        # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks of matrices"
-        # and accordingly acts on the LAST index of the first but the SECOND TO LAST index of the second.
+        # The unexpected ordering takes care of the indexing convention mentioned in the
+        # docstring:
+        # We are considering lhs, rhs as row vectors in a matrix (or higher-dimensional
+        # object). For this reason, we must commute them with respect to the normal
+        # interpretation as column vectors (that's why rhs @ lhs and not lhs @ rhs).
+        # Furthermore, the @ operator interpretes multi-dimensional objects as "stacks
+        # of matrices" and accordingly acts on the LAST index of the first but the
+        # SECOND TO LAST index of the second.
         if input_basis == "real":
             return rhs @ lhs.transpose().conjugate() * self.a
         elif input_basis == "spectral":

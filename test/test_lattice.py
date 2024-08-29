@@ -4,7 +4,8 @@ import numpy as np
 
 def test_lattice_real_basis(spectrum):
     """
-    Python test function to test the lattice method of the Spectrum class in the real space.
+    Python test function to test the lattice method of the Spectrum class in the real
+    space.
     """
 
     lattice = spectrum.lattice(output_basis="real")
@@ -14,7 +15,11 @@ def test_lattice_real_basis(spectrum):
         expected = np.linspace(0, spectrum.L, spectrum.total_num_of_dof, endpoint=False)
 
     elif spectrum.spacetime_dimension == 2:
-        t, x = np.meshgrid(np.linspace(0, spectrum.L[0], spectrum.num_points[0], endpoint=False), np.linspace(0, spectrum.L[1], spectrum.num_points[1], endpoint=False), indexing="ij")
+        t, x = np.meshgrid(
+            np.linspace(0, spectrum.L[0], spectrum.num_points[0], endpoint=False),
+            np.linspace(0, spectrum.L[1], spectrum.num_points[1], endpoint=False),
+            indexing="ij",
+        )
         expected = t.flatten(), x.flatten()
     assert np.equal(lattice, expected).all()
 

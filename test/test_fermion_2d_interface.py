@@ -14,7 +14,9 @@ def test_provides_number_of_points_as_array(num_points):
     assert all(FreeFermion2D(num_points).num_points == num_points)
 
 
-@pytest.mark.parametrize("num_points,L", [((1, 2), (3, 4)), ((9, 8), (0.1, 1000)), ((1, 42), (1, 1))])
+@pytest.mark.parametrize(
+    "num_points,L", [((1, 2), (3, 4)), ((9, 8), (0.1, 1000)), ((1, 42), (1, 1))]
+)
 def test_provides_lattice_spacing_as_array(num_points, L):
     assert all(FreeFermion2D(num_points, L=L).a == np.array(L) / num_points)
 
@@ -24,13 +26,26 @@ def test_defaults_to_unit_lattice_spacing(num_points):
     assert all(FreeFermion2D(num_points).a == np.ones_like(num_points))
 
 
-@pytest.mark.parametrize("num_points,L", [((1, 2), (3, 4)), ((9, 8), (0.1, 1000)), ((1, 42), (1, 1))])
+@pytest.mark.parametrize(
+    "num_points,L", [((1, 2), (3, 4)), ((9, 8), (0.1, 1000)), ((1, 42), (1, 1))]
+)
 def test_exposes_x(num_points, L):
-    assert np.allclose(FreeFermion2D(num_points, L=L).x, np.meshgrid(np.linspace(0, L[0], num_points[0], endpoint=False), np.linspace(0, L[1], num_points[1], endpoint=False), indexing="ij"))
+    assert np.allclose(
+        FreeFermion2D(num_points, L=L).x,
+        np.meshgrid(
+            np.linspace(0, L[0], num_points[0], endpoint=False),
+            np.linspace(0, L[1], num_points[1], endpoint=False),
+            indexing="ij",
+        ),
+    )
 
 
-@pytest.mark.parametrize("num_points,L", [((1, 2), (3, 4)), ((9, 8), (0.1, 1000)), ((1, 42), (1, 1))])
+@pytest.mark.parametrize(
+    "num_points,L", [((1, 2), (3, 4)), ((9, 8), (0.1, 1000)), ((1, 42), (1, 1))]
+)
 def test_exposes_momenta(num_points, L):
     p_t = 2.0j * np.pi * np.fft.fftfreq(num_points[0], L[0] / num_points[0])
     p_x = 2.0j * np.pi * np.fft.fftfreq(num_points[1], L[1] / num_points[1])
-    assert np.allclose(FreeFermion2D(num_points, L=L).p, np.array(np.meshgrid(p_t, p_x, indexing="ij")))
+    assert np.allclose(
+        FreeFermion2D(num_points, L=L).p, np.array(np.meshgrid(p_t, p_x, indexing="ij"))
+    )

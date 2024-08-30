@@ -15,7 +15,9 @@ if __name__ == "__main__":
 
     plt.plot(x, y, label=r"$\cos(x)$")
     plt.plot(x, -np.sin(x), label=r"$-\sin(x)$")
-    plt.plot(x, np.real(z), label=r"$\frac{\mathrm{d}}{\mathrm{d}x} \cos(x)$", linestyle="--")
+    plt.plot(
+        x, np.real(z), label=r"$\frac{\mathrm{d}}{\mathrm{d}x} \cos(x)$", linestyle="--"
+    )
 
     # Any imaginary contribution is numerical noise:
     assert np.allclose(np.imag(z), 0)

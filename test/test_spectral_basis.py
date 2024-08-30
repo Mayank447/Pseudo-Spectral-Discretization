@@ -2,17 +2,19 @@
 
 from pseudospectral import DiracOperator
 import numpy as np
-import pytest
-import scipy
 
-## Some Fixtures like Spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient, arbitrary_index_multiple_eigenfunctions
-## are defined in the conftest.py file.and imported in all the test files automatically.
+# Some Fixtures like
+#   spectrum,
+#   arbitrary_index_single_eigenfunction,
+#   arbitrary_single_coefficient,
+#   arbitrary_index_multiple_eigenfunctions
+# are defined in the conftest.py file.and imported in all the test files automatically.
 
 num_single_eigenfunction_testrun = 10
 num_eigenfunctions_superposition_testrun = 10
 
 
-# ########################################## HELPER_FUNCTIONS ##########################################
+# HELPER_FUNCTIONS
 def arbitrary_multiple_coefficients(length=1):
     """
     Python function to initialize a numpy array of the given length
@@ -21,43 +23,51 @@ def arbitrary_multiple_coefficients(length=1):
     return np.random.randn(length)
 
 
-# ########################################### TEST FUNCTION ############################################
+#  TEST FUNCTION
 def test_application_to_a_single_eigenfunction(
-    spectrum, 
-    arbitrary_index_single_eigenfunction, 
-    arbitrary_single_coefficient
+    spectrum, arbitrary_index_single_eigenfunction, arbitrary_single_coefficient
 ):
     """
-    Python test function to test the application of the Dirac operator to a single eigenfunction in real space.
+    Python test function to test the application of the Dirac operator to a single
+    eigenfunction in real space.
     """
     operator = DiracOperator(spectrum)
 
-    eigenfunction = arbitrary_single_coefficient * np.eye(spectrum.total_num_lattice_points)[arbitrary_index_single_eigenfunction, :]
-    expected = eigenfunction * spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
+    eigenfunction = (
+        arbitrary_single_coefficient
+        * np.eye(spectrum.total_num_of_dof)[arbitrary_index_single_eigenfunction, :]
+    )
+    expected = (
+        eigenfunction * spectrum.eigenvalues[arbitrary_index_single_eigenfunction]
+    )
 
-    result = operator.apply_to(eigenfunction, input_basis="spectral", output_basis="spectral")
+    result = operator.apply_to(
+        eigenfunction, input_basis="spectral", output_basis="spectral"
+    )
     assert np.allclose(result, expected)
 
 
 def test_application_to_superposition_of_eigenfunctions(
-    spectrum, 
-    arbitrary_index_multiple_eigenfunctions
+    spectrum, arbitrary_index_multiple_eigenfunctions
 ):
     """
-    Python test function to test the application of the Dirac operator to a superposition of two eigenfunctions.
+    Python test function to test the application of the Dirac operator to a
+    superposition of two eigenfunctions.
     """
     operator = DiracOperator(spectrum)
-    arbitrary_coefficients = arbitrary_multiple_coefficients(len(arbitrary_index_multiple_eigenfunctions))
+    arbitrary_coefficients = arbitrary_multiple_coefficients(
+        len(arbitrary_index_multiple_eigenfunctions)
+    )
 
     superposition = (
-        arbitrary_coefficients[:, np.newaxis] * 
-        np.eye(spectrum.total_num_lattice_points)[arbitrary_index_multiple_eigenfunctions]
+        arbitrary_coefficients[:, np.newaxis]
+        * np.eye(spectrum.total_num_of_dof)[arbitrary_index_multiple_eigenfunctions]
     )
 
     expected = np.sum(
-        spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis] * 
-        superposition, 
-        axis=0
+        spectrum.eigenvalues[arbitrary_index_multiple_eigenfunctions][:, np.newaxis]
+        * superposition,
+        axis=0,
     )
 
     result = operator.apply_to(

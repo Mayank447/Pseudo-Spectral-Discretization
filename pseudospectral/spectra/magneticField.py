@@ -17,7 +17,10 @@ class MagneticField:
         N: Number of energy levels
         # flux: magnetic flux
         """
+        self.initialize(Nt, nu, N, dimension)
+        
 
+    def initialize(self, Nt, nu, N, dimension):
         self.gap = 1  #energy gap [Free parameter]
         self._dimension = dimension
         self._eigenvalues = None
@@ -38,6 +41,7 @@ class MagneticField:
         # For lattice discretization
         self._n_x = self.nu
         self._n_y = self.N
+
 
     @property
     def dimension(self):

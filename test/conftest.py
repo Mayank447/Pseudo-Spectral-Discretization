@@ -17,6 +17,26 @@ SPECTRA = [
         "type": FreeFermion2D,
         "config": {"num_points": [3, 70], "L": [2, 7], "mu": 0, "m": 0},
     },
+    {
+        "type": FreeFermion2D,
+        "config": {
+            "num_points": [3, 3],
+            "L": [1, 1],
+            "mu": 0,
+            "m": 0,
+            "theta": [0.5, 0.0],
+        },
+    },
+    {
+        "type": FreeFermion2D,
+        "config": {
+            "num_points": [3, 70],
+            "L": [2, 7],
+            "mu": 0,
+            "m": 0,
+            "theta": [0.3, 0.8],
+        },
+    },
 ]
 
 SPECTRA += [spec | {"type": naive_implementation_of(spec["type"])} for spec in SPECTRA]

@@ -1,4 +1,4 @@
-from pseudospectral.spectra.derivative1D import Derivative1D
+from pseudospectral import Derivative1D, FreeFermion2D
 import pytest
 import numpy as np
 
@@ -17,6 +17,16 @@ SPECTRA = [
         "type": Derivative1D,
         "config": {"total_num_lattice_points": 101, "L": 42, "theta": 0.8},
     },
+    {
+        "type": FreeFermion2D,
+        "config": {
+            "num_points": [3, 3],
+            "L": [1, 1],
+            "theta": [0.0, 0.0],
+            "mu": 0,
+            "m": 0,
+        },
+    },
 ]
 
 
@@ -27,10 +37,16 @@ def spectrum(request):
 
 def test_eigenfunctions_obey_boundary_conditions(spectrum):
     eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))
-    assert np.allclose(
-        np.exp(2.0j * np.pi * spectrum.theta) * eigenfunctions(*spectrum.lattice()),
-        eigenfunctions(spectrum.lattice()[0] + spectrum.L),
-    )
+    lattice = np.array(spectrum.lattice())
+    for dim in range(spectrum.spacetime_dimension):
+        shifted_lattice = np.array(lattice) + spectrum.L.reshape(-1)[dim] * np.eye(
+            spectrum.spacetime_dimension
+        )[dim].reshape(spectrum.spacetime_dimension, 1)
+        assert np.allclose(
+            np.exp(2.0j * np.pi * spectrum.theta).reshape(-1)[dim]
+            * eigenfunctions(*lattice).reshape(spectrum.total_num_of_dof, -1),
+            eigenfunctions(*shifted_lattice).reshape(spectrum.total_num_of_dof, -1),
+        )
 
 
 def test_inverse_transform_results_in_eigenfunction(spectrum):
@@ -39,12 +55,19 @@ def test_inverse_transform_results_in_eigenfunction(spectrum):
         spectral_representation, "spectral", "real"
     )
     eigenfunction = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))
-    assert np.allclose(eigenfunction(*spectrum.lattice()), real_space_representation)
+    assert np.allclose(
+        eigenfunction(*spectrum.lattice()).reshape(spectrum.total_num_of_dof, -1),
+        real_space_representation,
+    )
 
 
 def test_transform_with_correct_boundary_conditions(spectrum):
     eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))
     assert np.allclose(
-        spectrum.transform(eigenfunctions(*spectrum.lattice()), "real", "spectral"),
+        spectrum.transform(
+            eigenfunctions(*spectrum.lattice()).reshape(spectrum.total_num_of_dof, -1),
+            "real",
+            "spectral",
+        ),
         np.eye(spectrum.total_num_of_dof),
     )

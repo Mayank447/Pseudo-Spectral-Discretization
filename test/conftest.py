@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
-from pseudospectral import Derivative1D, FreeFermion2D, naive_implementation_of
+from pseudospectral import (
+    Derivative1D,
+    FreeFermion2D,
+    Identity,
+    naive_implementation_of,
+)
 import pytest
 import numpy as np
+
 
 SPECTRA = [
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3}},
@@ -39,6 +45,10 @@ SPECTRA = [
     },
 ]
 
+SPECTRA += [
+    {"type": Identity, "config": {"spectrum": spec["type"](**spec["config"])}}
+    for spec in SPECTRA
+]
 SPECTRA += [spec | {"type": naive_implementation_of(spec["type"])} for spec in SPECTRA]
 
 

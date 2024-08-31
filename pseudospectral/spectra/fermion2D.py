@@ -112,9 +112,13 @@ class FreeFermion2D:
             )
             + self.m * IDENTITY[..., *(self.spacetime_dimension * [np.newaxis])]
         ).transpose(np.roll(np.arange(self.spacetime_dimension + 2), 2))
-        self.eigenvalues, self.eta = np.linalg.eig(matrix_in_momentum_space)
+        self._eigenvalues, self.eta = np.linalg.eig(matrix_in_momentum_space)
         self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
-        self.eigenvalues = self.eigenvalues.reshape(-1)
+        self._eigenvalues = self._eigenvalues.reshape(-1)
+
+    @property
+    def eigenvalues(self):
+        return self._eigenvalues
 
     def eigenfunction(self, index):
         """

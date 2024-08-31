@@ -27,6 +27,16 @@ SPECTRA = [
             "m": 0,
         },
     },
+    {
+        "type": FreeFermion2D,
+        "config": {
+            "num_points": [3, 3],
+            "L": [1, 1],
+            "theta": [0.5, 0.2],
+            "mu": 0,
+            "m": 0,
+        },
+    },
 ]
 
 

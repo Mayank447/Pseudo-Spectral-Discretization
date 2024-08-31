@@ -62,7 +62,12 @@ class FreeFermion2D:
         )
         self.p = I2PI * np.array(
             np.meshgrid(
-                *(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)),
+                *(
+                    np.fft.fftfreq(n, a) + t / length
+                    for n, a, t, length in zip(
+                        self.num_points, self.a, self.theta, self.L
+                    )
+                ),
                 indexing="ij",
             )
         )

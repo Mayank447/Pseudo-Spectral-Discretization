@@ -27,13 +27,13 @@ class FreeFermion2D:
         m: mass parameter
     """
 
-    def __init__(self, num_points, *, L=None, mu=0, m=0):
-        self._initialise_members(num_points, L, mu, m)
+    def __init__(self, num_points, *, L=None, theta=None, mu=0, m=0):
+        self._initialise_members(num_points, L, theta, mu, m)
         self._setup_spinor_structure()
         self._compute_grids()
         self._solve_spectral_problem_in_spinor_space()
 
-    def _initialise_members(self, num_points, L, mu, m):
+    def _initialise_members(self, num_points, L, theta, mu, m):
         """
         Please, note that some derived quantities like self.dof_spinor are computed
         later!
@@ -42,6 +42,9 @@ class FreeFermion2D:
         self.m = m
         self.num_points = np.asarray(num_points)
         self.L = np.asarray(L) if L is not None else self.num_points
+        self.theta = (
+            np.asarray(theta) if theta is not None else np.zeros_like(self.num_points)
+        )
         self.a = self.L / self.num_points
         self.spacetime_dimension = len(self.num_points)
         self.vol = np.prod(self.L)

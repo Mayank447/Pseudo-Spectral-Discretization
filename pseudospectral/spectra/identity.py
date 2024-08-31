@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from copy import deepcopy
 import numpy as np
 
 
@@ -8,8 +9,12 @@ class Identity:
     spectrum.
     """
 
-    def __init__(self, spectrum):
-        self.eigenfunction = spectrum.eigenfunction
-        self.transform = spectrum.transform
-        self.scalar_product = spectrum.scalar_product
-        self.eigenvalues = np.ones_like(spectrum.eigenvalues)
+    def __new__(cls, spectrum):
+        class TailoredIdentity(type(spectrum)):
+            @property
+            def eigenvalues(self):
+                return np.ones_like(super().eigenvalues)
+
+        new_self = deepcopy(spectrum)
+        new_self.__class__ = TailoredIdentity
+        return new_self

@@ -32,7 +32,9 @@ def test_lattice_spectral_basis(spectrum):
     expected = None
 
     if spectrum.spacetime_dimension == 1:
-        expected = spectrum.eigenvalues
+        # We're explicitly using the private data here because the public interface may
+        # have been overridden by the identity spectrum.
+        expected = spectrum._eigenvalues
 
     elif spectrum.spacetime_dimension == 2:
         expected = spectrum.p.reshape(spectrum.spacetime_dimension, -1)

@@ -204,7 +204,8 @@ class FreeFermion2D:
                 input_vector.reshape(-1, np.prod(self.num_points), self.dof_spinor),
             )
             return (
-                np.fft.ifftn(
+                self.boundary_conditions.reshape(1, *self.num_points, 1).conjugate()
+                * np.fft.ifftn(
                     input_in_uniform_spinor_basis.reshape(
                         -1, *self.num_points, self.dof_spinor
                     ),

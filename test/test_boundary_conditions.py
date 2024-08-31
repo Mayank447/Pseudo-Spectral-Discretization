@@ -1,48 +1,4 @@
-from pseudospectral import Derivative1D, FreeFermion2D
-import pytest
 import numpy as np
-
-SPECTRA = [
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 3}},
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 101}},
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "L": 3}},
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 101, "L": 42}},
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "theta": 0.1}},
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 101, "theta": 0.3}},
-    {
-        "type": Derivative1D,
-        "config": {"total_num_lattice_points": 3, "L": 3, "theta": 0.5},
-    },
-    {
-        "type": Derivative1D,
-        "config": {"total_num_lattice_points": 101, "L": 42, "theta": 0.8},
-    },
-    {
-        "type": FreeFermion2D,
-        "config": {
-            "num_points": [3, 3],
-            "L": [1, 1],
-            "theta": [0.0, 0.0],
-            "mu": 0,
-            "m": 0,
-        },
-    },
-    {
-        "type": FreeFermion2D,
-        "config": {
-            "num_points": [3, 3],
-            "L": [1, 1],
-            "theta": [0.5, 0.2],
-            "mu": 0,
-            "m": 0,
-        },
-    },
-]
-
-
-@pytest.fixture(params=SPECTRA)
-def spectrum(request):
-    return request.param["type"](**request.param["config"])
 
 
 def test_eigenfunctions_obey_boundary_conditions(spectrum):

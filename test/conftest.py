@@ -6,9 +6,13 @@ import numpy as np
 
 SPECTRA = [
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3}},
+    {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "theta": 0.5}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "L": 3}},
-    {"type": Derivative1D, "config": {"total_num_lattice_points": 101, "L": 42}},
+    {
+        "type": Derivative1D,
+        "config": {"total_num_lattice_points": 101, "L": 42, "theta": 0.2},
+    },
     {
         "type": FreeFermion2D,
         "config": {"num_points": [3, 3], "L": [1, 1], "mu": 0, "m": 0},

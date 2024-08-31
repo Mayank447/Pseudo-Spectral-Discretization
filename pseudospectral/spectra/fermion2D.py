@@ -72,6 +72,17 @@ class FreeFermion2D:
             )
         )
 
+        self.boundary_conditions = np.prod(
+            np.exp(
+                -I2PI
+                * (self.theta / self.L).reshape(
+                    -1, *(np.ones(self.spacetime_dimension, dtype=int))
+                )
+                * self.x
+            ),
+            axis=0,
+        )
+
     def _setup_spinor_structure(self):
         """
         This includes the gamma matrices, dof_spinor and total_num_of_dof.
@@ -172,7 +183,8 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             input_in_momentum_space = np.fft.fftn(
-                input_vector.reshape(-1, *self.num_points, self.dof_spinor),
+                self.boundary_conditions.reshape(1, *self.num_points, 1)
+                * input_vector.reshape(-1, *self.num_points, self.dof_spinor),
                 axes=1 + np.arange(self.spacetime_dimension),
                 norm="ortho",
             ) * np.sqrt(self.volume_element)

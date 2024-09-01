@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 
 
-class Identity:
+class ElementwiseSpectralMultiplication:
     """
     This spectrum represents the identity operator in the vector space of the given
     spectrum.

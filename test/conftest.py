@@ -3,7 +3,7 @@
 from pseudospectral import (
     Derivative1D,
     FreeFermion2D,
-    Identity,
+    ElementwiseSpectralMultiplication,
     naive_implementation_of,
 )
 import pytest
@@ -46,7 +46,10 @@ SPECTRA = [
 ]
 
 SPECTRA += [
-    {"type": Identity, "config": {"spectrum": spec["type"](**spec["config"])}}
+    {
+        "type": ElementwiseSpectralMultiplication,
+        "config": {"spectrum": spec["type"](**spec["config"])},
+    }
     for spec in SPECTRA
 ]
 SPECTRA += [spec | {"type": naive_implementation_of(spec["type"])} for spec in SPECTRA]

@@ -5,16 +5,17 @@ import numpy as np
 
 class ElementwiseSpectralMultiplication:
     """
-    This spectrum represents the identity operator in the vector space of the given
-    spectrum.
+    This spectrum represents elementwise multiplication of the spectral coefficients.
+    In a way, it generalises the specialised spectra. For example, using
+    spectrum.eigenvalues as field_values reproduces the original spectrum.
     """
 
-    def __new__(cls, spectrum):
-        class TailoredIdentity(type(spectrum)):
+    def __new__(cls, spectrum, field_values=1):
+        class TailoredElementwiseSpectralMultiplication(type(spectrum)):
             @property
             def eigenvalues(self):
-                return np.ones_like(super().eigenvalues)
+                return field_values * np.ones_like(super().eigenvalues)
 
         new_self = deepcopy(spectrum)
-        new_self.__class__ = TailoredIdentity
+        new_self.__class__ = TailoredElementwiseSpectralMultiplication
         return new_self

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import numpy as np
 
 
 class DiracOperator:
@@ -33,3 +34,24 @@ class DiracOperator:
                 f"{input_basis} to {output_basis}."
             )
             raise ValueError(message)
+
+    def __add__(self, other):
+        return CompositeOperator((self, other), lambda f: np.sum(f, axis=0))
+
+
+class CompositeOperator:
+    def __init__(self, operators, operation):
+        self.operators = operators
+        self.operation = operation
+
+    def apply_to(self, coefficients):
+        """
+        As the multiple operators might not commute, we cannot offer a version in the
+        spectral basis because that would be ambiguous.
+
+        This is a general purpose implementation. Special cases should be implemented as
+        needed to increase performance.
+        """
+        return self.operation(
+            [operator.apply_to(coefficients) for operator in self.operators]
+        )

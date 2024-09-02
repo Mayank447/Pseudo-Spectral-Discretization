@@ -11,11 +11,20 @@ class ElementwiseSpectralMultiplication:
     """
 
     def __new__(cls, spectrum, given_field_values=1):
-        class TailoredElementwiseSpectralMultiplication(type(spectrum)):
+        class TailoredElementwiseSpectralMultiplication(
+            type(spectrum), ElementwiseSpectralMultiplication
+        ):
             field_values = given_field_values
 
+            # Revert the non-trivial effects of inheriting from
+            # ElementwiseSpectralMultiplication.
+            def __new__(cls, *args, **kwargs):
+                return super().__new__(cls, *args, **kwargs)
+
+            # We'll not initialise it this way and need to avoid wrong constructor
+            # calls.
             def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
+                pass
 
             @property
             def eigenvalues(self):
@@ -54,9 +63,23 @@ class ElementwiseRealMultiplication:
         return spectral_coefficients / norms, norms
 
     def __new__(cls, spectrum, given_field_values=1):
-        class TailoredElementwiseRealMultiplication(type(spectrum)):
+        # Inherit from ElementwiseRealMultiplication so that `isinstance` calls work as
+        # expected.`
+        class TailoredElementwiseRealMultiplication(
+            type(spectrum), ElementwiseRealMultiplication
+        ):
             field_values = given_field_values
             spectral_coefficients, norms = cls._compute_decomposition(spectrum)
+
+            # Revert the non-trivial effects of inheriting from
+            # ElementwiseRealMultiplication.
+            def __new__(cls, *args, **kwargs):
+                return super().__new__(cls, *args, **kwargs)
+
+            # We'll not initialise it this way and need to avoid wrong constructor
+            # calls.
+            def __init__(self, *args, **kwargs):
+                pass
 
             @property
             def eigenvalues(self):

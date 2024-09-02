@@ -33,7 +33,7 @@ def test_lattice_spectral_basis(spectrum):
 
     if spectrum.spacetime_dimension == 1:
         # We're explicitly using the private data here because the public interface may
-        # have been overridden by the identity spectrum.
+        # have been overridden by another spectrum.
         expected = spectrum._eigenvalues
 
     elif spectrum.spacetime_dimension == 2:

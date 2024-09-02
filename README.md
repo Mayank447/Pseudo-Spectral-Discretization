@@ -50,4 +50,4 @@ This codebase contains the implementation of the DiracOperator class, which is u
 spectra should not use `self.eigenvalues` internally
 but `self._eigenvalues` (or wherever the data is actually stored)
 because `self.eigenvalues` is public interface
-which is overridden when applying the `Identity` spectrum.
+which is overridden when applying another spectrum on top.

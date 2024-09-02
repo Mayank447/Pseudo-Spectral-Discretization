@@ -236,10 +236,10 @@ class FreeFermion2D:
             input_basis: basis of the input vectors (real/spectral)
         """
         if input_basis == "real":
-            return rhs @ lhs.transpose().conjugate() * self.volume_element
+            return np.inner(lhs.conjugate(), rhs) * self.volume_element
 
         elif input_basis == "spectral":
-            return rhs @ lhs.transpose().conjugate()
+            return np.inner(lhs.conjugate(), rhs)
 
         else:
             raise ValueError(f"Unsupported input space - {input_basis}.")

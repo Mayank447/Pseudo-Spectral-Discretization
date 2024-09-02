@@ -134,8 +134,8 @@ class Derivative1D:
         # of matrices" and accordingly acts on the LAST index of the first but the
         # SECOND TO LAST index of the second.
         if input_basis == "real":
-            return rhs @ lhs.transpose().conjugate() * self.a
+            return np.inner(lhs.conjugate(), rhs) * self.a
         elif input_basis == "spectral":
-            return rhs @ lhs.transpose().conjugate()
+            return np.inner(lhs.conjugate(), rhs)
         else:
             raise ValueError(f"Unsupported input space - {input_basis}.")

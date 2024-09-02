@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
+import numpy as np
+import pytest
+
 from pseudospectral import (
     Derivative1D,
-    FreeFermion2D,
     ElementwiseSpectralMultiplication,
+    ElementwiseRealMultiplication,
+    FreeFermion2D,
     naive_implementation_of,
 )
-import pytest
-import numpy as np
 
-
-SPECTRA = [
+BASIS_SPECTRA = [
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 101}},
     {"type": Derivative1D, "config": {"total_num_lattice_points": 3, "L": 3}},
@@ -45,14 +46,30 @@ SPECTRA = [
     },
 ]
 
-SPECTRA += [
+SPECTRAL_MULTIPLICATION_SPECTRA = [
     {
         "type": ElementwiseSpectralMultiplication,
         "config": {"spectrum": spec["type"](**spec["config"])},
     }
-    for spec in SPECTRA
+    for spec in BASIS_SPECTRA
 ]
-SPECTRA += [spec | {"type": naive_implementation_of(spec["type"])} for spec in SPECTRA]
+REAL_MULTIPLICATION_SPECTRA = [
+    {
+        "type": ElementwiseRealMultiplication,
+        "config": {"spectrum": spec["type"](**spec["config"])},
+    }
+    for spec in BASIS_SPECTRA
+]
+NAIVE_SPECTRA = [
+    spec | {"type": naive_implementation_of(spec["type"])} for spec in BASIS_SPECTRA
+]
+
+SPECTRA = (
+    BASIS_SPECTRA
+    + SPECTRAL_MULTIPLICATION_SPECTRA
+    + REAL_MULTIPLICATION_SPECTRA
+    + NAIVE_SPECTRA
+)
 
 
 # Pytest settings

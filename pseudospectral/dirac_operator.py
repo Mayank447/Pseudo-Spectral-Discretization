@@ -44,6 +44,9 @@ class CompositeOperator:
         self.operators = operators
         self.operation = operation
 
+    def __add__(self, other):
+        return CompositeOperator((self, other), lambda f: np.sum(f, axis=0))
+
     def apply_to(self, coefficients):
         """
         As the multiple operators might not commute, we cannot offer a version in the

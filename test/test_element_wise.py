@@ -15,7 +15,7 @@ from pseudospectral import (
 def test_identity_is_identity(spectrum, ElementWise):
     input_vectors = np.eye(spectrum.total_num_of_dof)
     assert np.allclose(
-        DiracOperator(ElementWise(spectrum)).apply_to(input_vectors),
+        DiracOperator(ElementWise(spectrum, 1)).apply_to(input_vectors),
         input_vectors,
     )
 

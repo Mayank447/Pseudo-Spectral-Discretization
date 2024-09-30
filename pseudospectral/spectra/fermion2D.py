@@ -27,13 +27,13 @@ class FreeFermion2D:
         m: mass parameter
     """
 
-    def __init__(self, num_points, *, L=None, mu=0, m=0):
-        self._initialise_members(num_points, L, mu, m)
+    def __init__(self, num_points, *, L=None, theta=None, mu=0, m=0):
+        self._initialise_members(num_points, L, theta, mu, m)
         self._setup_spinor_structure()
         self._compute_grids()
         self._solve_spectral_problem_in_spinor_space()
 
-    def _initialise_members(self, num_points, L, mu, m):
+    def _initialise_members(self, num_points, L, theta, mu, m):
         """
         Please, note that some derived quantities like self.dof_spinor are computed
         later!
@@ -42,6 +42,9 @@ class FreeFermion2D:
         self.m = m
         self.num_points = np.asarray(num_points)
         self.L = np.asarray(L) if L is not None else self.num_points
+        self.theta = (
+            np.asarray(theta) if theta is not None else np.zeros_like(self.num_points)
+        )
         self.a = self.L / self.num_points
         self.spacetime_dimension = len(self.num_points)
         self.vol = np.prod(self.L)
@@ -59,9 +62,25 @@ class FreeFermion2D:
         )
         self.p = I2PI * np.array(
             np.meshgrid(
-                *(np.fft.fftfreq(n, a) for n, a in zip(self.num_points, self.a)),
+                *(
+                    np.fft.fftfreq(n, a) + t / length
+                    for n, a, t, length in zip(
+                        self.num_points, self.a, self.theta, self.L
+                    )
+                ),
                 indexing="ij",
             )
+        )
+
+        self.boundary_conditions = np.prod(
+            np.exp(
+                -I2PI
+                * (self.theta / self.L).reshape(
+                    -1, *(np.ones(self.spacetime_dimension, dtype=int))
+                )
+                * self.x
+            ),
+            axis=0,
         )
 
     def _setup_spinor_structure(self):
@@ -164,7 +183,8 @@ class FreeFermion2D:
 
         elif input_basis == "real" and output_basis == "spectral":
             input_in_momentum_space = np.fft.fftn(
-                input_vector.reshape(-1, *self.num_points, self.dof_spinor),
+                self.boundary_conditions.reshape(1, *self.num_points, 1)
+                * input_vector.reshape(-1, *self.num_points, self.dof_spinor),
                 axes=1 + np.arange(self.spacetime_dimension),
                 norm="ortho",
             ) * np.sqrt(self.volume_element)
@@ -184,7 +204,8 @@ class FreeFermion2D:
                 input_vector.reshape(-1, np.prod(self.num_points), self.dof_spinor),
             )
             return (
-                np.fft.ifftn(
+                self.boundary_conditions.reshape(1, *self.num_points, 1).conjugate()
+                * np.fft.ifftn(
                     input_in_uniform_spinor_basis.reshape(
                         -1, *self.num_points, self.dof_spinor
                     ),

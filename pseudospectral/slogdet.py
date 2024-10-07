@@ -10,5 +10,9 @@ def slogdet(operator):
     Before use in production, this should be implemented in a smarter way.
     """
     return np.linalg.slogdet(
-        operator.apply_to(np.eye(operator.spectrum.total_num_of_dof))
+        operator.apply_to(
+            np.eye(operator.spectrum.total_num_of_dof),
+            input_basis="real",
+            output_basis="real",
+        )
     )

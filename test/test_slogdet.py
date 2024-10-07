@@ -11,17 +11,16 @@ def has_exact_zero_modes(spec):
 
 
 # exact zero modes are difficult, we'll treat them separately
-SPECTRA_WITHOUT_EXACT_ZERO_MODES = [
+SPECTRA_WITHOUT_EXACT_ZERO_MODES = (
     # these are fine
-    spec
-    for spec in SPECTRA
-    if not has_exact_zero_modes(spec)
-] + [
+    [spec for spec in SPECTRA if not has_exact_zero_modes(spec)]
     # we'll add a small mass to the rest, so they have no exact zero modes anymore
-    spec | (spec["config"] | {"m": 0.01})
-    for spec in SPECTRA
-    if has_exact_zero_modes(spec) and isinstance(spec["type"], FreeFermion2D)
-]
+    + [
+        spec | (spec["config"] | {"m": 0.01})
+        for spec in SPECTRA
+        if has_exact_zero_modes(spec) and isinstance(spec["type"], FreeFermion2D)
+    ]
+)
 
 
 @pytest.fixture(params=SPECTRA_WITHOUT_EXACT_ZERO_MODES)

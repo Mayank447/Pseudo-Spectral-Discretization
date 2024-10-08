@@ -47,7 +47,7 @@ class CompositeOperator:
     def __add__(self, other):
         return CompositeOperator((self, other), lambda f: np.sum(f, axis=0))
 
-    def apply_to(self, coefficients):
+    def apply_to(self, coefficients, input_basis="real", output_basis="real"):
         """
         As the multiple operators might not commute, we cannot offer a version in the
         spectral basis because that would be ambiguous.
@@ -55,6 +55,13 @@ class CompositeOperator:
         This is a general purpose implementation. Special cases should be implemented as
         needed to increase performance.
         """
+        if input_basis != "real" or output_basis != "real":
+            message = (
+                "We cannot know a spectral basis for a composite operator. "
+                "Please use a real basis for input and output. "
+                f"You gave {input_basis=} and {output_basis=}"
+            )
+            raise ValueError(message)
         return self.operation(
             [operator.apply_to(coefficients) for operator in self.operators]
         )

@@ -11,6 +11,10 @@ class ElementwiseSpectralMultiplication:
     """
 
     def __new__(cls, spectrum, given_field_values=1):
+        # Inheriting from ElementwiseSpectralMultiplication in order to make it
+        # identifiable as a derived spectrum.
+        # `isinstance(inst, ElementwiseSpectralMultiplicationt)` would return
+        # `False` otherwise.`
         class TailoredElementwiseSpectralMultiplication(
             type(spectrum), ElementwiseSpectralMultiplication
         ):
@@ -63,8 +67,10 @@ class ElementwiseRealMultiplication:
         return spectral_coefficients / norms, norms
 
     def __new__(cls, spectrum, given_field_values=1):
-        # Inherit from ElementwiseRealMultiplication so that `isinstance` calls work as
-        # expected.`
+        # Inheriting from ElementwiseRealMultiplication in order to make it
+        # identifiable as a derived spectrum.
+        # `isinstance(inst, ElementwiseRealMultiplicationt)` would return
+        # `False` otherwise.`
         class TailoredElementwiseRealMultiplication(
             type(spectrum), ElementwiseRealMultiplication
         ):

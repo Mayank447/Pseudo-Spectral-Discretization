@@ -20,11 +20,6 @@ class ElementwiseSpectralMultiplication:
         ):
             field_values = given_field_values
 
-            # Revert the non-trivial effects of inheriting from
-            # ElementwiseSpectralMultiplication.
-            def __new__(cls, *args, **kwargs):
-                return super().__new__(cls, *args, **kwargs)
-
             # We'll not initialise it this way and need to avoid wrong constructor
             # calls.
             def __init__(self, *args, **kwargs):
@@ -76,11 +71,6 @@ class ElementwiseRealMultiplication:
         ):
             field_values = given_field_values
             spectral_coefficients, norms = cls._compute_decomposition(spectrum)
-
-            # Revert the non-trivial effects of inheriting from
-            # ElementwiseRealMultiplication.
-            def __new__(cls, *args, **kwargs):
-                return super().__new__(cls, *args, **kwargs)
 
             # We'll not initialise it this way and need to avoid wrong constructor
             # calls.

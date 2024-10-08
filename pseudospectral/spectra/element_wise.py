@@ -21,7 +21,9 @@ class ElementwiseSpectralMultiplication:
             field_values = given_field_values
 
             # We'll not initialise it this way and need to avoid wrong constructor
-            # calls.
+            # calls. In fact, after we return from this __new__ the next step is to call
+            # __init__ on the returned object which we already initialised correctly
+            # inside of the __new__.
             def __init__(self, *args, **kwargs):
                 pass
 
@@ -73,7 +75,9 @@ class ElementwiseRealMultiplication:
             spectral_coefficients, norms = cls._compute_decomposition(spectrum)
 
             # We'll not initialise it this way and need to avoid wrong constructor
-            # calls.
+            # calls. In fact, after we return from this __new__ the next step is to call
+            # __init__ on the returned object which we already initialised correctly
+            # inside of the __new__.
             def __init__(self, *args, **kwargs):
                 pass
 

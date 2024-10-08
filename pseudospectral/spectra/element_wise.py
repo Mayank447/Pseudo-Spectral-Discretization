@@ -120,9 +120,6 @@ class ElementwiseRealMultiplication:
                     )
                     raise ValueError(message)
 
-            def scalar_product(self, lhs, rhs, input_basis="real"):
-                return super().scalar_product(lhs, rhs, input_basis)
-
         new_self = deepcopy(spectrum)
         new_self.__class__ = TailoredElementwiseRealMultiplication
         return new_self

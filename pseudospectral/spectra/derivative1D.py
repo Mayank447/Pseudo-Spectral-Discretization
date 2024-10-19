@@ -21,6 +21,10 @@ class Derivative1D:
         self.L = np.asarray(L)
         self.a = L / total_num_lattice_points
         self.theta = np.asarray(theta)
+        self._eigenvalues = I2PI * (
+            np.fft.fftfreq(self.total_num_lattice_points, d=self.a)
+            + self.theta / self.L
+        )
 
     @property
     def spacetime_dimension(self):
@@ -35,11 +39,7 @@ class Derivative1D:
         Private function to return the eigenvalues of the 1D derivative operator
         i.e. ik for the k-th eigenfunction exp(ikx) and k = 2*pi*m/L
         """
-        tmp = I2PI * (
-            np.fft.fftfreq(self.total_num_lattice_points, d=self.a)
-            + self.theta / self.L
-        )
-        return tmp
+        return self._eigenvalues
 
     def eigenfunction(self, index: np.ndarray):
         """
@@ -54,7 +54,7 @@ class Derivative1D:
             raise ValueError("Index out of bounds for the eigenfunction.")
 
         else:
-            return lambda x: np.exp(np.kron(self.eigenvalues[index], x)).reshape(
+            return lambda x: np.exp(np.kron(self._eigenvalues[index], x)).reshape(
                 len(index), -1
             ) / np.sqrt(self.L)
 
@@ -109,7 +109,7 @@ class Derivative1D:
             )
 
         elif output_basis == "spectral":
-            return (self.eigenvalues,)
+            return (self._eigenvalues,)
 
         else:
             raise ValueError("Unsupported output space.")
@@ -134,8 +134,8 @@ class Derivative1D:
         # of matrices" and accordingly acts on the LAST index of the first but the
         # SECOND TO LAST index of the second.
         if input_basis == "real":
-            return rhs @ lhs.transpose().conjugate() * self.a
+            return np.inner(lhs.conjugate(), rhs) * self.a
         elif input_basis == "spectral":
-            return rhs @ lhs.transpose().conjugate()
+            return np.inner(lhs.conjugate(), rhs)
         else:
             raise ValueError(f"Unsupported input space - {input_basis}.")

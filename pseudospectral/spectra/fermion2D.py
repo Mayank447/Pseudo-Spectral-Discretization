@@ -112,9 +112,13 @@ class FreeFermion2D:
             )
             + self.m * IDENTITY[..., *(self.spacetime_dimension * [np.newaxis])]
         ).transpose(np.roll(np.arange(self.spacetime_dimension + 2), 2))
-        self.eigenvalues, self.eta = np.linalg.eig(matrix_in_momentum_space)
+        self._eigenvalues, self.eta = np.linalg.eig(matrix_in_momentum_space)
         self.eta = self.eta.reshape(-1, self.dof_spinor, self.dof_spinor)
-        self.eigenvalues = self.eigenvalues.reshape(-1)
+        self._eigenvalues = self._eigenvalues.reshape(-1)
+
+    @property
+    def eigenvalues(self):
+        return self._eigenvalues
 
     def eigenfunction(self, index):
         """
@@ -232,10 +236,10 @@ class FreeFermion2D:
             input_basis: basis of the input vectors (real/spectral)
         """
         if input_basis == "real":
-            return rhs @ lhs.transpose().conjugate() * self.volume_element
+            return np.inner(lhs.conjugate(), rhs) * self.volume_element
 
         elif input_basis == "spectral":
-            return rhs @ lhs.transpose().conjugate()
+            return np.inner(lhs.conjugate(), rhs)
 
         else:
             raise ValueError(f"Unsupported input space - {input_basis}.")

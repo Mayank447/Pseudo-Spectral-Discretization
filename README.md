@@ -4,7 +4,6 @@ This codebase contains the implementation of the DiracOperator class, which is u
 
 ### Directory Structure
 
-
 - `pseudospectral` folder contains all the source code of the project which are mainly `.py` files broadly categorized into Dirac operator and Spectra python files.
 - `pseudospectral/spectra` folder contains spectrum class implementations.
 - `example_scripts` folder for example script usage of the `DiracOperator`, `Spectrum` classes, methods and a boiler-plate to begin with.
@@ -44,3 +43,11 @@ This codebase contains the implementation of the DiracOperator class, which is u
   ``from pseudospectral import DiracOperator, FreeFermions2D``
 - You may further refer to:
   - `examples` folder for example script usage of the DiracOperator, Spectrum classes, methods and a boilerplate to begin with.
+
+#### Gotchas
+
+- As opposed to standard best practices,
+spectra should not use `self.eigenvalues` internally
+but `self._eigenvalues` (or wherever the data is actually stored)
+because `self.eigenvalues` is public interface
+which is overridden when applying another spectrum on top.

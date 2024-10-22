@@ -4,3 +4,4 @@ from .spectra.derivative1D import Derivative1D
 from .spectra.fermion2D import FreeFermion2D
 from .spectra.naive_implementation import naive_implementation_of
 from .spectra.element_wise import ElementwiseSpectralMultiplication, ElementwiseRealMultiplication
+from .slogdet import slogdet

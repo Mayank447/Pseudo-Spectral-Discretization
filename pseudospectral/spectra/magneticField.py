@@ -79,7 +79,7 @@ class MagneticField:
         eigval[1::2] = -eigval[1::2]
         return eigval
     
-    
+
     def get_index(self, w, n, p, sign):
         """
         sign: Must be 0 for positive and 1 for negative
@@ -119,6 +119,7 @@ class MagneticField:
         """
         p: non-negative integer < nu
         k: int
+        Returns: 2D array
         """
         normalization = np.pow((self.B/(np.pi * (self.L**2))), 0.25)
         alpha_p = 2 * np.pi * p/self.L
@@ -132,18 +133,22 @@ class MagneticField:
     def phi_0_p(self, p):
         """
         p: non-negative integer < nu
+        Returns: 2D array
         """
         return lambda x, y: (
             np.sum([self.phi_0_p_k(p, k)(x,y) for k in range(-10,11)], axis=0)
         )
     
     def phi_n_p_k(self, n, p, k):
+        """
+        Returns: 1D Array
+        """
         alpha_p = 2 * np.pi * p/self.L
         sqrt_B = np.sqrt(self.B)
         return lambda x,y: (
             special.hermite(n)(sqrt_B*y + ((alpha_p + k*self.B*self.L)/sqrt_B)) * 
             self.phi_0_p_k(p,k)(x,y)
-        )
+        ).flatten()
     #This special.hermite step can be calculated only along a row and then extruded
 
     def phi_n_p(self, n, p):
@@ -158,52 +163,29 @@ class MagneticField:
         )
     
     # Rename the below as eigenfunction and account for both signs of mu
-    def phi_w_n_p(self, w, n, p):
+    def phi_w_n_p(self, w, n, p, sign):
         """
         w: Something to do with time
         n: non-negative integer (nth energy level)
         p: non-negative integer < nu
+        sign: 0 for positive and -1 for negative
         """
-        lambd = self.lamda_value(n)
-        mu = np.sqrt(lambd**2 + w**2)
+        index = self.get_index(w,n,p,sign)
+        mu = self._eigenvalues(index)
+        lambd = np.sqrt(2 * self.B * n)
         normalization = 1/(np.sqrt(2 * self.beta * mu * (mu-w)))
         
         return lambda t,x,y: (
             normalization *
             np.exp(1j * w * t) *
-            np.array([(mu-w) * self.phi_n_p(n,p)(x,y).flatten(), 
-                      lambd * self.phi_n_p(n-1,p)(x,y).flatten()]).flatten('F')
+            np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
+                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
         )
 ###################### Working Tested code ############
 
-
     def eigenfunction(self, index):
-        omega = self.omega[index // ((2* self.N - 1) * self.nu)]
-        lamda = (index % (self.nu * (2* self.N - 1))) + self.nu
-        n = self.n[lamda // (2*self.nu)]
-        p = self.p[lamda % (2*self.nu)]
-        
-        sign = (-1**(index%2)) 
-        mu = sign * np.sqrt(omega**2 + self.lamda_value(n)**2)
-
-        if sign == 1:
-            return lambda t, x, y: (
-                np.exp(1j * omega * t) / np.sqrt(2 * self.beta * mu * (mu - sign * omega)) *
-                np.ravel([
-                    (mu - omega) * self.phi(n, p)(x, y, K),
-                    self.lamda_value(n) * self.phi(n-1, p)(x, y, K)
-                ], 'F')
-            )
-        
-        else:
-            return lambda t, x, y: (
-                np.exp(1j * omega * t) / np.sqrt(2 * self.beta * mu * (mu + sign * omega)) *
-                np.ravel([
-                    self.lamda_value(n) * self.phi(n, p)(x, y, K),
-                    (mu + omega) * self.phi(n-1, p)(x, y, K)
-                ], 'F')
-            )
-
+        w, n, p, sign = self.get_w_n_p_sign_from_index(index)
+        return self.phi_w_n_p(w,n,p,sign)
 
     def transform(self, coefficients, input_basis, output_basis):
         """

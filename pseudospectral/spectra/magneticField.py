@@ -9,13 +9,13 @@ class MagneticField:
     Spectrum class to represent the spectrum (eigenvalue, eigenfunctions) of the Dirac operator in the presence of a magnetic field.
     """
 
-    def __init__(self, Nt, nu, N, dimension=2+1):
+    def __init__(self, Nt, nu, N, dimension=1+2):
         """
         Constructor of the Spectrum class.
-        Nt: number of time slices
-        nu: Number of flux quanta (zero mode degenracy)
         N: Number of energy levels
-        dimension: Dimension of the space-time (2 for space + 1 for time by default)
+        nu: Number of flux quanta (zero mode degenracy)
+        Nt: number of time slices
+        dimension: Dimension of the space-time (1 for time + 2 for space by default)
         """
         self.initialize(Nt, nu, N, dimension)
         
@@ -24,89 +24,124 @@ class MagneticField:
         """
         Some other internal parameters:
         B: magnetic field
-        L: spatial length (Lx=Ly)
-        flux: magnetic flux
+        L: spatial length (Lx=Ly i.e. a square space lattice)
         p: flux quanta (0 <= p < nu)
+        flux: magnetic flux (Not used)
 
         beta: simulation time
         omega: temporal frequency
         """
-        
-        self.gap = 1  #energy gap [Free parameter]
-        self._dimension = dimension
-        self._eigenvalues = None
 
         self.Nt = Nt
         self.nu = nu
         self.N = N
+        
+        self.gap = 1  #energy gap [Free parameter]
+        self._dimension = dimension
+        self._eigenvalues = None
+        
+        self.B = 0.5 * np.square(self.gap/self.N) # As per disc. w/ Julian on dim analys
+        self.L = np.sqrt(2 * np.pi * self.nu/self.B)
+        self.flux = self.B * (self.L**2)
+        self.beta = Nt * self.gap # Beta is kind of a free parameter to be honest
 
         self.n = np.arange(self.N)
         self.p = np.arange(self.nu)
         self.omega = np.arange(self.Nt) # I think should be symmetric about 0
         
-        self.B = 0.5 * np.square(self.gap/self.N)
-        self.L = np.sqrt(2 * np.pi * self.nu/self.B)
-        self.flux = self.B * (self.L**2)
-        self.beta = Nt * self.gap
-
-        # For lattice discretization
+        # For lattice discretization - to be checked
         self._n_x = self.nu
         self._n_y = self.N
-    
-            
 
-    def compute_eigenvalues(self):
-        eigval = np.sqrt(
-                    (self.omega.reshape(-1,1))**2 
-                    + np.repeat(2 * self.B * self.n, 2 * self.nu)[self.nu :]
-                 ).reshape(-1)
-        
-        eigval[1::2] = -eigval[1::2]
-        return eigval 
-    
+
     def lamda_value(self, n):
         """
-        Function to return the eigenvalue (lambda) for a given n.
+        Function to return the eigenvalue of phi_n_k (lambda) for a given n.
         """
         return np.sqrt(2 * self.B * n)
 
+    def compute_eigenvalues(self):
+        """
+        Returns a list of mu_n (both positive and negative) and increasing in n
+        
+        Some logic behind implementation:
+            mu_n**2 = lambda_n**2 + omega**2
+            Now lambda_n = sqrt(2*B*n), for each energy level n there is a degeneracy of 2n except ground
+            The code should be self explanatory now, in the last line we consider both signs for mu_n
+        """
+        # There can be some optimization done wrt to storage and memory since a lot of values are just repeat
+        eigval = np.sqrt(
+                    (self.omega.reshape(-1,1))**2 
+                        + np.repeat(self.lamda_value(self.n)**2, 2*self.nu)[self.nu:]
+                    ).reshape(-1)
+        
+        eigval = np.repeat(eigval, 2)
+        eigval[1::2] = -eigval[1::2]
+        return eigval
 
-    def hermite_operator(self, n):
-        return lambda x: special.hermite(n)(x)
 
-    def phi_0(self, p, k):
+###################### Working Tested code ############
+    def phi_0_p_k(self, p, k):
         """
         p: non-negative integer < nu
         k: int
         """
-        normalization = np.pow((self.B/(np.pi * self.L**2)), 0.25)
+        normalization = np.pow((self.B/(np.pi * (self.L**2))), 0.25)
         alpha_p = 2 * np.pi * p/self.L
         
         return lambda x, y: (
             normalization * 
             np.exp(1j * (alpha_p + k * self.L * self.B) * x) *
-            np.exp(-self.B/2 * np.pow(y + alpha_p/self.B + k*self.L, 2))
+            np.exp(-self.B/2 * np.pow(y + (alpha_p/self.B) + k*self.L, 2))
         )
-
-    def phi(self, n, p):
+    
+    def phi_0_p(self, p):
         """
-        n: non-negative integer
         p: non-negative integer < nu
         """
-        normalization = (
-            (-1**(n%2)) * np.pow(self.B/(np.pi * self.L**2), 0.25) / np.sqrt(np.pow(2, n) * special.factorial(n))
+        return lambda x, y: (
+            np.sum([self.phi_0_p_k(p, k)(x,y) for k in range(-10,11)], axis=0)
         )
+    
+    def phi_n_p_k(self, n, p, k):
+        alpha_p = 2 * np.pi * p/self.L
+        sqrt_B = np.sqrt(self.B)
+        return lambda x,y: (
+            special.hermite(n)(sqrt_B*y + ((alpha_p + k*self.B*self.L)/sqrt_B)) * 
+            self.phi_0_p_k(p,k)(x,y)
+        )
+    #This special.hermite step can be calculated only along a row and then extruded
 
-        # x, y are numpy arrays whereas k is a non-negative integer
-        return lambda x, y, k: (
-            normalization * 
-            np.sum(
-                self.hermite_operator(n)(
-                    np.sqrt(self.flux) * (y/self.L + np.arange(-k, k+1).reshape(-1,1) + p/self.nu)
-                ) * 
-                np.exp(I2PI * (p + self.nu * np.arange(-k, k+1)).reshape(-1,1) * x / self.L)
-            , axis=0)
+    def phi_n_p(self, n, p):
+        """
+        n: non-negative integer (nth energy level)
+        p: non-negative integer < nu (degeneracy)
+        """
+        normalization = np.pow(-1,n%2) * 1/(np.sqrt(special.factorial(n) * np.pow(2,n)))
+        return lambda x, y: (
+            normalization *
+            np.sum([self.phi_n_p_k(n, p, k)(x,y) for k in range(-10,11)], axis=0)
         )
+    
+    # Rename the below as eigenfunction and account for both signs of mu
+    def phi_w_n_p(self, w, n, p):
+        """
+        w: Something to do with time
+        n: non-negative integer (nth energy level)
+        p: non-negative integer < nu
+        """
+        lambd = self.lamda_value(n)
+        mu = np.sqrt(lambd**2 + w**2)
+        normalization = 1/(np.sqrt(2 * self.beta * mu * (mu-w)))
+        
+        return lambda t,x,y: (
+            normalization *
+            np.exp(1j * w * t) *
+            np.array([(mu-w) * self.phi_n_p(n,p)(x,y).flatten(), 
+                      lambd * self.phi_n_p(n-1,p)(x,y).flatten()]).flatten('F')
+        )
+###################### Working Tested code ############
+
 
     def eigenfunction(self, index):
         omega = self.omega[index // ((2* self.N - 1) * self.nu)]

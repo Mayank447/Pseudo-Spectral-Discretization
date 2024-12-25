@@ -35,19 +35,19 @@ class MagneticField:
         self.Nt = Nt
         self.nu = nu
         self.N = N
-        
         self.gap = 1  #energy gap [Free parameter]
         self._dimension = dimension
-        self._eigenvalues = None
-        
+        self.total_num_of_dof = Nt * (2*nu - 1) * N * 2
+
         self.B = 0.5 * np.square(self.gap/self.N) # As per disc. w/ Julian on dim analys
         self.L = np.sqrt(2 * np.pi * self.nu/self.B)
         self.flux = self.B * (self.L**2)
         self.beta = Nt * self.gap # Beta is kind of a free parameter to be honest
 
-        self.n = np.arange(self.N)
-        self.p = np.arange(self.nu)
+        self.n = np.arange(self.N) 
+        self.p = np.arange(self.nu) #Unused
         self.omega = np.arange(self.Nt) # I think should be symmetric about 0
+        self._eigenvalues = self.compute_eigenvalues()
         
         # For lattice discretization - to be checked
         self._n_x = self.N
@@ -82,36 +82,41 @@ class MagneticField:
 
     def get_index(self, w, n, p, sign):
         """
+        w,n,p,sign: 1D Numpy array
         sign: Must be 0 for positive and 1 for negative
         """
-        index = 0
+        index = np.zeros_like(w)
         num_eigvec_t = self.nu * (2*self.N - 1)
         index += w * num_eigvec_t
 
-        if(n!=0):
-            index += self.nu * (2*n-1)
-
+        index[n!=0] += self.nu * (2*n-1)
         index += p
         index *= 2 # For sign
         return index + sign
     
 
     def get_w_n_p_sign_from_index(self, index):
+        """
+        index: 1D Numpy array
+        """
+        if(not isinstance(index, np.ndarray)):
+            index = np.array([index])
+        
+        n = np.zeros_like(index)
         sign = index%2
         index = index//2
 
         num_eigvec_t = self.nu * (2*self.N - 1)
-        w = index%num_eigvec_t
-        residue = index//num_eigvec_t
+        w = index//num_eigvec_t
+        residue = index%num_eigvec_t
 
-        n = 0
-        if(residue >= self.nu):
-            residue -= self.nu
-            n += 1
+        if(residue >= self.nu).any():
+            n[residue >= self.nu] += 1
+            residue[residue >= self.nu] -= self.nu
         
-        n = residue//(2*self.nu)
+        n += residue//(2*self.nu)
         p = residue%(2*self.nu)
-        return (w, n, p, sign)
+        return np.array([w, n, p, sign])
 
 
 ###################### Working Tested code ############
@@ -170,14 +175,15 @@ class MagneticField:
         p: non-negative integer < nu
         sign: 0 for positive and -1 for negative
         """
+        print(w,n,p,sign)
         index = self.get_index(w,n,p,sign)
-        mu = self._eigenvalues(index)
+        mu = self._eigenvalues[index]
         lambd = np.sqrt(2 * self.B * n)
         normalization = 1/(np.sqrt(2 * self.beta * mu * (mu-w)))
         
         return lambda t,x,y: (
             normalization *
-            np.exp(1j * w * t) *
+            np.repeat(np.exp(1j * w * t), 2) *
             np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
                       lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
         )
@@ -185,6 +191,7 @@ class MagneticField:
 
     def eigenfunction(self, index):
         w, n, p, sign = self.get_w_n_p_sign_from_index(index)
+        print(w,n,p,sign)
         return self.phi_w_n_p(w,n,p,sign)
 
     def transform(self, coefficients, input_basis, output_basis):
@@ -204,7 +211,7 @@ class MagneticField:
             raise ValueError("Invalid input_basis or output_basis.")
 
 
-    def inner_product(self, f, g, output_basis="real"):
+    def scalar_product(self, f, g, output_basis="real"):
         if output_basis == "real":
             normalization_x_y = self.L**2/(self._n_x * self._n_y)
             return self.gap * normalization_x_y * (g @ f.transpose().conjugate())
@@ -238,15 +245,9 @@ class MagneticField:
     def dimension(self):
         return self._dimension
 
-    @property
-    def eigenvalues(self):
-        if self._eigenvalues is None:
-            self._eigenvalues = self.compute_eigenvalues()
-        return self._eigenvalues
-
 
 if __name__ == "__main__":
     M = MagneticField(3, 3, 10)
-    print(M.eigenfunction(0)(*M.lattice("real")))
+    print(M.eigenfunction(6)(*M.lattice("real")))
     # v = M.phi(2, 1)(np.array([0,1,2]), np.array([1,1,1]), 100)
     # print(v)

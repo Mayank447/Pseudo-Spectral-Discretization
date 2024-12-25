@@ -15,12 +15,23 @@ class MagneticField:
         Nt: number of time slices
         nu: Number of flux quanta (zero mode degenracy)
         N: Number of energy levels
-        # flux: magnetic flux
+        dimension: Dimension of the space-time (2 for space + 1 for time by default)
         """
         self.initialize(Nt, nu, N, dimension)
         
 
     def initialize(self, Nt, nu, N, dimension):
+        """
+        Some other internal parameters:
+        B: magnetic field
+        L: spatial length (Lx=Ly)
+        flux: magnetic flux
+        p: flux quanta (0 <= p < nu)
+
+        beta: simulation time
+        omega: temporal frequency
+        """
+        
         self.gap = 1  #energy gap [Free parameter]
         self._dimension = dimension
         self._eigenvalues = None
@@ -31,31 +42,23 @@ class MagneticField:
 
         self.n = np.arange(self.N)
         self.p = np.arange(self.nu)
-        self.omega = np.arange(self.Nt)
+        self.omega = np.arange(self.Nt) # I think should be symmetric about 0
         
-        self.L = np.sqrt(4 * np.pi * self.N**2/self.gap**2)
         self.B = 0.5 * np.square(self.gap/self.N)
+        self.L = np.sqrt(2 * np.pi * self.nu/self.B)
         self.flux = self.B * (self.L**2)
         self.beta = Nt * self.gap
 
         # For lattice discretization
         self._n_x = self.nu
         self._n_y = self.N
+    
+            
 
-
-    @property
-    def dimension(self):
-        return self._dimension
-
-    @property
-    def eigenvalues(self):
-        if self._eigenvalues is None:
-            self._eigenvalues = self.compute_eigenvalues()
-        return self._eigenvalues
-        
     def compute_eigenvalues(self):
         eigval = np.sqrt(
-                    (self.omega.reshape(-1,1))**2 + np.repeat(2 * self.B * self.n, 2 * self.nu)[self.nu :]
+                    (self.omega.reshape(-1,1))**2 
+                    + np.repeat(2 * self.B * self.n, 2 * self.nu)[self.nu :]
                  ).reshape(-1)
         
         eigval[1::2] = -eigval[1::2]
@@ -69,7 +72,21 @@ class MagneticField:
 
 
     def hermite_operator(self, n):
-        return lambda x: np.exp(-(x**2)/2) * special.hermite(n)(x)
+        return lambda x: special.hermite(n)(x)
+
+    def phi_0(self, p, k):
+        """
+        p: non-negative integer < nu
+        k: int
+        """
+        normalization = np.pow((self.B/(np.pi * self.L**2)), 0.25)
+        alpha_p = 2 * np.pi * p/self.L
+        
+        return lambda x, y: (
+            normalization * 
+            np.exp(1j * (alpha_p + k * self.L * self.B) * x) *
+            np.exp(-self.B/2 * np.pow(y + alpha_p/self.B + k*self.L, 2))
+        )
 
     def phi(self, n, p):
         """
@@ -164,6 +181,17 @@ class MagneticField:
 
         else:
             raise ValueError(f"Invalid output_basis {output_basis}.")
+
+
+    @property
+    def dimension(self):
+        return self._dimension
+
+    @property
+    def eigenvalues(self):
+        if self._eigenvalues is None:
+            self._eigenvalues = self.compute_eigenvalues()
+        return self._eigenvalues
 
 
 if __name__ == "__main__":

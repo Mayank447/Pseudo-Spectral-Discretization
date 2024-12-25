@@ -50,8 +50,8 @@ class MagneticField:
         self.omega = np.arange(self.Nt) # I think should be symmetric about 0
         
         # For lattice discretization - to be checked
-        self._n_x = self.nu
-        self._n_y = self.N
+        self._n_x = self.N
+        self._n_y = 2 * self.nu - 1
 
 
     def lamda_value(self, n):
@@ -195,11 +195,10 @@ class MagneticField:
             return coefficients
         
         elif input_basis == "real" and output_basis == "spectral":
-            
-            return self.real_to_spectral(coefficients)
+            pass
         
         elif input_basis == "spectral" and output_basis == "real":
-            return self.spectral_to_real(coefficients)
+            pass
         
         else:
             raise ValueError("Invalid input_basis or output_basis.")
@@ -207,7 +206,8 @@ class MagneticField:
 
     def inner_product(self, f, g, output_basis="real"):
         if output_basis == "real":
-            pass
+            normalization_x_y = self.L**2/(self._n_x * self._n_y)
+            return self.gap * normalization_x_y * (g @ f.transpose().conjugate())
 
         elif output_basis == "spectral":
             return g @ f.transpose().conjugate()

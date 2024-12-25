@@ -49,19 +49,34 @@ class MF:
             np.sum([self.phi_n_p_k(n, p, k)(x,y) for k in range(-10,11)], axis=0)
         )
     
+    def phi_w_n_p(self, w, n, p):
+        beta = 2
+        lambd = np.sqrt(2*self.B*n)
+        mu = np.sqrt(lambd**2 + w**2)
+        normalization = 1/(np.sqrt(2 * beta * mu * (mu-w)))
+        
+        return lambda t,x,y: (
+            normalization *
+            np.exp(1j * w * t) *
+            np.array([(mu-w) * self.phi_n_p(n,p)(x,y).flatten(), 
+                      lambd * self.phi_n_p(n-1,p)(x,y).flatten()]).flatten('F')
+        )
+    
 nu = 4
 L = 1
 N = 1000
+beta = 2 #length of timescale
 
 if __name__ == '__main__':
     temp = MF(2*np.pi * nu, L)
     x = np.linspace(0, L, N)
     y = np.linspace(0, L, N)
     X, Y = np.meshgrid(x, y)
-    z = temp.phi_n_p(3, 2)(X, Y)
+    z = temp.phi_w_n_p(1, 3, 2)(1, X, Y)
 
-    fig = plt.figure()
-    ax = plt.axes(projection ='3d')
-    ax.plot_surface(X, Y, z.real)
-    print(L/(N**2) * np.sum(z * z.conjugate()))
+    # fig = plt.figure()
+    # ax = plt.axes(projection ='3d')
+    # ax.plot_surface(X, Y, z.real)
+    # print(z)
+    print(beta * L/(N**2) * np.sum(z * z.conjugate()))
     plt.show()

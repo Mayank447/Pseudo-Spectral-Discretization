@@ -78,6 +78,40 @@ class MagneticField:
         eigval = np.repeat(eigval, 2)
         eigval[1::2] = -eigval[1::2]
         return eigval
+    
+    
+    def get_index(self, w, n, p, sign):
+        """
+        sign: Must be 0 for positive and 1 for negative
+        """
+        index = 0
+        num_eigvec_t = self.nu * (2*self.N - 1)
+        index += w * num_eigvec_t
+
+        if(n!=0):
+            index += self.nu * (2*n-1)
+
+        index += p
+        index *= 2 # For sign
+        return index + sign
+    
+
+    def get_w_n_p_sign_from_index(self, index):
+        sign = index%2
+        index = index//2
+
+        num_eigvec_t = self.nu * (2*self.N - 1)
+        w = index%num_eigvec_t
+        residue = index//num_eigvec_t
+
+        n = 0
+        if(residue >= self.nu):
+            residue -= self.nu
+            n += 1
+        
+        n = residue//(2*self.nu)
+        p = residue%(2*self.nu)
+        return (w, n, p, sign)
 
 
 ###################### Working Tested code ############

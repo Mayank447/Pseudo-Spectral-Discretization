@@ -8,8 +8,7 @@ class MF:
         self.L = L
 
     def reshape_parameters(self, p):
-        if(not isinstance(p, np.ndarray)):
-            p = np.array([p])
+        p = np.asarray(p)
         return p.reshape(-1,1)
         
 
@@ -46,7 +45,7 @@ class MF:
         sqrt_B = np.sqrt(self.B)
 
         return lambda x,y: (
-            special.hermite(n)(sqrt_B*y + (alpha_p + k*self.B*self.L)/sqrt_B) * 
+            special.eval_hermite(n, sqrt_B*y + (alpha_p + k*self.B*self.L)/sqrt_B) *
             self.phi_0_p_k(p,k)(x,y)
         )
     #This special.hermite step can be calculated onlt along a row and then extruded
@@ -56,6 +55,8 @@ class MF:
         n: non-negative integer (nth eigenvector)
         p: non-negative integer < nu
         """
+        n = self.reshape_parameters(n)
+
         normalization = np.pow(-1,n%2) * 1/(np.sqrt(special.factorial(n) * np.pow(2,n)))
         return lambda x, y: (
             normalization *
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     X, Y = np.meshgrid(x, y, indexing="ij")
     X = X.flatten()
     Y = Y.flatten()
-    z = temp.phi_0_p([2,3])(X, Y)
+    z = temp.phi_n_p(np.array([2,3]), np.array([1,1]))(X, Y)
     # fig = plt.figure()
     # ax = plt.axes(projection ='3d')
     # ax.plot_surface(X, Y, z.real)

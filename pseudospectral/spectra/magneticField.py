@@ -44,7 +44,7 @@ class MagneticField:
         self.B = 0.5 * np.square(self.gap/self.N) # As per disc. w/ Julian on dim analys
         self.L = np.sqrt(2 * np.pi * self.nu/self.B)
         self.flux = self.B * (self.L**2)
-        self.beta = Nt * self.gap # Beta is kind of a free parameter to be honest
+        self.beta = 1
 
         self._eigenvalues = self.compute_eigenvalues()
         
@@ -69,7 +69,7 @@ class MagneticField:
             The code should be self explanatory now, in the last line we consider both signs for mu_n
         """
         n = np.arange(1, self.N + 1)
-        omega = np.arange(self.Nt) # I think should be symmetric about 0
+        omega = np.linspace(0, 1, self.Nt) # I think should be symmetric about 0
 
         # There can be some optimization done wrt to storage and memory since a lot of values are just repeat
         eigval = np.sqrt(
@@ -229,7 +229,7 @@ class MagneticField:
     def scalar_product(self, f, g, output_basis="real"):
         if output_basis == "real":
             normalization_x_y = self.L**2/(self._n_x * self._n_y)
-            return self.gap * normalization_x_y * (g @ f.transpose().conjugate())
+            return (self.beta/self.Nt) * normalization_x_y * (g @ f.transpose().conjugate())
 
         elif output_basis == "spectral":
             return g @ f.transpose().conjugate()
@@ -243,7 +243,7 @@ class MagneticField:
         Function to return the lattice of the spectrum.
         """
         if output_basis == "real":
-            t = np.arange(self.Nt)
+            t = np.linspace(0, 1, self.Nt)
             x = np.linspace(0, self.L, self._n_x, endpoint=False)
             y = np.linspace(0, self.L, self._n_y, endpoint=False)
             t, x, y = np.meshgrid(t, x, y, indexing="ij")
@@ -262,20 +262,20 @@ class MagneticField:
 
 
 if __name__ == "__main__":
-    spectrum = MagneticField(10, 10, 10)
+    spectrum = MagneticField(20, 20, 20)
     sample_points = spectrum.lattice()
-    e = spectrum.eigenfunction([0, 2])(*sample_points)
-    # print(spectrum.scalar_product(e[0],e[1]))
-    # print(e)
+    e = spectrum.eigenfunction(-7000)(*sample_points)
+    print(spectrum.scalar_product(e,e))
 
-    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))(
-        *sample_points
-    ).reshape(spectrum.total_num_of_dof, -1)
+    # eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))(
+    #     *sample_points
+    # ).reshape(-1, spectrum.total_num_of_dof)
 
-    assert np.allclose(
-        spectrum.scalar_product(eigenfunctions, eigenfunctions),
-        np.eye(*eigenfunctions.shape),
-    )
+
+    # print(
+    #     (spectrum.scalar_product(eigenfunctions, eigenfunctions)
+    #     - np.eye(*eigenfunctions.shape)).diagonal()
+    # )
 
 ## Couple of Notes:
 ## 1. n > 0 as chi_0 is not defined

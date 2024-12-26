@@ -64,31 +64,38 @@ class MF:
         )
     
     def phi_w_n_p(self, w, n, p):
-        beta = 2
+        w = self.reshape_parameters(w)
+        n = self.reshape_parameters(n)
+        p = self.reshape_parameters(p)
+
         lambd = np.sqrt(2*self.B*n)
         mu = np.sqrt(lambd**2 + w**2)
         normalization = 1/(np.sqrt(2 * beta * mu * (mu-w)))
         
         return lambda t,x,y: (
             normalization *
-            np.exp(1j * w * t) *
-            np.array([(mu-w) * self.phi_n_p(n,p)(x,y).flatten(), 
-                      lambd * self.phi_n_p(n-1,p)(x,y).flatten()]).flatten('F')
+            np.exp(1j * w * np.repeat(t,2).reshape(-1, 2*len(x))) *
+            np.dstack(((mu-w) * self.phi_n_p(n,p)(x,y), 
+                      lambd * self.phi_n_p(n-1,p)(x,y))).reshape(-1, 2*len(x))
         )
     
 nu = 4
 L = 1
 N = 10
-beta = 1 #length of timescale
+Nt = 2
+beta = 2 #length of timescale
 
 if __name__ == '__main__':
     temp = MF(2*np.pi * nu, L)
+    t = np.arange(Nt)
     x = np.linspace(0, L, N, endpoint=False)
     y = np.linspace(0, L, N, endpoint=False)
-    X, Y = np.meshgrid(x, y, indexing="ij")
+    t, X, Y = np.meshgrid(t, x, y, indexing="ij")
+    t = t.flatten()
     X = X.flatten()
     Y = Y.flatten()
-    z = temp.phi_n_p(np.array([2,3]), np.array([1,1]))(X, Y)
+
+    z = temp.phi_w_n_p(np.array([3,3]), np.array([2,3]), np.array([1,1]))(t, X, Y)
     # fig = plt.figure()
     # ax = plt.axes(projection ='3d')
     # ax.plot_surface(X, Y, z.real)

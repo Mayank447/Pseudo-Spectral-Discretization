@@ -37,21 +37,18 @@ class MagneticField:
         self.N = N
         self.gap = 1  #energy gap [Free parameter]
         self._dimension = dimension
-        self.total_num_of_dof = Nt * (2*nu - 1) * N * 2
+        self.total_num_of_dof = 2 * Nt * nu * N
 
         self.B = 0.5 * np.square(self.gap/self.N) # As per disc. w/ Julian on dim analys
         self.L = np.sqrt(2 * np.pi * self.nu/self.B)
         self.flux = self.B * (self.L**2)
         self.beta = Nt * self.gap # Beta is kind of a free parameter to be honest
 
-        self.n = np.arange(self.N) 
-        self.p = np.arange(self.nu) #Unused
-        self.omega = np.arange(self.Nt) # I think should be symmetric about 0
         self._eigenvalues = self.compute_eigenvalues()
         
         # For lattice discretization - to be checked
         self._n_x = self.N
-        self._n_y = 2 * self.nu - 1
+        self._n_y = 2 * self.nu
 
 
     def lamda_value(self, n):
@@ -69,10 +66,13 @@ class MagneticField:
             Now lambda_n = sqrt(2*B*n), for each energy level n there is a degeneracy of 2n except ground
             The code should be self explanatory now, in the last line we consider both signs for mu_n
         """
+        n = np.arange(1, self.N + 1)
+        omega = np.arange(self.Nt) # I think should be symmetric about 0
+
         # There can be some optimization done wrt to storage and memory since a lot of values are just repeat
         eigval = np.sqrt(
-                    (self.omega.reshape(-1,1))**2 
-                        + np.repeat(self.lamda_value(self.n)**2, 2*self.nu)[self.nu:]
+                    (omega.reshape(-1,1))**2 
+                        + np.repeat(2 * self.B * n, 2*self.nu)
                     ).reshape(-1)
         
         eigval = np.repeat(eigval, 2)
@@ -86,10 +86,9 @@ class MagneticField:
         sign: Must be 0 for positive and 1 for negative
         """
         index = np.zeros_like(w)
-        num_eigvec_t = self.nu * (2*self.N - 1)
-        index += w * num_eigvec_t
+        index += w * int(self.total_num_of_dof/self.Nt)
 
-        index[n!=0] += self.nu * (2*n-1)
+        index += 2 * self.nu * (n-1)
         index += p
         index *= 2 # For sign
         return index + sign
@@ -98,25 +97,21 @@ class MagneticField:
     def get_w_n_p_sign_from_index(self, index):
         """
         index: 1D Numpy array
+        Returns: w,n,p,sign: Each 1D numpy array
         """
         if(not isinstance(index, np.ndarray)):
-            index = np.array([index])
-        
-        n = np.zeros_like(index)
+            index = np.array([index]) # Make this change in fermion2D as well
+
         sign = index%2
         index = index//2
 
-        num_eigvec_t = self.nu * (2*self.N - 1)
-        w = index//num_eigvec_t
-        residue = index%num_eigvec_t
-
-        if(residue >= self.nu).any():
-            n[residue >= self.nu] += 1
-            residue[residue >= self.nu] -= self.nu
+        space_dof = int(self.total_num_of_dof/self.Nt)
+        w = index // space_dof
+        residue = index % space_dof
         
-        n += residue//(2*self.nu)
-        p = residue%(2*self.nu)
-        return np.array([w, n, p, sign])
+        n = residue // (2*self.nu)
+        p = residue % (2*self.nu)
+        return np.array([w, n+1, p, sign])
 
 
 ###################### Working Tested code ############
@@ -175,7 +170,6 @@ class MagneticField:
         p: non-negative integer < nu
         sign: 0 for positive and -1 for negative
         """
-        print(w,n,p,sign)
         index = self.get_index(w,n,p,sign)
         mu = self._eigenvalues[index]
         lambd = np.sqrt(2 * self.B * n)
@@ -183,15 +177,14 @@ class MagneticField:
         
         return lambda t,x,y: (
             normalization *
-            np.repeat(np.exp(1j * w * t), 2) *
             np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
-                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
+                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F') *
+            np.repeat(np.exp(1j * w * t), 2)
         )
 ###################### Working Tested code ############
 
     def eigenfunction(self, index):
         w, n, p, sign = self.get_w_n_p_sign_from_index(index)
-        print(w,n,p,sign)
         return self.phi_w_n_p(w,n,p,sign)
 
     def transform(self, coefficients, input_basis, output_basis):
@@ -248,6 +241,10 @@ class MagneticField:
 
 if __name__ == "__main__":
     M = MagneticField(3, 3, 10)
-    print(M.eigenfunction(6)(*M.lattice("real")))
-    # v = M.phi(2, 1)(np.array([0,1,2]), np.array([1,1,1]), 100)
-    # print(v)
+    e = M.eigenfunction(6)(*M.lattice("real"))
+    print(e)
+
+## Couple of Notes:
+## 1. n > 0 as chi_0 is not defined
+## 2. Hermite function in scipy takes n as an integer not np array
+## 3. A lot of optimizations can be done

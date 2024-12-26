@@ -7,18 +7,26 @@ class MF:
         self.B = B
         self.L = L
 
+    def reshape_parameters(self, p):
+        if(not isinstance(p, np.ndarray)):
+            p = np.array([p])
+        return p.reshape(-1,1)
+        
+
     def phi_0_p_k(self, p, k):
         """
-        p: non-negative integer < nu
-        k: int
+        p: non-negative integer list < nu
+        k: np.ndarray
         """
+        p = self.reshape_parameters(p)
+        k = self.reshape_parameters(k)
         normalization = np.pow((self.B/(np.pi * (self.L**2))), 0.25)
         alpha_p = 2 * np.pi * p/self.L
-        
+
         return lambda x, y: (
             normalization * 
             np.exp(1j * (alpha_p + k * self.L * self.B) * x) *
-            np.exp(-self.B/2 * np.pow(y + (alpha_p/self.B) + k*self.L, 2))
+            np.exp(-self.B/2 * np.pow(y + alpha_p/self.B + k*self.L, 2))
         )
     
     def phi_0_p(self, p):
@@ -30,10 +38,15 @@ class MF:
         )
     
     def phi_n_p_k(self, n, p, k):
+        n = self.reshape_parameters(n)
+        p = self.reshape_parameters(p)
+        k = self.reshape_parameters(k)
+
         alpha_p = 2 * np.pi * p/self.L
         sqrt_B = np.sqrt(self.B)
+
         return lambda x,y: (
-            special.hermite(n)(sqrt_B*y + ((alpha_p + k*self.B*self.L)/sqrt_B)) * 
+            special.hermite(n)(sqrt_B*y + (alpha_p + k*self.B*self.L)/sqrt_B) * 
             self.phi_0_p_k(p,k)(x,y)
         )
     #This special.hermite step can be calculated onlt along a row and then extruded
@@ -64,19 +77,20 @@ class MF:
     
 nu = 4
 L = 1
-N = 1000
-beta = 2 #length of timescale
+N = 10
+beta = 1 #length of timescale
 
 if __name__ == '__main__':
     temp = MF(2*np.pi * nu, L)
-    x = np.linspace(0, L, N)
-    y = np.linspace(0, L, N)
-    X, Y = np.meshgrid(x, y)
-    z = temp.phi_w_n_p(1, 3, 2)(1, X, Y)
-
+    x = np.linspace(0, L, N, endpoint=False)
+    y = np.linspace(0, L, N, endpoint=False)
+    X, Y = np.meshgrid(x, y, indexing="ij")
+    X = X.flatten()
+    Y = Y.flatten()
+    z = temp.phi_0_p([2,3])(X, Y)
     # fig = plt.figure()
     # ax = plt.axes(projection ='3d')
     # ax.plot_surface(X, Y, z.real)
-    # print(z)
-    print(beta * L/(N**2) * np.sum(z * z.conjugate()))
+    print(z)
+    print(L/(N**2) * np.sum(z * z.conjugate(), axis=1))
     plt.show()

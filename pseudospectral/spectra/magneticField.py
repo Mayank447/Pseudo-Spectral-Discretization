@@ -144,6 +144,7 @@ class MagneticField:
     
     def phi_n_p_k(self, n, p, k):
         """
+        n,p,k: 1D numpy array of same dimension
         Returns: 1D Array
         """
         alpha_p = 2 * np.pi * p/self.L
@@ -187,8 +188,19 @@ class MagneticField:
 ###################### Working Tested code ############
 
     def eigenfunction(self, index):
+        mu = self._eigenvalues[index]
         w, n, p, sign = self.get_w_n_p_sign_from_index(index)
-        return self.phi_w_n_p(w,n,p,sign)
+
+
+        lambd = np.sqrt(2 * self.B * n)
+        normalization = 1/(np.sqrt(2 * self.beta * mu * (mu-w)))
+        
+        return lambda t,x,y: (
+            normalization *
+            np.exp(1j * w * np.repeat(t, self._spinor_dimension)) *
+            np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
+                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
+        ).reshape(len(index), -1)
 
     def transform(self, coefficients, input_basis, output_basis):
         """
@@ -243,16 +255,17 @@ class MagneticField:
 
 
 if __name__ == "__main__":
-    spectrum = MagneticField(3, 3, 10)
+    spectrum = MagneticField(10, 10, 10)
     sample_points = spectrum.lattice()
-    # e = spectrum.eigenfunction(0)(*sample_points)
-    # f = spectrum.eigenfunction(2)(*sample_points)
-    # print(spectrum.scalar_product(e,f))
+    e = spectrum.eigenfunction(0)(*sample_points)
+    f = spectrum.eigenfunction(2)(*sample_points)
+    print(spectrum.scalar_product(e,f))
     # print(e)
 
     eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))(
         *sample_points
     ).reshape(spectrum.total_num_of_dof, -1)
+    print(len(eigenfunctions))
 
     # assert np.allclose(
     #     spectrum.scalar_product(eigenfunctions, eigenfunctions),

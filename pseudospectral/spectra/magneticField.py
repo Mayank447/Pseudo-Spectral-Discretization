@@ -36,8 +36,10 @@ class MagneticField:
         self.nu = nu
         self.N = N
         self.gap = 1  #energy gap [Free parameter]
+        
         self._dimension = dimension
-        self.total_num_of_dof = 2 * Nt * nu * N
+        self._spinor_dimension = 2
+        self.total_num_of_dof = Nt * nu * N * self._spinor_dimension
 
         self.B = 0.5 * np.square(self.gap/self.N) # As per disc. w/ Julian on dim analys
         self.L = np.sqrt(2 * np.pi * self.nu/self.B)
@@ -48,7 +50,7 @@ class MagneticField:
         
         # For lattice discretization - to be checked
         self._n_x = self.N
-        self._n_y = 2 * self.nu
+        self._n_y = self.nu
 
 
     def lamda_value(self, n):
@@ -72,10 +74,10 @@ class MagneticField:
         # There can be some optimization done wrt to storage and memory since a lot of values are just repeat
         eigval = np.sqrt(
                     (omega.reshape(-1,1))**2 
-                        + np.repeat(2 * self.B * n, 2*self.nu)
+                        + np.repeat(2 * self.B * n, self.nu)
                     ).reshape(-1)
-        
-        eigval = np.repeat(eigval, 2)
+
+        eigval = np.repeat(eigval, self._spinor_dimension)
         eigval[1::2] = -eigval[1::2]
         return eigval
     
@@ -86,11 +88,11 @@ class MagneticField:
         sign: Must be 0 for positive and 1 for negative
         """
         index = np.zeros_like(w)
-        index += w * int(self.total_num_of_dof/self.Nt)
+        index += w * int(self.total_num_of_dof/(self._spinor_dimension * self.Nt))
 
-        index += 2 * self.nu * (n-1)
+        index += self.nu * (n-1)
         index += p
-        index *= 2 # For sign
+        index *= self._spinor_dimension
         return index + sign
     
 
@@ -102,15 +104,16 @@ class MagneticField:
         if(not isinstance(index, np.ndarray)):
             index = np.array([index]) # Make this change in fermion2D as well
 
-        sign = index%2
-        index = index//2
-
         space_dof = int(self.total_num_of_dof/self.Nt)
         w = index // space_dof
-        residue = index % space_dof
-        
-        n = residue // (2*self.nu)
-        p = residue % (2*self.nu)
+        index %= space_dof
+
+        sign = index % self._spinor_dimension
+        index = index // self._spinor_dimension
+
+        n = index // self.nu
+        p = index % self.nu
+
         return np.array([w, n+1, p, sign])
 
 
@@ -146,7 +149,7 @@ class MagneticField:
         alpha_p = 2 * np.pi * p/self.L
         sqrt_B = np.sqrt(self.B)
         return lambda x,y: (
-            special.hermite(n)(sqrt_B*y + ((alpha_p + k*self.B*self.L)/sqrt_B)) * 
+            special.eval_hermite(n, sqrt_B*y + ((alpha_p + k*self.B*self.L)/sqrt_B)) * 
             self.phi_0_p_k(p,k)(x,y)
         ).flatten()
     #This special.hermite step can be calculated only along a row and then extruded
@@ -177,9 +180,9 @@ class MagneticField:
         
         return lambda t,x,y: (
             normalization *
+            np.exp(1j * w * np.repeat(t, self._spinor_dimension)) *
             np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
-                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F') *
-            np.repeat(np.exp(1j * w * t), 2)
+                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
         )
 ###################### Working Tested code ############
 
@@ -240,11 +243,22 @@ class MagneticField:
 
 
 if __name__ == "__main__":
-    M = MagneticField(3, 3, 10)
-    e = M.eigenfunction(6)(*M.lattice("real"))
-    print(e)
+    spectrum = MagneticField(3, 3, 10)
+    sample_points = spectrum.lattice()
+    # e = spectrum.eigenfunction(0)(*sample_points)
+    # f = spectrum.eigenfunction(2)(*sample_points)
+    # print(spectrum.scalar_product(e,f))
+    # print(e)
+
+    eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))(
+        *sample_points
+    ).reshape(spectrum.total_num_of_dof, -1)
+
+    # assert np.allclose(
+    #     spectrum.scalar_product(eigenfunctions, eigenfunctions),
+    #     np.eye(*eigenfunctions.shape),
+    # )
 
 ## Couple of Notes:
 ## 1. n > 0 as chi_0 is not defined
-## 2. Hermite function in scipy takes n as an integer not np array
-## 3. A lot of optimizations can be done
+## 2. A lot of optimizations can be done

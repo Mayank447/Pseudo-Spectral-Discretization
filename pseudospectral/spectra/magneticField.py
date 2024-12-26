@@ -118,89 +118,96 @@ class MagneticField:
 
 
 ###################### Working Tested code ############
+    def reshape_parameters(self, p):
+        p = np.asarray(p)
+        return p.reshape(-1,1)
+        
+
     def phi_0_p_k(self, p, k):
         """
-        p: non-negative integer < nu
-        k: int
-        Returns: 2D array
+        p: non-negative integer list < nu
+        k: np.ndarray
         """
+        p = self.reshape_parameters(p)
+        k = self.reshape_parameters(k)
         normalization = np.pow((self.B/(np.pi * (self.L**2))), 0.25)
         alpha_p = 2 * np.pi * p/self.L
-        
+
         return lambda x, y: (
             normalization * 
             np.exp(1j * (alpha_p + k * self.L * self.B) * x) *
-            np.exp(-self.B/2 * np.pow(y + (alpha_p/self.B) + k*self.L, 2))
+            np.exp(-self.B/2 * np.pow(y + alpha_p/self.B + k*self.L, 2))
         )
     
     def phi_0_p(self, p):
         """
         p: non-negative integer < nu
-        Returns: 2D array
         """
         return lambda x, y: (
             np.sum([self.phi_0_p_k(p, k)(x,y) for k in range(-10,11)], axis=0)
         )
     
     def phi_n_p_k(self, n, p, k):
-        """
-        n,p,k: 1D numpy array of same dimension
-        Returns: 1D Array
-        """
+        n = self.reshape_parameters(n)
+        p = self.reshape_parameters(p)
+        k = self.reshape_parameters(k)
+
         alpha_p = 2 * np.pi * p/self.L
         sqrt_B = np.sqrt(self.B)
-        return lambda x,y: (
-            special.eval_hermite(n, sqrt_B*y + ((alpha_p + k*self.B*self.L)/sqrt_B)) * 
-            self.phi_0_p_k(p,k)(x,y)
-        ).flatten()
-    #This special.hermite step can be calculated only along a row and then extruded
 
+        return lambda x,y: (
+            special.eval_hermite(n, sqrt_B*y + (alpha_p + k*self.B*self.L)/sqrt_B) *
+            self.phi_0_p_k(p,k)(x,y)
+        )
+    #This special.hermite step can be calculated onlt along a row and then extruded
+    
     def phi_n_p(self, n, p):
         """
-        n: non-negative integer (nth energy level)
-        p: non-negative integer < nu (degeneracy)
+        n: non-negative integer (nth eigenvector)
+        p: non-negative integer < nu
         """
+        n = self.reshape_parameters(n)
+
         normalization = np.pow(-1,n%2) * 1/(np.sqrt(special.factorial(n) * np.pow(2,n)))
         return lambda x, y: (
             normalization *
             np.sum([self.phi_n_p_k(n, p, k)(x,y) for k in range(-10,11)], axis=0)
         )
     
-    # Rename the below as eigenfunction and account for both signs of mu
-    def phi_w_n_p(self, w, n, p, sign):
-        """
-        w: Something to do with time
-        n: non-negative integer (nth energy level)
-        p: non-negative integer < nu
-        sign: 0 for positive and -1 for negative
-        """
-        index = self.get_index(w,n,p,sign)
-        mu = self._eigenvalues[index]
-        lambd = np.sqrt(2 * self.B * n)
+    def phi_w_n_p(self, w, n, p):
+        w = self.reshape_parameters(w)
+        n = self.reshape_parameters(n)
+        p = self.reshape_parameters(p)
+
+        lambd = np.sqrt(2*self.B*n)
+        mu = np.sqrt(lambd**2 + w**2)
         normalization = 1/(np.sqrt(2 * self.beta * mu * (mu-w)))
         
         return lambda t,x,y: (
             normalization *
-            np.exp(1j * w * np.repeat(t, self._spinor_dimension)) *
-            np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
-                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
+            np.exp(1j * w * np.repeat(t,2).reshape(-1, 2*len(x))) *
+            np.dstack(((mu-w) * self.phi_n_p(n,p)(x,y), 
+                      lambd * self.phi_n_p(n-1,p)(x,y))).reshape(-1, 2*len(x))
         )
 ###################### Working Tested code ############
 
     def eigenfunction(self, index):
+        index = self.reshape_parameters(index)
         mu = self._eigenvalues[index]
         w, n, p, sign = self.get_w_n_p_sign_from_index(index)
-
+        w = self.reshape_parameters(w)
+        n = self.reshape_parameters(n)
+        p = self.reshape_parameters(p)
 
         lambd = np.sqrt(2 * self.B * n)
         normalization = 1/(np.sqrt(2 * self.beta * mu * (mu-w)))
         
         return lambda t,x,y: (
             normalization *
-            np.exp(1j * w * np.repeat(t, self._spinor_dimension)) *
-            np.array([(mu-w) * self.phi_n_p(n,p)(x,y), 
-                      lambd * self.phi_n_p(n-1,p)(x,y)]).flatten('F')
-        ).reshape(len(index), -1)
+            np.exp(1j * w * np.repeat(t,2).reshape(-1, 2*len(x))) *
+            np.dstack(((mu-w) * self.phi_n_p(n,p)(x,y), 
+                      lambd * self.phi_n_p(n-1,p)(x,y))).reshape(-1, 2*len(x))
+        )
 
     def transform(self, coefficients, input_basis, output_basis):
         """
@@ -257,20 +264,18 @@ class MagneticField:
 if __name__ == "__main__":
     spectrum = MagneticField(10, 10, 10)
     sample_points = spectrum.lattice()
-    e = spectrum.eigenfunction(0)(*sample_points)
-    f = spectrum.eigenfunction(2)(*sample_points)
-    print(spectrum.scalar_product(e,f))
+    e = spectrum.eigenfunction([0, 2])(*sample_points)
+    # print(spectrum.scalar_product(e[0],e[1]))
     # print(e)
 
     eigenfunctions = spectrum.eigenfunction(np.arange(spectrum.total_num_of_dof))(
         *sample_points
     ).reshape(spectrum.total_num_of_dof, -1)
-    print(len(eigenfunctions))
 
-    # assert np.allclose(
-    #     spectrum.scalar_product(eigenfunctions, eigenfunctions),
-    #     np.eye(*eigenfunctions.shape),
-    # )
+    assert np.allclose(
+        spectrum.scalar_product(eigenfunctions, eigenfunctions),
+        np.eye(*eigenfunctions.shape),
+    )
 
 ## Couple of Notes:
 ## 1. n > 0 as chi_0 is not defined

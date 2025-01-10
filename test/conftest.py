@@ -8,7 +8,8 @@ from pseudospectral import (
     ElementwiseSpectralMultiplication,
     ElementwiseRealMultiplication,
     FreeFermion2D,
-    naive_implementation_of,
+    MagneticField,
+    naive_implementation_of
 )
 
 BASIS_SPECTRA = [
@@ -48,6 +49,14 @@ BASIS_SPECTRA = [
             "theta": [0.3, 0.8],
         },
     },
+    {
+        "type": MagneticField,
+        "config":{
+            "Nt": 10,
+            "N": 5,
+            "nu": 6
+        }
+    }
 ]
 
 SPECTRAL_MULTIPLICATION_SPECTRA = [
@@ -57,6 +66,7 @@ SPECTRAL_MULTIPLICATION_SPECTRA = [
     }
     for spec in BASIS_SPECTRA
 ]
+
 REAL_MULTIPLICATION_SPECTRA = [
     {
         "type": ElementwiseRealMultiplication,
@@ -64,6 +74,7 @@ REAL_MULTIPLICATION_SPECTRA = [
     }
     for spec in BASIS_SPECTRA
 ]
+
 NAIVE_SPECTRA = [
     spec | {"type": naive_implementation_of(spec["type"])} for spec in BASIS_SPECTRA
 ]

@@ -9,7 +9,7 @@ from pseudospectral import (
     ElementwiseRealMultiplication,
     FreeFermion2D,
     MagneticField,
-    naive_implementation_of,
+    naive_implementation_of
 )
 
 BASIS_SPECTRA = [
